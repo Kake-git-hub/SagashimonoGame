@@ -1,27 +1,29 @@
-import { Target, HintState, CONSTANTS, getHintRadius } from '../types';
+import { Target, HintState, getHintRadius } from '../types';
 
 interface Props {
   target: Target;
   hintState: HintState;
-  getPosition: (target: Target, offset?: [number, number]) => { x: number; y: number } | null;
+  getPosition: (x: number, y: number, offset?: [number, number]) => { x: number; y: number } | null;
+  scaleFactor: number; // 1000スケールをピクセルに変換する係数
 }
 
-export function HintOverlay({ target, hintState, getPosition }: Props) {
+export function HintOverlay({ target, hintState, getPosition, scaleFactor }: Props) {
   // 指定された位置のヒントを表示
   const targetPosition = target.positions[hintState.positionIndex];
   if (!targetPosition) return null;
 
   // オフセット付きで位置を計算
   const pos = getPosition(
-    { ...target, positions: [targetPosition] },
+    targetPosition[0],
+    targetPosition[1],
     hintState.centerOffset
   );
   if (!pos) return null;
 
   // レベルに応じた半径（画像の半分から半減）
   const hintRadius = getHintRadius(hintState.level);
-  // 実際の表示サイズ（パーセント）
-  const sizePercent = (hintRadius / CONSTANTS.SCALE) * 100 * 2; // 直径
+  // 実際の表示サイズ（ピクセル）
+  const sizePixels = hintRadius * scaleFactor * 2; // 直径
   
   return (
     <div
@@ -34,8 +36,8 @@ export function HintOverlay({ target, hintState, getPosition }: Props) {
       <div 
         style={{
           ...styles.pulse,
-          width: `${sizePercent}%`,
-          height: `${sizePercent}%`,
+          width: `${sizePixels}px`,
+          height: `${sizePixels}px`,
         }} 
       />
       {/* 中心の点 */}

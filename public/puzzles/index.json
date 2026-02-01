@@ -1,7 +1,7 @@
 [
   {
     "id": "toy-room",
-    "name": "ããã¡ãã®é¨å±",
+    "name": "おもちゃの部屋",
     "thumbnail": "puzzles/images/toy-room.webp",
     "targetCount": 10
   },
@@ -9,6 +9,6 @@
     "id": "どうぶつえん",
     "name": "どうぶつえん",
     "thumbnail": "puzzles/images/どうぶつえん.webp",
-    "targetCount": 11
+    "targetCount": 37
   }
 ]

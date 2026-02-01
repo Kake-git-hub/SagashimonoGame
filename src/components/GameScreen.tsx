@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Puzzle, Target, CONSTANTS, makePositionKey, getTotalPositionCount } from '../types';
+import { Puzzle, CONSTANTS, makePositionKey, getTotalPositionCount } from '../types';
 import { useGame } from '../hooks/useGame';
 import { useIsTablet } from '../hooks/useMediaQuery';
 import { useSettings } from '../hooks/useSettings';
@@ -24,7 +24,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
   const game = useGame(puzzle);
   
   const imageContainerRef = useRef<HTMLDivElement>(null);
-  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0, displayWidth: 0, displayHeight: 0 });
   const [thumbnails, setThumbnails] = useState<Map<string, string>>(new Map());
   const [foundAnimation, setFoundAnimation] = useState<string | null>(null);
 
@@ -39,7 +39,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
   // 画像サイズを取得
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
-    setImageSize({ width: img.naturalWidth, height: img.naturalHeight });
+    setImageSize({ width: img.naturalWidth, height: img.naturalHeight, displayWidth: 0, displayHeight: 0 });
   }, []);
 
   // クリック/タップ処理
@@ -106,10 +106,39 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
     }
   }, [game, imageSize]);
 
+  // 表示サイズを計算して更新
+  const updateDisplaySize = useCallback(() => {
+    const container = imageContainerRef.current;
+    if (!container || !imageSize.width) return;
+
+    const rect = container.getBoundingClientRect();
+    const containerAspect = rect.width / rect.height;
+    const imageAspect = imageSize.width / imageSize.height;
+
+    let displayWidth: number, displayHeight: number;
+
+    if (containerAspect > imageAspect) {
+      displayHeight = rect.height;
+      displayWidth = displayHeight * imageAspect;
+    } else {
+      displayWidth = rect.width;
+      displayHeight = displayWidth / imageAspect;
+    }
+
+    setImageSize(prev => ({ ...prev, displayWidth, displayHeight }));
+  }, [imageSize.width, imageSize.height]);
+
+  // リサイズ時に表示サイズを更新
+  useEffect(() => {
+    updateDisplaySize();
+    window.addEventListener('resize', updateDisplaySize);
+    return () => window.removeEventListener('resize', updateDisplaySize);
+  }, [updateDisplaySize]);
+
   // 座標から表示位置を計算
   const getPixelPosition = useCallback((x: number, y: number, offset?: [number, number]) => {
     const container = imageContainerRef.current;
-    if (!container || !imageSize.width) return null;
+    if (!container || !imageSize.width || !imageSize.displayWidth) return null;
 
     const rect = container.getBoundingClientRect();
     const containerAspect = rect.width / rect.height;
@@ -137,11 +166,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
     return { x: pixelX, y: pixelY };
   }, [imageSize]);
 
-  // ターゲットの表示位置を計算（HintOverlay用）
-  const getTargetPosition = useCallback((target: Target, offset?: [number, number]) => {
-    const [x, y] = target.positions[0];
-    return getPixelPosition(x, y, offset);
-  }, [getPixelPosition]);
+  // 未使用のgetTargetPositionを削除
 
   // 進捗計算
   const totalPositions = getTotalPositionCount(puzzle);
@@ -233,11 +258,12 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
           })}
 
           {/* ヒント表示 */}
-          {game.showHint && game.hintTarget && game.hintState && (
+          {game.showHint && game.hintTarget && game.hintState && imageSize && (
             <HintOverlay
               target={puzzle.targets.find(t => t.title === game.hintTarget)!}
               hintState={game.hintState}
-              getPosition={getTargetPosition}
+              getPosition={getPixelPosition}
+              scaleFactor={imageSize.displayWidth / CONSTANTS.SCALE}
             />
           )}
         </div>

@@ -35,10 +35,9 @@ export function TargetList({ targets, foundPositions, displayMode, thumbnails, l
     <div style={isVertical ? styles.listVertical : styles.listHorizontal}>
       {targetStats.map(({ target, foundCount, totalCount, isComplete }) => {
         const thumbnail = thumbnails.get(target.title);
-        // 複数ある場合は進捗を表示
-        const displayTitle = totalCount > 1 
-          ? `${target.title} ${foundCount}/${totalCount}`
-          : target.title;
+        // 複数ある場合は「◐ 2/3 らいおん」形式
+        const progressText = totalCount > 1 ? `${foundCount}/${totalCount} ` : '';
+        const checkboxIcon = isComplete ? '☑' : foundCount > 0 ? '◐' : '☐';
 
         if (displayMode === 'thumbnail') {
           return (
@@ -90,15 +89,18 @@ export function TargetList({ targets, foundPositions, displayMode, thumbnails, l
             }}
           >
             <span style={styles.checkbox}>
-              {isComplete ? '☑' : foundCount > 0 ? '◐' : '☐'}
+              {checkboxIcon}
             </span>
+            {totalCount > 1 && (
+              <span style={styles.progressCount}>{progressText}</span>
+            )}
             <span
               style={{
                 ...styles.textTitle,
                 ...(isComplete ? styles.foundText : {}),
               }}
             >
-              {displayTitle}
+              {target.title}
             </span>
           </div>
         );
@@ -142,11 +144,15 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '1.2rem',
     flexShrink: 0,
   },
+  progressCount: {
+    fontSize: '0.85rem',
+    color: 'rgba(255,255,255,0.8)',
+    flexShrink: 0,
+    minWidth: '28px',
+  },
   textTitle: {
     fontSize: '0.95rem',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    wordBreak: 'break-all',
   },
   foundText: {
     textDecoration: 'line-through',
