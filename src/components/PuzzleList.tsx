@@ -170,8 +170,14 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refresh
   }
 
   // サーバーパズルとカスタムパズルを分離
+  // カスタムパズルでもサーバーに同名のものがあればサーバーパズルとして扱う
   const serverPuzzles = puzzles.filter(p => !p.id.startsWith('custom-'));
-  const customPuzzles = puzzles.filter(p => p.id.startsWith('custom-'));
+  const serverPuzzleNames = new Set(serverPuzzles.map(p => p.name));
+  
+  // カスタムパズルの中から、サーバーに同名のものがあるものは除外
+  const customPuzzles = puzzles.filter(p => 
+    p.id.startsWith('custom-') && !serverPuzzleNames.has(p.name)
+  );
 
   return (
     <div style={styles.container}>
