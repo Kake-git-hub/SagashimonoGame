@@ -223,7 +223,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
               style={styles.hintButton}
               disabled={game.isCompleted || game.showHint}
             >
-              💡 ヒント
+              {game.hintState && game.hintState.level > 0 ? '💡 もっとヒント！' : '💡 ヒント'}
             </button>
           </aside>
         )}
@@ -282,7 +282,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
                   style={styles.hintButtonSmall}
                   disabled={game.isCompleted || game.showHint}
                 >
-                  💡
+                  {game.hintState && game.hintState.level > 0 ? '🔍' : '💡'}
                 </button>
               </>
             }

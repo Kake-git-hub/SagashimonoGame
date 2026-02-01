@@ -69,9 +69,10 @@ export const CONSTANTS = {
   THUMBNAIL_RADIUS: 50,
   // レスポンシブブレークポイント
   BREAKPOINT_TABLET: 768,
-  // ヒント初期半径（画像の半分=500）、連打で半減
-  HINT_INITIAL_RADIUS: 500,
-  HINT_MIN_RADIUS: 30,
+  // ヒント初期半径（画像の1/4=250）、連打で半減、3回まで
+  HINT_INITIAL_RADIUS: 250,
+  HINT_MIN_RADIUS: 62,
+  HINT_MAX_LEVEL: 2, // 0,1,2の3段階
 } as const;
 
 // 画面モード
@@ -97,8 +98,9 @@ export function getTotalPositionCount(puzzle: Puzzle): number {
   return puzzle.targets.reduce((sum, t) => sum + t.positions.length, 0);
 }
 
-// ヘルパー関数: ヒント半径を計算（レベルに応じて半減）
+// ヘルパー関数: ヒント半径を計算（レベルに応じて半減、3回まで）
 export function getHintRadius(level: number): number {
-  const radius = CONSTANTS.HINT_INITIAL_RADIUS / Math.pow(2, level);
+  const cappedLevel = Math.min(level, CONSTANTS.HINT_MAX_LEVEL);
+  const radius = CONSTANTS.HINT_INITIAL_RADIUS / Math.pow(2, cappedLevel);
   return Math.max(radius, CONSTANTS.HINT_MIN_RADIUS);
 }
