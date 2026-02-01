@@ -11,36 +11,42 @@ interface Props {
 export function TargetList({ targets, foundPositions, displayMode, thumbnails, layout }: Props) {
   const isVertical = layout === 'vertical';
 
-  // ターゲットを位置ごとに展開
-  const items: { target: Target; positionIndex: number; isFound: boolean }[] = [];
-  for (const target of targets) {
-    for (let i = 0; i < target.positions.length; i++) {
+  // ターゲットごとに発見数を集計
+  const targetStats = targets.map(target => {
+    let foundCount = 0;
+    const totalCount = target.positions.length;
+    
+    for (let i = 0; i < totalCount; i++) {
       const posKey = makePositionKey(target.title, i);
-      items.push({
-        target,
-        positionIndex: i,
-        isFound: foundPositions.has(posKey),
-      });
+      if (foundPositions.has(posKey)) {
+        foundCount++;
+      }
     }
-  }
+    
+    return {
+      target,
+      foundCount,
+      totalCount,
+      isComplete: foundCount >= totalCount,
+    };
+  });
 
   return (
     <div style={isVertical ? styles.listVertical : styles.listHorizontal}>
-      {items.map(({ target, positionIndex, isFound }) => {
-        const key = makePositionKey(target.title, positionIndex);
+      {targetStats.map(({ target, foundCount, totalCount, isComplete }) => {
         const thumbnail = thumbnails.get(target.title);
-        // 複数ある場合は番号を表示
-        const displayTitle = target.positions.length > 1 
-          ? `${target.title} (${positionIndex + 1})`
+        // 複数ある場合は進捗を表示
+        const displayTitle = totalCount > 1 
+          ? `${target.title} ${foundCount}/${totalCount}`
           : target.title;
 
         if (displayMode === 'thumbnail') {
           return (
             <div
-              key={key}
+              key={target.title}
               style={{
                 ...styles.thumbnailItem,
-                ...(isFound ? styles.thumbnailItemFound : {}),
+                ...(isComplete ? styles.thumbnailItemFound : {}),
               }}
             >
               <div style={styles.thumbnailWrapper}>
@@ -50,21 +56,25 @@ export function TargetList({ targets, foundPositions, displayMode, thumbnails, l
                     alt={target.title}
                     style={{
                       ...styles.thumbnailImage,
-                      filter: isFound ? 'none' : 'blur(5px) brightness(0.7)',
+                      filter: isComplete ? 'none' : 'blur(5px) brightness(0.7)',
                     }}
                   />
                 ) : (
                   <div style={styles.thumbnailPlaceholder}>?</div>
                 )}
-                {isFound && <div style={styles.checkMark}>✓</div>}
+                {isComplete && <div style={styles.checkMark}>✓</div>}
+                {/* 複数ある場合は進捗バッジ */}
+                {totalCount > 1 && !isComplete && foundCount > 0 && (
+                  <div style={styles.progressBadge}>{foundCount}/{totalCount}</div>
+                )}
               </div>
               <span
                 style={{
                   ...styles.thumbnailTitle,
-                  ...(isFound ? styles.foundText : {}),
+                  ...(isComplete ? styles.foundText : {}),
                 }}
               >
-                {displayTitle}
+                {target.title}
               </span>
             </div>
           );
@@ -73,17 +83,19 @@ export function TargetList({ targets, foundPositions, displayMode, thumbnails, l
         // テキストモード
         return (
           <div
-            key={key}
+            key={target.title}
             style={{
               ...styles.textItem,
-              ...(isFound ? styles.textItemFound : {}),
+              ...(isComplete ? styles.textItemFound : foundCount > 0 ? styles.textItemPartial : {}),
             }}
           >
-            <span style={styles.checkbox}>{isFound ? '☑' : '☐'}</span>
+            <span style={styles.checkbox}>
+              {isComplete ? '☑' : foundCount > 0 ? '◐' : '☐'}
+            </span>
             <span
               style={{
                 ...styles.textTitle,
-                ...(isFound ? styles.foundText : {}),
+                ...(isComplete ? styles.foundText : {}),
               }}
             >
               {displayTitle}
@@ -122,6 +134,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   textItemFound: {
     backgroundColor: 'rgba(76, 175, 80, 0.3)',
+  },
+  textItemPartial: {
+    backgroundColor: 'rgba(255, 193, 7, 0.3)',
   },
   checkbox: {
     fontSize: '1.2rem',
@@ -184,6 +199,17 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#4caf50',
     fontWeight: 'bold',
     textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+  },
+  progressBadge: {
+    position: 'absolute',
+    bottom: '2px',
+    right: '2px',
+    backgroundColor: 'rgba(255, 193, 7, 0.9)',
+    color: '#000',
+    padding: '1px 5px',
+    borderRadius: '8px',
+    fontSize: '0.7rem',
+    fontWeight: 'bold',
   },
   thumbnailTitle: {
     fontSize: '0.75rem',
