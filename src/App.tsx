@@ -11,13 +11,14 @@ function App() {
   const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState<number>(-1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [listRefreshKey, setListRefreshKey] = useState(0);
 
   // パズル一覧を読み込む
   useEffect(() => {
     fetchPuzzleList()
       .then(setPuzzleList)
       .catch(err => console.error('Failed to load puzzle list:', err));
-  }, []);
+  }, [listRefreshKey]);
 
   // パズルを選択
   const handleSelectPuzzle = useCallback(async (puzzleId: string) => {
@@ -40,11 +41,19 @@ function App() {
   const handleBackToList = useCallback(() => {
     setScreen('list');
     setCurrentPuzzle(null);
+    // パズル作成後に一覧を更新
+    setListRefreshKey(k => k + 1);
   }, []);
 
   // エディタを開く
   const handleOpenEditor = useCallback(() => {
     setScreen('editor');
+  }, []);
+
+  // パズル作成完了
+  const handlePuzzleCreated = useCallback((_puzzleId: string) => {
+    setListRefreshKey(k => k + 1);
+    setScreen('list');
   }, []);
 
   // 次のパズルへ
@@ -91,7 +100,7 @@ function App() {
       ) : null;
 
     case 'editor':
-      return <PuzzleEditor onBack={handleBackToList} />;
+      return <PuzzleEditor onBack={handleBackToList} onPuzzleCreated={handlePuzzleCreated} />;
 
     case 'list':
     default:

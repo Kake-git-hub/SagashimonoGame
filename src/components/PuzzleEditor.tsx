@@ -1,26 +1,67 @@
-import { useState, useCallback, useRef } from 'react';
-import { Target, CONSTANTS } from '../types';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { Target, CONSTANTS, CustomPuzzle } from '../types';
+import { saveCustomPuzzle } from '../services/storageService';
 
 interface Props {
   onBack: () => void;
+  onPuzzleCreated?: (puzzleId: string) => void;
 }
 
 interface EditorTarget extends Target {
   id: string;
 }
 
-export function PuzzleEditor({ onBack }: Props) {
+export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
   const [puzzleName, setPuzzleName] = useState('');
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [targets, setTargets] = useState<EditorTarget[]>([]);
-  const [editingTarget, setEditingTarget] = useState<string | null>(null);
+  const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [jsonInput, setJsonInput] = useState('');
   const [showJsonImport, setShowJsonImport] = useState(false);
+  const [draggingTarget, setDraggingTarget] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageNaturalSize, setImageNaturalSize] = useState({ width: 0, height: 0 });
+  const [containerRect, setContainerRect] = useState<DOMRect | null>(null);
+
+  // コンテナサイズの更新
+  useEffect(() => {
+    const updateRect = () => {
+      if (imageContainerRef.current) {
+        setContainerRect(imageContainerRef.current.getBoundingClientRect());
+      }
+    };
+    updateRect();
+    window.addEventListener('resize', updateRect);
+    return () => window.removeEventListener('resize', updateRect);
+  }, [imageSrc]);
+
+  // 画像表示領域の計算
+  const getImageDisplayInfo = useCallback(() => {
+    if (!containerRect || !imageNaturalSize.width) return null;
+
+    const containerAspect = containerRect.width / containerRect.height;
+    const imageAspect = imageNaturalSize.width / imageNaturalSize.height || 1;
+
+    let displayWidth: number, displayHeight: number, offsetX: number, offsetY: number;
+
+    if (containerAspect > imageAspect) {
+      displayHeight = containerRect.height;
+      displayWidth = displayHeight * imageAspect;
+      offsetX = (containerRect.width - displayWidth) / 2;
+      offsetY = 0;
+    } else {
+      displayWidth = containerRect.width;
+      displayHeight = displayWidth / imageAspect;
+      offsetX = 0;
+      offsetY = (containerRect.height - displayHeight) / 2;
+    }
+
+    return { displayWidth, displayHeight, offsetX, offsetY };
+  }, [containerRect, imageNaturalSize]);
 
   // ファイル選択
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,55 +80,114 @@ export function PuzzleEditor({ onBack }: Props) {
     reader.readAsDataURL(file);
   }, []);
 
-  // 画像クリックで座標追加
-  const handleImageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!imageSrc) return;
+  // クライアント座標からスケール座標に変換
+  const clientToScaleCoords = useCallback((clientX: number, clientY: number): [number, number] | null => {
+    if (!containerRect) return null;
+    const info = getImageDisplayInfo();
+    if (!info) return null;
 
-    const container = imageContainerRef.current;
-    if (!container) return;
+    const { displayWidth, displayHeight, offsetX, offsetY } = info;
 
-    const rect = container.getBoundingClientRect();
-    const img = container.querySelector('img');
-    if (!img) return;
-
-    // object-fit: contain を考慮した位置計算
-    const containerAspect = rect.width / rect.height;
-    const imageAspect = imageNaturalSize.width / imageNaturalSize.height || 1;
-
-    let displayWidth: number, displayHeight: number, offsetX: number, offsetY: number;
-
-    if (containerAspect > imageAspect) {
-      displayHeight = rect.height;
-      displayWidth = displayHeight * imageAspect;
-      offsetX = (rect.width - displayWidth) / 2;
-      offsetY = 0;
-    } else {
-      displayWidth = rect.width;
-      displayHeight = displayWidth / imageAspect;
-      offsetX = 0;
-      offsetY = (rect.height - displayHeight) / 2;
-    }
-
-    const relX = e.clientX - rect.left - offsetX;
-    const relY = e.clientY - rect.top - offsetY;
+    const relX = clientX - containerRect.left - offsetX;
+    const relY = clientY - containerRect.top - offsetY;
 
     if (relX < 0 || relX > displayWidth || relY < 0 || relY > displayHeight) {
-      return;
+      return null;
     }
 
-    // 0-1000スケールに変換
     const scaleX = Math.round((relX / displayWidth) * CONSTANTS.SCALE);
     const scaleY = Math.round((relY / displayHeight) * CONSTANTS.SCALE);
+
+    return [
+      Math.max(0, Math.min(CONSTANTS.SCALE, scaleX)),
+      Math.max(0, Math.min(CONSTANTS.SCALE, scaleY))
+    ];
+  }, [containerRect, getImageDisplayInfo]);
+
+  // 画像クリックで座標追加
+  const handleImageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!imageSrc || draggingTarget) return;
+
+    const coords = clientToScaleCoords(e.clientX, e.clientY);
+    if (!coords) return;
 
     const newTarget: EditorTarget = {
       id: Date.now().toString(),
       title: `アイテム${targets.length + 1}`,
-      position: [scaleX, scaleY],
+      position: coords,
     };
 
     setTargets(prev => [...prev, newTarget]);
-    setEditingTarget(newTarget.id);
-  }, [imageSrc, targets.length, imageNaturalSize]);
+    setSelectedTarget(newTarget.id);
+  }, [imageSrc, targets.length, clientToScaleCoords, draggingTarget]);
+
+  // ターゲットのドラッグ開始
+  const handleMarkerMouseDown = useCallback((e: React.MouseEvent, targetId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setDraggingTarget(targetId);
+    setSelectedTarget(targetId);
+  }, []);
+
+  // ドラッグ中の移動
+  useEffect(() => {
+    if (!draggingTarget) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const coords = clientToScaleCoords(e.clientX, e.clientY);
+      if (!coords) return;
+
+      setTargets(prev => prev.map(t => 
+        t.id === draggingTarget ? { ...t, position: coords } : t
+      ));
+    };
+
+    const handleMouseUp = () => {
+      setDraggingTarget(null);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [draggingTarget, clientToScaleCoords]);
+
+  // タッチ対応
+  const handleMarkerTouchStart = useCallback((e: React.TouchEvent, targetId: string) => {
+    e.stopPropagation();
+    setDraggingTarget(targetId);
+    setSelectedTarget(targetId);
+  }, []);
+
+  useEffect(() => {
+    if (!draggingTarget) return;
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 0) return;
+      const touch = e.touches[0];
+      const coords = clientToScaleCoords(touch.clientX, touch.clientY);
+      if (!coords) return;
+
+      setTargets(prev => prev.map(t => 
+        t.id === draggingTarget ? { ...t, position: coords } : t
+      ));
+    };
+
+    const handleTouchEnd = () => {
+      setDraggingTarget(null);
+    };
+
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [draggingTarget, clientToScaleCoords]);
 
   // ターゲット名変更
   const handleTargetNameChange = useCallback((id: string, newTitle: string) => {
@@ -97,10 +197,10 @@ export function PuzzleEditor({ onBack }: Props) {
   // ターゲット削除
   const handleTargetDelete = useCallback((id: string) => {
     setTargets(prev => prev.filter(t => t.id !== id));
-    if (editingTarget === id) {
-      setEditingTarget(null);
+    if (selectedTarget === id) {
+      setSelectedTarget(null);
     }
-  }, [editingTarget]);
+  }, [selectedTarget]);
 
   // JSONインポート
   const handleJsonImport = useCallback(() => {
@@ -146,35 +246,62 @@ export function PuzzleEditor({ onBack }: Props) {
     URL.revokeObjectURL(url);
   }, [puzzleName, targets]);
 
-  // ターゲットの表示位置を計算
-  const getTargetDisplayPosition = useCallback((target: EditorTarget) => {
-    const container = imageContainerRef.current;
-    if (!container || !imageNaturalSize.width) return null;
-
-    const rect = container.getBoundingClientRect();
-    const containerAspect = rect.width / rect.height;
-    const imageAspect = imageNaturalSize.width / imageNaturalSize.height;
-
-    let displayWidth: number, displayHeight: number, offsetX: number, offsetY: number;
-
-    if (containerAspect > imageAspect) {
-      displayHeight = rect.height;
-      displayWidth = displayHeight * imageAspect;
-      offsetX = (rect.width - displayWidth) / 2;
-      offsetY = 0;
-    } else {
-      displayWidth = rect.width;
-      displayHeight = displayWidth / imageAspect;
-      offsetX = 0;
-      offsetY = (rect.height - displayHeight) / 2;
+  // パズル完成（保存）
+  const handleComplete = useCallback(async () => {
+    if (!imageSrc || targets.length === 0) {
+      alert('画像とターゲットを追加してください');
+      return;
     }
 
+    if (!puzzleName.trim()) {
+      alert('パズル名を入力してください');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const puzzleId = `custom-${Date.now()}`;
+      const customPuzzle: CustomPuzzle = {
+        id: puzzleId,
+        name: puzzleName.trim(),
+        imageSrc: puzzleId, // カスタムパズルはIDで識別
+        imageData: imageSrc,
+        targets: targets.map(t => ({
+          title: t.title,
+          position: t.position,
+        })),
+        createdAt: Date.now(),
+      };
+
+      saveCustomPuzzle(customPuzzle);
+      alert('パズルを保存しました！');
+      
+      if (onPuzzleCreated) {
+        onPuzzleCreated(puzzleId);
+      } else {
+        onBack();
+      }
+    } catch (err) {
+      alert('保存に失敗しました: ' + (err instanceof Error ? err.message : '不明なエラー'));
+    } finally {
+      setSaving(false);
+    }
+  }, [imageSrc, targets, puzzleName, onBack, onPuzzleCreated]);
+
+  // ターゲットの表示位置を計算
+  const getTargetDisplayPosition = useCallback((target: EditorTarget) => {
+    const info = getImageDisplayInfo();
+    if (!info) return null;
+
+    const { displayWidth, displayHeight, offsetX, offsetY } = info;
     const [x, y] = target.position;
     const pixelX = offsetX + (x / CONSTANTS.SCALE) * displayWidth;
     const pixelY = offsetY + (y / CONSTANTS.SCALE) * displayHeight;
 
     return { x: pixelX, y: pixelY };
-  }, [imageNaturalSize]);
+  }, [getImageDisplayInfo]);
+
+  const canComplete = imageSrc && targets.length > 0 && puzzleName.trim();
 
   return (
     <div style={styles.container}>
@@ -183,16 +310,28 @@ export function PuzzleEditor({ onBack }: Props) {
           ← もどる
         </button>
         <h1 style={styles.title}>パズルエディタ</h1>
-        <button onClick={exportJson} style={styles.exportButton} disabled={targets.length === 0}>
-          📥 JSON出力
-        </button>
+        <div style={styles.headerButtons}>
+          <button onClick={exportJson} style={styles.exportButton} disabled={targets.length === 0}>
+            📥 JSON
+          </button>
+          <button 
+            onClick={handleComplete} 
+            style={{
+              ...styles.completeButton,
+              opacity: canComplete ? 1 : 0.5,
+            }}
+            disabled={!canComplete || saving}
+          >
+            {saving ? '保存中...' : '✅ 完成'}
+          </button>
+        </div>
       </header>
 
       <div style={styles.main}>
         {/* 左: 設定パネル */}
         <div style={styles.sidebar}>
           <div style={styles.section}>
-            <label style={styles.label}>パズル名</label>
+            <label style={styles.label}>パズル名 *</label>
             <input
               type="text"
               value={puzzleName}
@@ -203,7 +342,7 @@ export function PuzzleEditor({ onBack }: Props) {
           </div>
 
           <div style={styles.section}>
-            <label style={styles.label}>画像</label>
+            <label style={styles.label}>画像 *</label>
             <input
               ref={fileInputRef}
               type="file"
@@ -249,19 +388,31 @@ export function PuzzleEditor({ onBack }: Props) {
 
             <div style={styles.targetList}>
               {targets.map((target, index) => (
-                <div key={target.id} style={styles.targetItem}>
+                <div 
+                  key={target.id} 
+                  style={{
+                    ...styles.targetItem,
+                    backgroundColor: selectedTarget === target.id ? '#fff3e0' : '#f8f8f8',
+                    borderColor: selectedTarget === target.id ? '#ff9800' : 'transparent',
+                  }}
+                  onClick={() => setSelectedTarget(target.id)}
+                >
                   <span style={styles.targetIndex}>{index + 1}</span>
                   <input
                     type="text"
                     value={target.title}
                     onChange={e => handleTargetNameChange(target.id, e.target.value)}
                     style={styles.targetInput}
+                    onClick={e => e.stopPropagation()}
                   />
                   <span style={styles.targetCoord}>
                     ({target.position[0]}, {target.position[1]})
                   </span>
                   <button
-                    onClick={() => handleTargetDelete(target.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTargetDelete(target.id);
+                    }}
                     style={styles.deleteButton}
                   >
                     ×
@@ -271,9 +422,10 @@ export function PuzzleEditor({ onBack }: Props) {
             </div>
           </div>
 
-          <p style={styles.hint}>
-            💡 画像をクリックしてターゲットを追加
-          </p>
+          <div style={styles.hintBox}>
+            <p style={styles.hint}>💡 画像をクリック → ターゲット追加</p>
+            <p style={styles.hint}>🖐️ マーカーをドラッグ → 位置調整</p>
+          </div>
         </div>
 
         {/* 右: 画像プレビュー */}
@@ -291,6 +443,12 @@ export function PuzzleEditor({ onBack }: Props) {
                 onLoad={e => {
                   const img = e.currentTarget;
                   setImageNaturalSize({ width: img.naturalWidth, height: img.naturalHeight });
+                  // 遅延してrectを更新
+                  setTimeout(() => {
+                    if (imageContainerRef.current) {
+                      setContainerRect(imageContainerRef.current.getBoundingClientRect());
+                    }
+                  }, 100);
                 }}
                 draggable={false}
               />
@@ -299,6 +457,8 @@ export function PuzzleEditor({ onBack }: Props) {
               {targets.map(target => {
                 const pos = getTargetDisplayPosition(target);
                 if (!pos) return null;
+                const isSelected = selectedTarget === target.id;
+                const isDragging = draggingTarget === target.id;
                 return (
                   <div
                     key={target.id}
@@ -306,12 +466,13 @@ export function PuzzleEditor({ onBack }: Props) {
                       ...styles.marker,
                       left: pos.x,
                       top: pos.y,
-                      backgroundColor: editingTarget === target.id ? '#ff5722' : '#4caf50',
+                      backgroundColor: isDragging ? '#ff5722' : isSelected ? '#ff9800' : '#4caf50',
+                      transform: `translate(-50%, -50%) scale(${isDragging ? 1.2 : 1})`,
+                      cursor: 'grab',
+                      zIndex: isDragging ? 100 : isSelected ? 50 : 10,
                     }}
-                    onClick={e => {
-                      e.stopPropagation();
-                      setEditingTarget(target.id);
-                    }}
+                    onMouseDown={e => handleMarkerMouseDown(e, target.id)}
+                    onTouchStart={e => handleMarkerTouchStart(e, target.id)}
                   >
                     <span style={styles.markerNumber}>
                       {targets.findIndex(t => t.id === target.id) + 1}
@@ -322,7 +483,7 @@ export function PuzzleEditor({ onBack }: Props) {
             </div>
           ) : (
             <div style={styles.placeholder}>
-              <p>画像を選択してください</p>
+              <p>📷 画像を選択してください</p>
             </div>
           )}
         </div>
@@ -345,6 +506,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '10px 20px',
     backgroundColor: '#333',
     color: 'white',
+    gap: '10px',
   },
   backButton: {
     padding: '8px 15px',
@@ -354,12 +516,29 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid rgba(255,255,255,0.3)',
     borderRadius: '20px',
     cursor: 'pointer',
+    flexShrink: 0,
   },
   title: {
     margin: 0,
     fontSize: '1.3rem',
+    flex: 1,
+    textAlign: 'center',
+  },
+  headerButtons: {
+    display: 'flex',
+    gap: '8px',
+    flexShrink: 0,
   },
   exportButton: {
+    padding: '8px 12px',
+    fontSize: '0.9rem',
+    backgroundColor: '#607d8b',
+    color: 'white',
+    border: 'none',
+    borderRadius: '20px',
+    cursor: 'pointer',
+  },
+  completeButton: {
     padding: '8px 15px',
     fontSize: '1rem',
     backgroundColor: '#4caf50',
@@ -367,6 +546,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: 'none',
     borderRadius: '20px',
     cursor: 'pointer',
+    fontWeight: 'bold',
   },
   main: {
     display: 'flex',
@@ -379,6 +559,8 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '20px',
     overflowY: 'auto',
     borderRight: '1px solid #ddd',
+    display: 'flex',
+    flexDirection: 'column',
   },
   section: {
     marginBottom: '20px',
@@ -453,7 +635,7 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   targetList: {
-    maxHeight: '300px',
+    maxHeight: '250px',
     overflowY: 'auto',
   },
   targetItem: {
@@ -461,9 +643,11 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: '8px',
     padding: '8px',
-    backgroundColor: '#f8f8f8',
     borderRadius: '8px',
     marginBottom: '8px',
+    border: '2px solid transparent',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
   },
   targetIndex: {
     width: '24px',
@@ -490,6 +674,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.75rem',
     color: '#999',
     flexShrink: 0,
+    fontFamily: 'monospace',
   },
   deleteButton: {
     width: '24px',
@@ -505,11 +690,16 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '1rem',
     flexShrink: 0,
   },
+  hintBox: {
+    marginTop: 'auto',
+    padding: '15px',
+    backgroundColor: '#e3f2fd',
+    borderRadius: '10px',
+  },
   hint: {
-    fontSize: '0.9rem',
-    color: '#666',
-    textAlign: 'center',
-    marginTop: '20px',
+    fontSize: '0.85rem',
+    color: '#1565c0',
+    margin: '5px 0',
   },
   preview: {
     flex: 1,
@@ -518,39 +708,46 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     padding: '20px',
     backgroundColor: '#e0e0e0',
+    overflow: 'hidden',
   },
   imageContainer: {
     position: 'relative',
-    maxWidth: '100%',
-    maxHeight: '100%',
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     cursor: 'crosshair',
   },
   image: {
     maxWidth: '100%',
-    maxHeight: 'calc(100vh - 120px)',
+    maxHeight: '100%',
     objectFit: 'contain',
     display: 'block',
+    userSelect: 'none',
   },
   marker: {
     position: 'absolute',
-    transform: 'translate(-50%, -50%)',
-    width: '30px',
-    height: '30px',
+    width: '32px',
+    height: '32px',
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    cursor: 'pointer',
     boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
     border: '2px solid white',
+    transition: 'transform 0.1s, background-color 0.2s',
+    touchAction: 'none',
   },
   markerNumber: {
     color: 'white',
     fontSize: '0.9rem',
     fontWeight: 'bold',
+    pointerEvents: 'none',
   },
   placeholder: {
     color: '#999',
     fontSize: '1.2rem',
+    textAlign: 'center',
   },
 };

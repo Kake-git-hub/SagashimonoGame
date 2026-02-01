@@ -33,6 +33,12 @@ export interface Settings {
   displayMode: 'text' | 'thumbnail';
 }
 
+// カスタムパズル（ユーザー作成）
+export interface CustomPuzzle extends Puzzle {
+  imageData: string; // Base64 data URL
+  createdAt: number; // timestamp
+}
+
 // ゲーム状態
 export interface GameState {
   puzzle: Puzzle | null;

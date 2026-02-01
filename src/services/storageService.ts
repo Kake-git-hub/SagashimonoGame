@@ -1,8 +1,9 @@
-import { Progress, Settings } from '../types';
+import { Progress, Settings, CustomPuzzle, PuzzleSummary } from '../types';
 
 const STORAGE_KEYS = {
   PROGRESS: 'sagashimono_progress',
   SETTINGS: 'sagashimono_settings',
+  CUSTOM_PUZZLES: 'sagashimono_custom_puzzles',
 } as const;
 
 // 進捗データの保存
@@ -59,4 +60,53 @@ export function getSettings(): Settings {
   return {
     displayMode: 'text',
   };
+}
+
+// カスタムパズルの保存
+export function saveCustomPuzzle(puzzle: CustomPuzzle): void {
+  const puzzles = getAllCustomPuzzles();
+  // 同じIDがあれば上書き
+  const index = puzzles.findIndex(p => p.id === puzzle.id);
+  if (index >= 0) {
+    puzzles[index] = puzzle;
+  } else {
+    puzzles.push(puzzle);
+  }
+  localStorage.setItem(STORAGE_KEYS.CUSTOM_PUZZLES, JSON.stringify(puzzles));
+}
+
+// 全カスタムパズルを取得
+export function getAllCustomPuzzles(): CustomPuzzle[] {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.CUSTOM_PUZZLES);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+}
+
+// 特定のカスタムパズルを取得
+export function getCustomPuzzle(id: string): CustomPuzzle | null {
+  const puzzles = getAllCustomPuzzles();
+  return puzzles.find(p => p.id === id) || null;
+}
+
+// カスタムパズルを削除
+export function deleteCustomPuzzle(id: string): void {
+  const puzzles = getAllCustomPuzzles();
+  const filtered = puzzles.filter(p => p.id !== id);
+  localStorage.setItem(STORAGE_KEYS.CUSTOM_PUZZLES, JSON.stringify(filtered));
+  // 進捗も削除
+  resetProgress(id);
+}
+
+// カスタムパズルの一覧をサマリー形式で取得
+export function getCustomPuzzleSummaries(): PuzzleSummary[] {
+  const puzzles = getAllCustomPuzzles();
+  return puzzles.map(p => ({
+    id: p.id,
+    name: p.name,
+    thumbnail: p.imageData,
+    targetCount: p.targets.length,
+  }));
 }
