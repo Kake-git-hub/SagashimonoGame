@@ -39,6 +39,13 @@ export interface CustomPuzzle extends Puzzle {
   createdAt: number; // timestamp
 }
 
+// ヒント状態
+export interface HintState {
+  target: string;        // ヒント対象のtitle
+  level: number;         // ヒントレベル（0から始まり、連打で増加）
+  centerOffset: [number, number]; // ランダムオフセット
+}
+
 // ゲーム状態
 export interface GameState {
   puzzle: Puzzle | null;
@@ -46,6 +53,7 @@ export interface GameState {
   isCompleted: boolean;
   showHint: boolean;
   hintTarget: string | null;
+  hintState: HintState | null; // 詳細なヒント状態
 }
 
 // 定数
@@ -55,11 +63,13 @@ export const CONSTANTS = {
   // 正解判定の半径（5%相当）
   HIT_RADIUS: 50,
   // ヒント表示時間（ミリ秒）
-  HINT_DURATION: 2000,
+  HINT_DURATION: 2500,
   // サムネイル切り抜きサイズ（片側）
   THUMBNAIL_RADIUS: 50,
   // レスポンシブブレークポイント
   BREAKPOINT_TABLET: 768,
+  // ヒント半径（レベル別：0から順に縮小）
+  HINT_RADII: [300, 200, 130, 80, 50],
 } as const;
 
 // 画面モード

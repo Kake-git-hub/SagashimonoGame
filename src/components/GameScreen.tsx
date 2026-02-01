@@ -106,8 +106,8 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
     }
   }, [game, imageSize]);
 
-  // ターゲットの表示位置を計算
-  const getTargetPosition = useCallback((target: Target) => {
+  // ターゲットの表示位置を計算（オフセット付き対応）
+  const getTargetPosition = useCallback((target: Target, offset?: [number, number]) => {
     const container = imageContainerRef.current;
     if (!container || !imageSize.width) return null;
 
@@ -130,8 +130,11 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
     }
 
     const [x, y] = target.positions[0];
-    const pixelX = offsetX + (x / CONSTANTS.SCALE) * displayWidth;
-    const pixelY = offsetY + (y / CONSTANTS.SCALE) * displayHeight;
+    // オフセットがあれば適用
+    const finalX = x + (offset ? offset[0] : 0);
+    const finalY = y + (offset ? offset[1] : 0);
+    const pixelX = offsetX + (finalX / CONSTANTS.SCALE) * displayWidth;
+    const pixelY = offsetY + (finalY / CONSTANTS.SCALE) * displayHeight;
 
     return { x: pixelX, y: pixelY };
   }, [imageSize]);
@@ -209,9 +212,10 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
           })}
 
           {/* ヒント表示 */}
-          {game.showHint && game.hintTarget && (
+          {game.showHint && game.hintTarget && game.hintState && (
             <HintOverlay
               target={puzzle.targets.find(t => t.title === game.hintTarget)!}
+              hintState={game.hintState}
               getPosition={getTargetPosition}
             />
           )}

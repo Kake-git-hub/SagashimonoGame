@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Puzzle, GameState, CONSTANTS, Progress } from '../types';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { Puzzle, GameState, CONSTANTS, Progress, HintState } from '../types';
 import { saveProgress, getProgress } from '../services/storageService';
 
 export function useGame(puzzle: Puzzle | null) {
@@ -9,7 +9,10 @@ export function useGame(puzzle: Puzzle | null) {
     isCompleted: false,
     showHint: false,
     hintTarget: null,
+    hintState: null,
   });
+
+  const hintTimerRef = useRef<number | null>(null);
 
   // パズルが変わったら状態をリセット（進捗があれば復元）
   useEffect(() => {
@@ -20,6 +23,7 @@ export function useGame(puzzle: Puzzle | null) {
         isCompleted: false,
         showHint: false,
         hintTarget: null,
+        hintState: null,
       });
       return;
     }
@@ -35,6 +39,7 @@ export function useGame(puzzle: Puzzle | null) {
       isCompleted,
       showHint: false,
       hintTarget: null,
+      hintState: null,
     });
   }, [puzzle]);
 
@@ -84,8 +89,13 @@ export function useGame(puzzle: Puzzle | null) {
     });
   }, []);
 
-  // ヒントを表示
+  // ヒントを表示（連打で段階的に狭まる）
   const triggerHint = useCallback(() => {
+    // 前のタイマーをクリア
+    if (hintTimerRef.current) {
+      clearTimeout(hintTimerRef.current);
+    }
+
     setState(prev => {
       if (!prev.puzzle) return prev;
 
@@ -96,27 +106,92 @@ export function useGame(puzzle: Puzzle | null) {
 
       if (unfoundTargets.length === 0) return prev;
 
-      const randomTarget = unfoundTargets[Math.floor(Math.random() * unfoundTargets.length)];
+      // 同じターゲットへの連打か、新しいターゲットか判定
+      let nextLevel = 0;
+      let targetName: string;
+      let centerOffset: [number, number];
+
+      if (prev.showHint && prev.hintState) {
+        // 既にヒント表示中 → レベルアップ（同じターゲット）
+        const currentTarget = unfoundTargets.find(t => t.title === prev.hintState!.target);
+        if (currentTarget) {
+          // 同じターゲットでレベルアップ
+          targetName = prev.hintState.target;
+          nextLevel = Math.min(prev.hintState.level + 1, CONSTANTS.HINT_RADII.length - 1);
+          
+          // レベルが上がったらオフセットを再計算（より精密に）
+          const hintRadius = CONSTANTS.HINT_RADII[nextLevel];
+          centerOffset = calculateRandomOffset(currentTarget.positions[0], hintRadius);
+        } else {
+          // 前のターゲットが見つかった後の連打 → 新しいターゲット
+          const randomTarget = unfoundTargets[Math.floor(Math.random() * unfoundTargets.length)];
+          targetName = randomTarget.title;
+          nextLevel = 0;
+          const hintRadius = CONSTANTS.HINT_RADII[0];
+          centerOffset = calculateRandomOffset(randomTarget.positions[0], hintRadius);
+        }
+      } else {
+        // 新規ヒント
+        const randomTarget = unfoundTargets[Math.floor(Math.random() * unfoundTargets.length)];
+        targetName = randomTarget.title;
+        nextLevel = 0;
+        const hintRadius = CONSTANTS.HINT_RADII[0];
+        centerOffset = calculateRandomOffset(randomTarget.positions[0], hintRadius);
+      }
+
+      const newHintState: HintState = {
+        target: targetName,
+        level: nextLevel,
+        centerOffset,
+      };
 
       return {
         ...prev,
         showHint: true,
-        hintTarget: randomTarget.title,
+        hintTarget: targetName,
+        hintState: newHintState,
       };
     });
 
     // 一定時間後にヒントを非表示
-    setTimeout(() => {
+    hintTimerRef.current = window.setTimeout(() => {
       setState(prev => ({
         ...prev,
         showHint: false,
         hintTarget: null,
+        hintState: null,
       }));
     }, CONSTANTS.HINT_DURATION);
   }, []);
 
+  // ランダムオフセットを計算（答えがヒント円内に収まる範囲で）
+  // 答えの位置からmaxOffset以内のランダムな位置を返す
+  function calculateRandomOffset(answerPos: [number, number], hintRadius: number): [number, number] {
+    // 答えの判定半径を考慮して、ヒント円の中心をずらせる最大距離
+    const maxOffset = Math.max(0, hintRadius - CONSTANTS.HIT_RADIUS);
+    
+    // ランダムな角度と距離
+    const angle = Math.random() * Math.PI * 2;
+    const distance = Math.random() * maxOffset;
+    
+    const offsetX = Math.cos(angle) * distance;
+    const offsetY = Math.sin(angle) * distance;
+    
+    // 画面外にはみ出ないよう調整
+    const margin = hintRadius;
+    const newX = Math.max(margin, Math.min(CONSTANTS.SCALE - margin, answerPos[0] + offsetX));
+    const newY = Math.max(margin, Math.min(CONSTANTS.SCALE - margin, answerPos[1] + offsetY));
+    
+    // オフセットとして返す（実際の中心位置 - 答えの位置）
+    return [newX - answerPos[0], newY - answerPos[1]];
+  }
+
   // ゲームをリセット
   const resetGame = useCallback(() => {
+    if (hintTimerRef.current) {
+      clearTimeout(hintTimerRef.current);
+    }
+    
     setState(prev => {
       if (!prev.puzzle) return prev;
 
@@ -135,6 +210,7 @@ export function useGame(puzzle: Puzzle | null) {
         isCompleted: false,
         showHint: false,
         hintTarget: null,
+        hintState: null,
       };
     });
   }, []);

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PuzzleSummary } from '../types';
 import { fetchPuzzleList, getImageUrl } from '../services/puzzleService';
-import { getAllProgress, deleteCustomPuzzle, resetProgress } from '../services/storageService';
+import { getAllProgress, deleteCustomPuzzle, resetProgress, exportCustomPuzzleForServer } from '../services/storageService';
 
 interface Props {
   onSelectPuzzle: (puzzleId: string) => void;
@@ -68,6 +68,17 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refresh
     e.stopPropagation();
     onEditPuzzle(puzzleId);
   }, [onEditPuzzle]);
+
+  // エクスポートボタン（サーバー用にダウンロード）
+  const handleExport = useCallback(async (e: React.MouseEvent, puzzleId: string, puzzleName: string) => {
+    e.stopPropagation();
+    try {
+      await exportCustomPuzzleForServer(puzzleId);
+      alert(`「${puzzleName}」をエクスポートしました。\nJSONファイルと画像ファイルがダウンロードされます。\n\npublic/puzzles/ に配置し、index.json に追加してください。`);
+    } catch (err) {
+      alert(`エクスポートに失敗しました: ${err instanceof Error ? err.message : 'エラー'}`);
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -193,6 +204,13 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refresh
                     )}
                     {/* カスタムパズルの操作ボタン */}
                     <div style={styles.customPuzzleButtons}>
+                      <button 
+                        style={styles.exportButton}
+                        onClick={(e) => handleExport(e, puzzle.id, puzzle.name)}
+                        title="サーバー用にエクスポート"
+                      >
+                        📤
+                      </button>
                       <button 
                         style={styles.editButton}
                         onClick={(e) => handleEdit(e, puzzle.id)}
@@ -335,6 +353,19 @@ const styles: Record<string, React.CSSProperties> = {
     left: '10px',
     display: 'flex',
     gap: '5px',
+  },
+  exportButton: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(144, 238, 144, 0.95)',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
   },
   editButton: {
     width: '36px',

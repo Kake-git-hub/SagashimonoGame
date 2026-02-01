@@ -110,3 +110,59 @@ export function getCustomPuzzleSummaries(): PuzzleSummary[] {
     targetCount: p.targets.length,
   }));
 }
+
+// カスタムパズルをサーバー用形式でエクスポート
+export async function exportCustomPuzzleForServer(id: string): Promise<void> {
+  const puzzle = getCustomPuzzle(id);
+  if (!puzzle) {
+    throw new Error('パズルが見つかりません');
+  }
+
+  // サーバー用のJSON形式に変換（画像はファイル参照に）
+  const sanitizedName = puzzle.name.replace(/[<>:"/\\|?*]/g, '_');
+  const serverPuzzle = {
+    id: sanitizedName,
+    name: puzzle.name,
+    imageSrc: `puzzles/images/${sanitizedName}.webp`,
+    targets: puzzle.targets,
+  };
+
+  // JSONファイルをダウンロード
+  const jsonBlob = new Blob(
+    [JSON.stringify(serverPuzzle, null, 2)],
+    { type: 'application/json' }
+  );
+  const jsonUrl = URL.createObjectURL(jsonBlob);
+  const jsonLink = document.createElement('a');
+  jsonLink.href = jsonUrl;
+  jsonLink.download = `${sanitizedName}.json`;
+  jsonLink.click();
+  URL.revokeObjectURL(jsonUrl);
+
+  // 画像ファイルをダウンロード
+  // Base64データからBlobに変換
+  const base64Data = puzzle.imageData.split(',')[1];
+  const mimeType = puzzle.imageData.split(':')[1]?.split(';')[0] || 'image/webp';
+  const byteCharacters = atob(base64Data);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  const imageBlob = new Blob([byteArray], { type: mimeType });
+
+  // 拡張子を決定
+  const ext = mimeType.includes('webp') ? 'webp' : 
+              mimeType.includes('png') ? 'png' : 'jpg';
+
+  const imageUrl = URL.createObjectURL(imageBlob);
+  const imageLink = document.createElement('a');
+  imageLink.href = imageUrl;
+  imageLink.download = `${sanitizedName}.${ext}`;
+  
+  // 少し遅延を入れて画像もダウンロード
+  setTimeout(() => {
+    imageLink.click();
+    URL.revokeObjectURL(imageUrl);
+  }, 500);
+}
