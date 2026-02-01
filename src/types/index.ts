@@ -1,0 +1,60 @@
+// ターゲット（探すアイテム）
+export interface Target {
+  title: string;
+  position: [number, number]; // [x, y] 0-1000スケール
+}
+
+// パズルデータ
+export interface Puzzle {
+  id: string;
+  name: string;
+  imageSrc: string;
+  targets: Target[];
+}
+
+// パズル一覧用のサマリー
+export interface PuzzleSummary {
+  id: string;
+  name: string;
+  thumbnail: string;
+  targetCount: number;
+}
+
+// 進捗データ
+export interface Progress {
+  puzzleId: string;
+  foundTargets: string[]; // 発見済みターゲットのtitle配列
+  completed: boolean;
+  lastPlayed: number; // timestamp
+}
+
+// 設定
+export interface Settings {
+  displayMode: 'text' | 'thumbnail';
+}
+
+// ゲーム状態
+export interface GameState {
+  puzzle: Puzzle | null;
+  foundTargets: string[];
+  isCompleted: boolean;
+  showHint: boolean;
+  hintTarget: string | null;
+}
+
+// 定数
+export const CONSTANTS = {
+  // 座標スケール（画像左上(0,0)〜右下(1000,1000)）
+  SCALE: 1000,
+  // 正解判定の半径（5%相当）
+  HIT_RADIUS: 50,
+  // ヒント表示時間（ミリ秒）
+  HINT_DURATION: 2000,
+  // サムネイル切り抜きサイズ（片側）
+  THUMBNAIL_RADIUS: 50,
+  // レスポンシブブレークポイント
+  BREAKPOINT_TABLET: 768,
+} as const;
+
+// 画面モード
+export type ScreenMode = 'list' | 'game' | 'editor';
