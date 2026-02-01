@@ -122,15 +122,15 @@ export function useGame(puzzle: Puzzle | null) {
 
       if (unfound.length === 0) return prev;
 
-      // 同じターゲット・位置への連打か判定
+      // 同じターゲット・位置への連打か判定（hintStateが残っていれば継続）
       let nextLevel = 0;
       let selectedTarget: string;
       let selectedPositionIndex: number;
       let selectedPosition: [number, number];
       let centerOffset: [number, number];
 
-      if (prev.showHint && prev.hintState) {
-        // 既にヒント表示中
+      if (prev.hintState) {
+        // 前回のヒント状態がある
         const stillUnfound = unfound.find(
           u => u.target === prev.hintState!.target && u.positionIndex === prev.hintState!.positionIndex
         );
@@ -181,13 +181,13 @@ export function useGame(puzzle: Puzzle | null) {
       };
     });
 
-    // 一定時間後にヒントを非表示
+    // 一定時間後にヒントを非表示（hintStateは保持してレベルを引き継ぐ）
     hintTimerRef.current = window.setTimeout(() => {
       setState(prev => ({
         ...prev,
         showHint: false,
         hintTarget: null,
-        hintState: null,
+        // hintStateは保持（次のヒントでレベルを引き継ぐため）
       }));
     }, CONSTANTS.HINT_DURATION);
   }, []);
