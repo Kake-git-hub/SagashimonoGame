@@ -3,15 +3,15 @@
   "name": "おもちゃの部屋",
   "imageSrc": "puzzles/images/toy-room.webp",
   "targets": [
-    {"title": "リス", "position": [495, 80]},
-    {"title": "窓際のロボット", "position": [80, 500]},
-    {"title": "黄色いドレスの人形", "position": [780, 430]},
-    {"title": "開いた絵本（右下）", "position": [840, 750]},
-    {"title": "赤い電話機", "position": [790, 220]},
-    {"title": "アンティーク時計", "position": [690, 230]},
-    {"title": "帆船の模型", "position": [640, 680]},
-    {"title": "緑色の大きな本（中央）", "position": [520, 360]},
-    {"title": "青いロボット（左下）", "position": [250, 680]},
-    {"title": "潜水ヘルメット（右下）", "position": [930, 610]}
+    {"title": "リス", "positions": [[495, 80]]},
+    {"title": "窓際のロボット", "positions": [[80, 500]]},
+    {"title": "黄色いドレスの人形", "positions": [[780, 430]]},
+    {"title": "開いた絵本（右下）", "positions": [[840, 750]]},
+    {"title": "赤い電話機", "positions": [[790, 220]]},
+    {"title": "アンティーク時計", "positions": [[690, 230]]},
+    {"title": "帆船の模型", "positions": [[640, 680]]},
+    {"title": "緑色の大きな本（中央）", "positions": [[520, 360]]},
+    {"title": "青いロボット（左下）", "positions": [[250, 680]]},
+    {"title": "潜水ヘルメット（右下）", "positions": [[930, 610]]}
   ]
 }

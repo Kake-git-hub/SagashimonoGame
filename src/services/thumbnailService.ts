@@ -32,8 +32,8 @@ export async function generateThumbnail(
         canvas.width = size;
         canvas.height = size;
 
-        // 座標を実際のピクセル位置に変換
-        const [x, y] = target.position;
+        // 座標を実際のピクセル位置に変換（最初の座標を使用）
+        const [x, y] = target.positions[0];
         const imgX = (x / CONSTANTS.SCALE) * img.width;
         const imgY = (y / CONSTANTS.SCALE) * img.height;
 
@@ -94,7 +94,7 @@ export async function generateAllThumbnails(
     canvas.width = size;
     canvas.height = size;
 
-    const [x, y] = target.position;
+    const [x, y] = target.positions[0];
     const imgX = (x / CONSTANTS.SCALE) * img.width;
     const imgY = (y / CONSTANTS.SCALE) * img.height;
 

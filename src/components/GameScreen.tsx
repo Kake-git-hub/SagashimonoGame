@@ -129,7 +129,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
       offsetY = (rect.height - displayHeight) / 2;
     }
 
-    const [x, y] = target.position;
+    const [x, y] = target.positions[0];
     const pixelX = offsetX + (x / CONSTANTS.SCALE) * displayWidth;
     const pixelY = offsetY + (y / CONSTANTS.SCALE) * displayHeight;
 

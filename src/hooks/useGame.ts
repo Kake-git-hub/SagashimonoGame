@@ -46,11 +46,12 @@ export function useGame(puzzle: Puzzle | null) {
       // すでに発見済みならスキップ
       if (state.foundTargets.includes(target.title)) continue;
 
-      const [targetX, targetY] = target.position;
-      const distance = Math.hypot(clickX - targetX, clickY - targetY);
-
-      if (distance < CONSTANTS.HIT_RADIUS) {
-        return target.title;
+      // 複数座標のいずれかにヒットすればOK
+      for (const [targetX, targetY] of target.positions) {
+        const distance = Math.hypot(clickX - targetX, clickY - targetY);
+        if (distance < CONSTANTS.HIT_RADIUS) {
+          return target.title;
+        }
       }
     }
 

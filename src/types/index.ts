@@ -1,7 +1,7 @@
 // ターゲット（探すアイテム）
 export interface Target {
   title: string;
-  position: [number, number]; // [x, y] 0-1000スケール
+  positions: [number, number][]; // [[x, y], ...] 0-1000スケール、複数回答可
 }
 
 // パズルデータ

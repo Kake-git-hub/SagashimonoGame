@@ -7,8 +7,15 @@ interface Props {
   onPuzzleCreated?: (puzzleId: string) => void;
 }
 
-interface EditorTarget extends Target {
+interface EditorTarget {
   id: string;
+  title: string;
+  positions: [number, number][];
+}
+
+interface MarkerInfo {
+  targetId: string;
+  positionIndex: number;
 }
 
 export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
@@ -19,7 +26,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [jsonInput, setJsonInput] = useState('');
   const [showJsonImport, setShowJsonImport] = useState(false);
-  const [draggingTarget, setDraggingTarget] = useState<string | null>(null);
+  const [draggingMarker, setDraggingMarker] = useState<MarkerInfo | null>(null);
   const [saving, setSaving] = useState(false);
 
   const imageContainerRef = useRef<HTMLDivElement>(null);
@@ -104,46 +111,67 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
     ];
   }, [containerRect, getImageDisplayInfo]);
 
-  // 画像クリックで座標追加
-  const handleImageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!imageSrc || draggingTarget) return;
-
-    const coords = clientToScaleCoords(e.clientX, e.clientY);
-    if (!coords) return;
-
+  // 新しいターゲットを追加（ボタンから）
+  const handleAddTarget = useCallback(() => {
     const newTarget: EditorTarget = {
       id: Date.now().toString(),
       title: `アイテム${targets.length + 1}`,
-      position: coords,
+      positions: [[500, 500]], // 中央に配置
     };
-
     setTargets(prev => [...prev, newTarget]);
     setSelectedTarget(newTarget.id);
-  }, [imageSrc, targets.length, clientToScaleCoords, draggingTarget]);
+  }, [targets.length]);
 
-  // ターゲットのドラッグ開始
-  const handleMarkerMouseDown = useCallback((e: React.MouseEvent, targetId: string) => {
+  // ターゲットに座標を追加
+  const handleAddPosition = useCallback((targetId: string) => {
+    setTargets(prev => prev.map(t => {
+      if (t.id !== targetId) return t;
+      // 最後の座標から少しずらした位置に追加
+      const lastPos = t.positions[t.positions.length - 1];
+      const newPos: [number, number] = [
+        Math.min(CONSTANTS.SCALE, lastPos[0] + 50),
+        Math.min(CONSTANTS.SCALE, lastPos[1] + 50)
+      ];
+      return { ...t, positions: [...t.positions, newPos] };
+    }));
+  }, []);
+
+  // 座標を削除
+  const handleDeletePosition = useCallback((targetId: string, posIndex: number) => {
+    setTargets(prev => prev.map(t => {
+      if (t.id !== targetId) return t;
+      if (t.positions.length <= 1) return t; // 最低1つは残す
+      const newPositions = t.positions.filter((_, i) => i !== posIndex);
+      return { ...t, positions: newPositions };
+    }));
+  }, []);
+
+  // マーカーのドラッグ開始
+  const handleMarkerMouseDown = useCallback((e: React.MouseEvent, marker: MarkerInfo) => {
     e.stopPropagation();
     e.preventDefault();
-    setDraggingTarget(targetId);
-    setSelectedTarget(targetId);
+    setDraggingMarker(marker);
+    setSelectedTarget(marker.targetId);
   }, []);
 
   // ドラッグ中の移動
   useEffect(() => {
-    if (!draggingTarget) return;
+    if (!draggingMarker) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       const coords = clientToScaleCoords(e.clientX, e.clientY);
       if (!coords) return;
 
-      setTargets(prev => prev.map(t => 
-        t.id === draggingTarget ? { ...t, position: coords } : t
-      ));
+      setTargets(prev => prev.map(t => {
+        if (t.id !== draggingMarker.targetId) return t;
+        const newPositions = [...t.positions];
+        newPositions[draggingMarker.positionIndex] = coords;
+        return { ...t, positions: newPositions };
+      }));
     };
 
     const handleMouseUp = () => {
-      setDraggingTarget(null);
+      setDraggingMarker(null);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -153,17 +181,17 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [draggingTarget, clientToScaleCoords]);
+  }, [draggingMarker, clientToScaleCoords]);
 
   // タッチ対応
-  const handleMarkerTouchStart = useCallback((e: React.TouchEvent, targetId: string) => {
+  const handleMarkerTouchStart = useCallback((e: React.TouchEvent, marker: MarkerInfo) => {
     e.stopPropagation();
-    setDraggingTarget(targetId);
-    setSelectedTarget(targetId);
+    setDraggingMarker(marker);
+    setSelectedTarget(marker.targetId);
   }, []);
 
   useEffect(() => {
-    if (!draggingTarget) return;
+    if (!draggingMarker) return;
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 0) return;
@@ -171,13 +199,16 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
       const coords = clientToScaleCoords(touch.clientX, touch.clientY);
       if (!coords) return;
 
-      setTargets(prev => prev.map(t => 
-        t.id === draggingTarget ? { ...t, position: coords } : t
-      ));
+      setTargets(prev => prev.map(t => {
+        if (t.id !== draggingMarker.targetId) return t;
+        const newPositions = [...t.positions];
+        newPositions[draggingMarker.positionIndex] = coords;
+        return { ...t, positions: newPositions };
+      }));
     };
 
     const handleTouchEnd = () => {
-      setDraggingTarget(null);
+      setDraggingMarker(null);
     };
 
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
@@ -187,7 +218,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [draggingTarget, clientToScaleCoords]);
+  }, [draggingMarker, clientToScaleCoords]);
 
   // ターゲット名変更
   const handleTargetNameChange = useCallback((id: string, newTitle: string) => {
@@ -202,7 +233,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
     }
   }, [selectedTarget]);
 
-  // JSONインポート
+  // JSONインポート（複数座標形式対応）
   const handleJsonImport = useCallback(() => {
     try {
       const parsed = JSON.parse(jsonInput);
@@ -210,11 +241,23 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
         throw new Error('配列形式のJSONを入力してください');
       }
 
-      const importedTargets: EditorTarget[] = parsed.map((item, index) => ({
-        id: `imported-${Date.now()}-${index}`,
-        title: item.title || `アイテム${index + 1}`,
-        position: item.position || [500, 500],
-      }));
+      const importedTargets: EditorTarget[] = parsed.map((item, index) => {
+        // positions配列またはposition単体を処理
+        let positions: [number, number][];
+        if (Array.isArray(item.positions)) {
+          positions = item.positions;
+        } else if (Array.isArray(item.position)) {
+          positions = [item.position];
+        } else {
+          positions = [[500, 500]];
+        }
+
+        return {
+          id: `imported-${Date.now()}-${index}`,
+          title: item.title || `アイテム${index + 1}`,
+          positions,
+        };
+      });
 
       setTargets(importedTargets);
       setShowJsonImport(false);
@@ -232,7 +275,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
       imageSrc: `puzzles/images/${puzzleName.toLowerCase().replace(/\s+/g, '-') || 'puzzle'}.webp`,
       targets: targets.map(t => ({
         title: t.title,
-        position: t.position,
+        positions: t.positions,
       })),
     };
 
@@ -261,15 +304,17 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
     setSaving(true);
     try {
       const puzzleId = `custom-${Date.now()}`;
+      const exportTargets: Target[] = targets.map(t => ({
+        title: t.title,
+        positions: t.positions,
+      }));
+
       const customPuzzle: CustomPuzzle = {
         id: puzzleId,
         name: puzzleName.trim(),
-        imageSrc: puzzleId, // カスタムパズルはIDで識別
+        imageSrc: puzzleId,
         imageData: imageSrc,
-        targets: targets.map(t => ({
-          title: t.title,
-          position: t.position,
-        })),
+        targets: exportTargets,
         createdAt: Date.now(),
       };
 
@@ -288,13 +333,13 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
     }
   }, [imageSrc, targets, puzzleName, onBack, onPuzzleCreated]);
 
-  // ターゲットの表示位置を計算
-  const getTargetDisplayPosition = useCallback((target: EditorTarget) => {
+  // 座標の表示位置を計算
+  const getPositionDisplayCoords = useCallback((pos: [number, number]) => {
     const info = getImageDisplayInfo();
     if (!info) return null;
 
     const { displayWidth, displayHeight, offsetX, offsetY } = info;
-    const [x, y] = target.position;
+    const [x, y] = pos;
     const pixelX = offsetX + (x / CONSTANTS.SCALE) * displayWidth;
     const pixelY = offsetY + (y / CONSTANTS.SCALE) * displayHeight;
 
@@ -302,6 +347,13 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
   }, [getImageDisplayInfo]);
 
   const canComplete = imageSrc && targets.length > 0 && puzzleName.trim();
+
+  // ターゲットの色を取得
+  const getTargetColor = (targetId: string) => {
+    const colors = ['#4caf50', '#2196f3', '#ff9800', '#e91e63', '#9c27b0', '#00bcd4', '#ff5722', '#795548'];
+    const index = targets.findIndex(t => t.id === targetId);
+    return colors[index % colors.length];
+  };
 
   return (
     <div style={styles.container}>
@@ -364,12 +416,17 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
           <div style={styles.section}>
             <div style={styles.sectionHeader}>
               <label style={styles.label}>ターゲット ({targets.length})</label>
-              <button
-                onClick={() => setShowJsonImport(!showJsonImport)}
-                style={styles.smallButton}
-              >
-                📋 JSONインポート
-              </button>
+              <div style={styles.buttonGroup}>
+                <button onClick={handleAddTarget} style={styles.addButton}>
+                  ➕ 追加
+                </button>
+                <button
+                  onClick={() => setShowJsonImport(!showJsonImport)}
+                  style={styles.smallButton}
+                >
+                  📋 JSON
+                </button>
+              </div>
             </div>
 
             {showJsonImport && (
@@ -377,7 +434,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
                 <textarea
                   value={jsonInput}
                   onChange={e => setJsonInput(e.target.value)}
-                  placeholder='[{"title": "リス", "position": [495, 80]}, ...]'
+                  placeholder='[{"title": "シマウマ", "positions": [[350, 450], [830, 190]]}, ...]'
                   style={styles.textarea}
                 />
                 <button onClick={handleJsonImport} style={styles.importButton}>
@@ -387,44 +444,81 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
             )}
 
             <div style={styles.targetList}>
-              {targets.map((target, index) => (
-                <div 
-                  key={target.id} 
-                  style={{
-                    ...styles.targetItem,
-                    backgroundColor: selectedTarget === target.id ? '#fff3e0' : '#f8f8f8',
-                    borderColor: selectedTarget === target.id ? '#ff9800' : 'transparent',
-                  }}
-                  onClick={() => setSelectedTarget(target.id)}
-                >
-                  <span style={styles.targetIndex}>{index + 1}</span>
-                  <input
-                    type="text"
-                    value={target.title}
-                    onChange={e => handleTargetNameChange(target.id, e.target.value)}
-                    style={styles.targetInput}
-                    onClick={e => e.stopPropagation()}
-                  />
-                  <span style={styles.targetCoord}>
-                    ({target.position[0]}, {target.position[1]})
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleTargetDelete(target.id);
+              {targets.map((target, index) => {
+                const isSelected = selectedTarget === target.id;
+                const color = getTargetColor(target.id);
+                return (
+                  <div 
+                    key={target.id} 
+                    style={{
+                      ...styles.targetItem,
+                      backgroundColor: isSelected ? '#fff3e0' : '#f8f8f8',
+                      borderColor: isSelected ? color : 'transparent',
                     }}
-                    style={styles.deleteButton}
+                    onClick={() => setSelectedTarget(target.id)}
                   >
-                    ×
-                  </button>
-                </div>
-              ))}
+                    <div style={styles.targetHeader}>
+                      <span style={{ ...styles.targetIndex, backgroundColor: color }}>
+                        {index + 1}
+                      </span>
+                      <input
+                        type="text"
+                        value={target.title}
+                        onChange={e => handleTargetNameChange(target.id, e.target.value)}
+                        style={styles.targetInput}
+                        onClick={e => e.stopPropagation()}
+                      />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTargetDelete(target.id);
+                        }}
+                        style={styles.deleteButton}
+                      >
+                        ×
+                      </button>
+                    </div>
+                    {isSelected && (
+                      <div style={styles.positionList}>
+                        {target.positions.map((pos, posIndex) => (
+                          <div key={posIndex} style={styles.positionItem}>
+                            <span style={styles.positionLabel}>
+                              座標{posIndex + 1}: ({pos[0]}, {pos[1]})
+                            </span>
+                            {target.positions.length > 1 && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeletePosition(target.id, posIndex);
+                                }}
+                                style={styles.smallDeleteButton}
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddPosition(target.id);
+                          }}
+                          style={styles.addPositionButton}
+                        >
+                          + 座標追加
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           <div style={styles.hintBox}>
-            <p style={styles.hint}>💡 画像をクリック → ターゲット追加</p>
+            <p style={styles.hint}>💡 「追加」ボタン → ターゲット追加</p>
             <p style={styles.hint}>🖐️ マーカーをドラッグ → 位置調整</p>
+            <p style={styles.hint}>📍 複数座標 → 「座標追加」ボタン</p>
           </div>
         </div>
 
@@ -434,7 +528,6 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
             <div
               ref={imageContainerRef}
               style={styles.imageContainer}
-              onClick={handleImageClick}
             >
               <img
                 src={imageSrc}
@@ -443,7 +536,6 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
                 onLoad={e => {
                   const img = e.currentTarget;
                   setImageNaturalSize({ width: img.naturalWidth, height: img.naturalHeight });
-                  // 遅延してrectを更新
                   setTimeout(() => {
                     if (imageContainerRef.current) {
                       setContainerRect(imageContainerRef.current.getBoundingClientRect());
@@ -455,30 +547,42 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
 
               {/* ターゲットマーカー */}
               {targets.map(target => {
-                const pos = getTargetDisplayPosition(target);
-                if (!pos) return null;
                 const isSelected = selectedTarget === target.id;
-                const isDragging = draggingTarget === target.id;
-                return (
-                  <div
-                    key={target.id}
-                    style={{
-                      ...styles.marker,
-                      left: pos.x,
-                      top: pos.y,
-                      backgroundColor: isDragging ? '#ff5722' : isSelected ? '#ff9800' : '#4caf50',
-                      transform: `translate(-50%, -50%) scale(${isDragging ? 1.2 : 1})`,
-                      cursor: 'grab',
-                      zIndex: isDragging ? 100 : isSelected ? 50 : 10,
-                    }}
-                    onMouseDown={e => handleMarkerMouseDown(e, target.id)}
-                    onTouchStart={e => handleMarkerTouchStart(e, target.id)}
-                  >
-                    <span style={styles.markerNumber}>
-                      {targets.findIndex(t => t.id === target.id) + 1}
-                    </span>
-                  </div>
-                );
+                const color = getTargetColor(target.id);
+                const targetIndex = targets.findIndex(t => t.id === target.id);
+
+                return target.positions.map((pos, posIndex) => {
+                  const displayPos = getPositionDisplayCoords(pos);
+                  if (!displayPos) return null;
+
+                  const marker: MarkerInfo = { targetId: target.id, positionIndex: posIndex };
+                  const isDragging = draggingMarker?.targetId === target.id && 
+                                     draggingMarker?.positionIndex === posIndex;
+
+                  return (
+                    <div
+                      key={`${target.id}-${posIndex}`}
+                      style={{
+                        ...styles.marker,
+                        left: displayPos.x,
+                        top: displayPos.y,
+                        backgroundColor: isDragging ? '#ff5722' : color,
+                        opacity: isSelected ? 1 : 0.7,
+                        transform: `translate(-50%, -50%) scale(${isDragging ? 1.2 : 1})`,
+                        cursor: 'grab',
+                        zIndex: isDragging ? 100 : isSelected ? 50 : 10,
+                      }}
+                      onMouseDown={e => handleMarkerMouseDown(e, marker)}
+                      onTouchStart={e => handleMarkerTouchStart(e, marker)}
+                    >
+                      <span style={styles.markerNumber}>
+                        {target.positions.length > 1 
+                          ? `${targetIndex + 1}-${posIndex + 1}` 
+                          : `${targetIndex + 1}`}
+                      </span>
+                    </div>
+                  );
+                });
               })}
             </div>
           ) : (
@@ -571,6 +675,10 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     marginBottom: '10px',
   },
+  buttonGroup: {
+    display: 'flex',
+    gap: '5px',
+  },
   label: {
     display: 'block',
     fontSize: '0.9rem',
@@ -601,6 +709,15 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#666',
     marginTop: '8px',
     wordBreak: 'break-all',
+  },
+  addButton: {
+    padding: '5px 12px',
+    fontSize: '0.85rem',
+    backgroundColor: '#4caf50',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
   },
   smallButton: {
     padding: '5px 10px',
@@ -635,19 +752,21 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   targetList: {
-    maxHeight: '250px',
+    maxHeight: '300px',
     overflowY: 'auto',
   },
   targetItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '8px',
+    padding: '10px',
     borderRadius: '8px',
     marginBottom: '8px',
     border: '2px solid transparent',
     cursor: 'pointer',
     transition: 'all 0.2s',
+  },
+  targetHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
   },
   targetIndex: {
     width: '24px',
@@ -655,7 +774,6 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#4caf50',
     color: 'white',
     borderRadius: '50%',
     fontSize: '0.8rem',
@@ -670,12 +788,6 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '5px',
     minWidth: 0,
   },
-  targetCoord: {
-    fontSize: '0.75rem',
-    color: '#999',
-    flexShrink: 0,
-    fontFamily: 'monospace',
-  },
   deleteButton: {
     width: '24px',
     height: '24px',
@@ -689,6 +801,43 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     fontSize: '1rem',
     flexShrink: 0,
+  },
+  positionList: {
+    marginTop: '10px',
+    paddingLeft: '32px',
+  },
+  positionItem: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '4px 0',
+    fontSize: '0.8rem',
+  },
+  positionLabel: {
+    color: '#666',
+    fontFamily: 'monospace',
+  },
+  smallDeleteButton: {
+    width: '18px',
+    height: '18px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ff5722',
+    color: 'white',
+    border: 'none',
+    borderRadius: '50%',
+    cursor: 'pointer',
+    fontSize: '0.8rem',
+  },
+  addPositionButton: {
+    marginTop: '5px',
+    padding: '4px 10px',
+    fontSize: '0.75rem',
+    backgroundColor: '#e0e0e0',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
   },
   hintBox: {
     marginTop: 'auto',
@@ -717,7 +866,6 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    cursor: 'crosshair',
   },
   image: {
     maxWidth: '100%',
@@ -741,7 +889,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   markerNumber: {
     color: 'white',
-    fontSize: '0.9rem',
+    fontSize: '0.75rem',
     fontWeight: 'bold',
     pointerEvents: 'none',
   },
