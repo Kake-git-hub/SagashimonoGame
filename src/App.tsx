@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Puzzle, PuzzleSummary, ScreenMode } from './types';
+import { Puzzle, PuzzleSummary, ScreenMode, CustomPuzzle } from './types';
 import { fetchPuzzle, fetchPuzzleList } from './services/puzzleService';
+import { getCustomPuzzle } from './services/storageService';
 import { PuzzleList, GameScreen, PuzzleEditor } from './components';
 import './App.css';
 
@@ -12,6 +13,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [listRefreshKey, setListRefreshKey] = useState(0);
+  const [editPuzzle, setEditPuzzle] = useState<CustomPuzzle | null>(null);
 
   // パズル一覧を読み込む
   useEffect(() => {
@@ -47,12 +49,23 @@ function App() {
 
   // エディタを開く
   const handleOpenEditor = useCallback(() => {
+    setEditPuzzle(null);
     setScreen('editor');
+  }, []);
+
+  // 編集モードでエディタを開く
+  const handleEditPuzzle = useCallback((puzzleId: string) => {
+    const puzzle = getCustomPuzzle(puzzleId);
+    if (puzzle) {
+      setEditPuzzle(puzzle);
+      setScreen('editor');
+    }
   }, []);
 
   // パズル作成完了
   const handlePuzzleCreated = useCallback((_puzzleId: string) => {
     setListRefreshKey(k => k + 1);
+    setEditPuzzle(null);
     setScreen('list');
   }, []);
 
@@ -100,7 +113,7 @@ function App() {
       ) : null;
 
     case 'editor':
-      return <PuzzleEditor onBack={handleBackToList} onPuzzleCreated={handlePuzzleCreated} />;
+      return <PuzzleEditor onBack={handleBackToList} onPuzzleCreated={handlePuzzleCreated} editPuzzle={editPuzzle} />;
 
     case 'list':
     default:
@@ -108,6 +121,8 @@ function App() {
         <PuzzleList
           onSelectPuzzle={handleSelectPuzzle}
           onOpenEditor={handleOpenEditor}
+          onEditPuzzle={handleEditPuzzle}
+          refreshKey={listRefreshKey}
         />
       );
   }

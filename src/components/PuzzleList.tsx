@@ -1,24 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PuzzleSummary } from '../types';
 import { fetchPuzzleList, getImageUrl } from '../services/puzzleService';
-import { getAllProgress } from '../services/storageService';
+import { getAllProgress, deleteCustomPuzzle, resetProgress } from '../services/storageService';
 
 interface Props {
   onSelectPuzzle: (puzzleId: string) => void;
   onOpenEditor: () => void;
+  onEditPuzzle: (puzzleId: string) => void;
+  refreshKey?: number;
 }
 
-export function PuzzleList({ onSelectPuzzle, onOpenEditor }: Props) {
+export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refreshKey }: Props) {
   const [puzzles, setPuzzles] = useState<PuzzleSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<Record<string, { found: number; total: number }>>({});
 
-  useEffect(() => {
-    loadPuzzles();
-  }, []);
-
-  const loadPuzzles = async () => {
+  const loadPuzzles = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -41,7 +39,35 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor }: Props) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadPuzzles();
+  }, [loadPuzzles, refreshKey]);
+
+  // カスタムパズルの削除
+  const handleDeletePuzzle = useCallback((e: React.MouseEvent, puzzleId: string, puzzleName: string) => {
+    e.stopPropagation();
+    if (confirm(`「${puzzleName}」を削除しますか？`)) {
+      deleteCustomPuzzle(puzzleId);
+      loadPuzzles();
+    }
+  }, [loadPuzzles]);
+
+  // 進捗リセット
+  const handleResetProgress = useCallback((e: React.MouseEvent, puzzleId: string, puzzleName: string) => {
+    e.stopPropagation();
+    if (confirm(`「${puzzleName}」の進捗をリセットしますか？`)) {
+      resetProgress(puzzleId);
+      loadPuzzles();
+    }
+  }, [loadPuzzles]);
+
+  // 編集ボタン
+  const handleEdit = useCallback((e: React.MouseEvent, puzzleId: string) => {
+    e.stopPropagation();
+    onEditPuzzle(puzzleId);
+  }, [onEditPuzzle]);
 
   if (loading) {
     return (
@@ -64,6 +90,10 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor }: Props) {
     );
   }
 
+  // サーバーパズルとカスタムパズルを分離
+  const serverPuzzles = puzzles.filter(p => !p.id.startsWith('custom-'));
+  const customPuzzles = puzzles.filter(p => p.id.startsWith('custom-'));
+
   return (
     <div style={styles.container}>
       <header style={styles.header}>
@@ -71,55 +101,140 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor }: Props) {
         <p style={styles.subtitle}>パズルをえらんでね</p>
       </header>
 
-      <div style={styles.puzzleGrid}>
-        {puzzles.map(puzzle => {
-          const p = progress[puzzle.id];
-          const isCompleted = p && p.found === p.total;
-          const hasProgress = p && p.found > 0;
+      {/* サーバーパズル */}
+      {serverPuzzles.length > 0 && (
+        <div style={styles.puzzleGrid}>
+          {serverPuzzles.map(puzzle => {
+            const p = progress[puzzle.id];
+            const isCompleted = p && p.found === p.total;
+            const hasProgress = p && p.found > 0;
 
-          return (
-            <div
-              key={puzzle.id}
-              style={{
-                ...styles.puzzleCard,
-                ...(isCompleted ? styles.completedCard : {}),
-              }}
-              onClick={() => onSelectPuzzle(puzzle.id)}
-            >
-              <div style={styles.thumbnailContainer}>
-                <img
-                  src={getImageUrl(puzzle.thumbnail)}
-                  alt={puzzle.name}
-                  style={styles.thumbnail}
-                />
-                {isCompleted && (
-                  <div style={styles.completedBadge}>✅ クリア！</div>
-                )}
+            return (
+              <div
+                key={puzzle.id}
+                style={{
+                  ...styles.puzzleCard,
+                  ...(isCompleted ? styles.completedCard : {}),
+                }}
+                onClick={() => onSelectPuzzle(puzzle.id)}
+              >
+                <div style={styles.thumbnailContainer}>
+                  <img
+                    src={getImageUrl(puzzle.thumbnail)}
+                    alt={puzzle.name}
+                    style={styles.thumbnail}
+                  />
+                  {isCompleted && (
+                    <div style={styles.completedBadge}>✅ クリア！</div>
+                  )}
+                  {hasProgress && !isCompleted && (
+                    <button 
+                      style={styles.resetButton}
+                      onClick={(e) => handleResetProgress(e, puzzle.id, puzzle.name)}
+                      title="進捗をリセット"
+                    >
+                      🔄
+                    </button>
+                  )}
+                </div>
+                <div style={styles.puzzleInfo}>
+                  <h2 style={styles.puzzleName}>{puzzle.name}</h2>
+                  {p && (
+                    <div style={styles.progressBar}>
+                      <div
+                        style={{
+                          ...styles.progressFill,
+                          width: `${(p.found / p.total) * 100}%`,
+                          backgroundColor: isCompleted ? '#4caf50' : '#4a90d9',
+                        }}
+                      />
+                      <span style={styles.progressText}>
+                        {p.found} / {p.total}
+                      </span>
+                    </div>
+                  )}
+                  {hasProgress && !isCompleted && (
+                    <span style={styles.continueLabel}>つづきから</span>
+                  )}
+                </div>
               </div>
-              <div style={styles.puzzleInfo}>
-                <h2 style={styles.puzzleName}>{puzzle.name}</h2>
-                {p && (
-                  <div style={styles.progressBar}>
-                    <div
-                      style={{
-                        ...styles.progressFill,
-                        width: `${(p.found / p.total) * 100}%`,
-                        backgroundColor: isCompleted ? '#4caf50' : '#4a90d9',
-                      }}
+            );
+          })}
+        </div>
+      )}
+
+      {/* カスタムパズルセクション */}
+      {customPuzzles.length > 0 && (
+        <>
+          <h2 style={styles.sectionTitle}>📝 じぶんでつくったパズル</h2>
+          <div style={styles.puzzleGrid}>
+            {customPuzzles.map(puzzle => {
+              const p = progress[puzzle.id];
+              const isCompleted = p && p.found === p.total;
+              const hasProgress = p && p.found > 0;
+
+              return (
+                <div
+                  key={puzzle.id}
+                  style={{
+                    ...styles.puzzleCard,
+                    ...(isCompleted ? styles.completedCard : {}),
+                  }}
+                  onClick={() => onSelectPuzzle(puzzle.id)}
+                >
+                  <div style={styles.thumbnailContainer}>
+                    <img
+                      src={getImageUrl(puzzle.thumbnail)}
+                      alt={puzzle.name}
+                      style={styles.thumbnail}
                     />
-                    <span style={styles.progressText}>
-                      {p.found} / {p.total}
-                    </span>
+                    {isCompleted && (
+                      <div style={styles.completedBadge}>✅ クリア！</div>
+                    )}
+                    {/* カスタムパズルの操作ボタン */}
+                    <div style={styles.customPuzzleButtons}>
+                      <button 
+                        style={styles.editButton}
+                        onClick={(e) => handleEdit(e, puzzle.id)}
+                        title="編集"
+                      >
+                        ✏️
+                      </button>
+                      <button 
+                        style={styles.deleteButtonSmall}
+                        onClick={(e) => handleDeletePuzzle(e, puzzle.id, puzzle.name)}
+                        title="削除"
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </div>
-                )}
-                {hasProgress && !isCompleted && (
-                  <span style={styles.continueLabel}>つづきから</span>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                  <div style={styles.puzzleInfo}>
+                    <h2 style={styles.puzzleName}>{puzzle.name}</h2>
+                    {p && (
+                      <div style={styles.progressBar}>
+                        <div
+                          style={{
+                            ...styles.progressFill,
+                            width: `${(p.found / p.total) * 100}%`,
+                            backgroundColor: isCompleted ? '#4caf50' : '#4a90d9',
+                          }}
+                        />
+                        <span style={styles.progressText}>
+                          {p.found} / {p.total}
+                        </span>
+                      </div>
+                    )}
+                    {hasProgress && !isCompleted && (
+                      <span style={styles.continueLabel}>つづきから</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       <button style={styles.editorButton} onClick={onOpenEditor}>
         ✏️ パズルをつくる
@@ -147,6 +262,12 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '1.1rem',
     color: '#666',
     margin: 0,
+  },
+  sectionTitle: {
+    fontSize: '1.3rem',
+    color: '#555',
+    margin: '40px 0 20px',
+    textAlign: 'center',
   },
   loading: {
     textAlign: 'center',
@@ -207,6 +328,55 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '20px',
     fontSize: '0.9rem',
     fontWeight: 'bold',
+  },
+  customPuzzleButtons: {
+    position: 'absolute',
+    top: '10px',
+    left: '10px',
+    display: 'flex',
+    gap: '5px',
+  },
+  editButton: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+  },
+  deleteButtonSmall: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+  },
+  resetButton: {
+    position: 'absolute',
+    top: '10px',
+    left: '10px',
+    width: '36px',
+    height: '36px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
   },
   puzzleInfo: {
     padding: '15px',

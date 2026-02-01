@@ -1,10 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Target, CONSTANTS, CustomPuzzle } from '../types';
 import { saveCustomPuzzle } from '../services/storageService';
+import { compressImage, formatSize, estimateBase64Size } from '../services/imageService';
 
 interface Props {
   onBack: () => void;
   onPuzzleCreated?: (puzzleId: string) => void;
+  editPuzzle?: CustomPuzzle | null; // 編集モード用
 }
 
 interface EditorTarget {
@@ -18,7 +20,8 @@ interface MarkerInfo {
   positionIndex: number;
 }
 
-export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
+export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
+  const [puzzleId, setPuzzleId] = useState<string | null>(null);
   const [puzzleName, setPuzzleName] = useState('');
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -28,11 +31,27 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
   const [showJsonImport, setShowJsonImport] = useState(false);
   const [draggingMarker, setDraggingMarker] = useState<MarkerInfo | null>(null);
   const [saving, setSaving] = useState(false);
+  const [imageSize, setImageSize] = useState<string>('');
 
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageNaturalSize, setImageNaturalSize] = useState({ width: 0, height: 0 });
   const [containerRect, setContainerRect] = useState<DOMRect | null>(null);
+
+  // 編集モードの初期化
+  useEffect(() => {
+    if (editPuzzle) {
+      setPuzzleId(editPuzzle.id);
+      setPuzzleName(editPuzzle.name);
+      setImageSrc(editPuzzle.imageData);
+      setImageSize(formatSize(estimateBase64Size(editPuzzle.imageData)));
+      setTargets(editPuzzle.targets.map((t, i) => ({
+        id: `edit-${i}-${Date.now()}`,
+        title: t.title,
+        positions: t.positions,
+      })));
+    }
+  }, [editPuzzle]);
 
   // コンテナサイズの更新
   useEffect(() => {
@@ -70,8 +89,8 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
     return { displayWidth, displayHeight, offsetX, offsetY };
   }, [containerRect, imageNaturalSize]);
 
-  // ファイル選択
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  // ファイル選択（圧縮付き）
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
@@ -80,9 +99,24 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
     }
 
     setImageFile(file);
+    
+    // まずファイルを読み込み
     const reader = new FileReader();
-    reader.onload = () => {
-      setImageSrc(reader.result as string);
+    reader.onload = async () => {
+      const originalDataUrl = reader.result as string;
+      
+      try {
+        // 圧縮
+        const compressedDataUrl = await compressImage(originalDataUrl);
+        const size = estimateBase64Size(compressedDataUrl);
+        setImageSrc(compressedDataUrl);
+        setImageSize(formatSize(size));
+      } catch (err) {
+        console.error('Image compression failed:', err);
+        // 圧縮失敗時はそのまま使用
+        setImageSrc(originalDataUrl);
+        setImageSize(formatSize(estimateBase64Size(originalDataUrl)));
+      }
     };
     reader.readAsDataURL(file);
   }, []);
@@ -303,35 +337,41 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
 
     setSaving(true);
     try {
-      const puzzleId = `custom-${Date.now()}`;
+      // 編集モードなら既存IDを使用、新規ならID生成
+      const saveId = puzzleId || `custom-${Date.now()}`;
       const exportTargets: Target[] = targets.map(t => ({
         title: t.title,
         positions: t.positions,
       }));
 
       const customPuzzle: CustomPuzzle = {
-        id: puzzleId,
+        id: saveId,
         name: puzzleName.trim(),
-        imageSrc: puzzleId,
+        imageSrc: saveId,
         imageData: imageSrc,
         targets: exportTargets,
-        createdAt: Date.now(),
+        createdAt: editPuzzle?.createdAt || Date.now(),
       };
 
       saveCustomPuzzle(customPuzzle);
-      alert('パズルを保存しました！');
+      alert(editPuzzle ? 'パズルを更新しました！' : 'パズルを保存しました！');
       
       if (onPuzzleCreated) {
-        onPuzzleCreated(puzzleId);
+        onPuzzleCreated(saveId);
       } else {
         onBack();
       }
     } catch (err) {
-      alert('保存に失敗しました: ' + (err instanceof Error ? err.message : '不明なエラー'));
+      const message = err instanceof Error ? err.message : '不明なエラー';
+      if (message.includes('quota')) {
+        alert('保存に失敗しました: ストレージ容量が不足しています。\n古いパズルを削除するか、より小さい画像を使用してください。');
+      } else {
+        alert('保存に失敗しました: ' + message);
+      }
     } finally {
       setSaving(false);
     }
-  }, [imageSrc, targets, puzzleName, onBack, onPuzzleCreated]);
+  }, [imageSrc, targets, puzzleName, puzzleId, editPuzzle, onBack, onPuzzleCreated]);
 
   // 座標の表示位置を計算
   const getPositionDisplayCoords = useCallback((pos: [number, number]) => {
@@ -355,13 +395,17 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
     return colors[index % colors.length];
   };
 
+  const isEditMode = !!editPuzzle;
+
   return (
     <div style={styles.container}>
       <header style={styles.header}>
         <button onClick={onBack} style={styles.backButton}>
           ← もどる
         </button>
-        <h1 style={styles.title}>パズルエディタ</h1>
+        <h1 style={styles.title}>
+          {isEditMode ? '📝 パズル編集' : '✏️ パズル作成'}
+        </h1>
         <div style={styles.headerButtons}>
           <button onClick={exportJson} style={styles.exportButton} disabled={targets.length === 0}>
             📥 JSON
@@ -374,7 +418,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
             }}
             disabled={!canComplete || saving}
           >
-            {saving ? '保存中...' : '✅ 完成'}
+            {saving ? '保存中...' : isEditMode ? '💾 更新' : '✅ 完成'}
           </button>
         </div>
       </header>
@@ -394,7 +438,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
           </div>
 
           <div style={styles.section}>
-            <label style={styles.label}>画像 *</label>
+            <label style={styles.label}>画像 * {imageSize && `(${imageSize})`}</label>
             <input
               ref={fileInputRef}
               type="file"
@@ -406,7 +450,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated }: Props) {
               onClick={() => fileInputRef.current?.click()}
               style={styles.uploadButton}
             >
-              📁 画像を選択
+              📁 {imageSrc ? '画像を変更' : '画像を選択'}
             </button>
             {imageFile && (
               <p style={styles.fileName}>{imageFile.name}</p>
