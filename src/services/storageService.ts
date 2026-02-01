@@ -107,7 +107,8 @@ export function getCustomPuzzleSummaries(): PuzzleSummary[] {
     id: p.id,
     name: p.name,
     thumbnail: p.imageData,
-    targetCount: p.targets.length,
+    // 位置の総数（全部見つける形式のため）
+    targetCount: p.targets.reduce((sum, t) => sum + t.positions.length, 0),
   }));
 }
 

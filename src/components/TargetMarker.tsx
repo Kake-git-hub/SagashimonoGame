@@ -13,10 +13,10 @@ export function TargetMarker({ x, y, isNew = false }: Props) {
         ...styles.marker,
         left: x,
         top: y,
-        animation: isNew ? 'markerBounce 0.5s ease-out' : undefined,
+        animation: isNew ? 'markerPop 0.4s ease-out' : undefined,
       }}
     >
-      <span style={styles.arrow}>▼</span>
+      <div style={styles.circle} />
     </div>
   );
 }
@@ -24,16 +24,17 @@ export function TargetMarker({ x, y, isNew = false }: Props) {
 const styles: Record<string, CSSProperties> = {
   marker: {
     position: 'absolute',
-    transform: 'translate(-50%, -100%)',
+    transform: 'translate(-50%, -50%)',
     pointerEvents: 'none',
     zIndex: 10,
   },
-  arrow: {
-    display: 'block',
-    fontSize: '2rem',
-    color: '#ff5722',
-    textShadow: '0 2px 4px rgba(0,0,0,0.5), 0 0 10px rgba(255, 87, 34, 0.5)',
-    filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.3))',
+  circle: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    border: '4px solid #4caf50',
+    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+    boxShadow: '0 0 10px rgba(76, 175, 80, 0.6), inset 0 0 10px rgba(76, 175, 80, 0.3)',
   },
 };
 

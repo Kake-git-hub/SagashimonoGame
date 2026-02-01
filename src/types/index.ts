@@ -23,7 +23,7 @@ export interface PuzzleSummary {
 // 進捗データ
 export interface Progress {
   puzzleId: string;
-  foundTargets: string[]; // 発見済みターゲットのtitle配列
+  foundPositions: string[]; // 発見済み位置のキー配列 "title:index"
   completed: boolean;
   lastPlayed: number; // timestamp
 }
@@ -42,6 +42,7 @@ export interface CustomPuzzle extends Puzzle {
 // ヒント状態
 export interface HintState {
   target: string;        // ヒント対象のtitle
+  positionIndex: number; // どの位置のヒントか
   level: number;         // ヒントレベル（0から始まり、連打で増加）
   centerOffset: [number, number]; // ランダムオフセット
 }
@@ -49,7 +50,7 @@ export interface HintState {
 // ゲーム状態
 export interface GameState {
   puzzle: Puzzle | null;
-  foundTargets: string[];
+  foundPositions: Set<string>; // 発見済み位置のキー "title:index"
   isCompleted: boolean;
   showHint: boolean;
   hintTarget: string | null;
@@ -63,14 +64,41 @@ export const CONSTANTS = {
   // 正解判定の半径（5%相当）
   HIT_RADIUS: 50,
   // ヒント表示時間（ミリ秒）
-  HINT_DURATION: 2500,
+  HINT_DURATION: 3000,
   // サムネイル切り抜きサイズ（片側）
   THUMBNAIL_RADIUS: 50,
   // レスポンシブブレークポイント
   BREAKPOINT_TABLET: 768,
-  // ヒント半径（レベル別：0から順に縮小）
-  HINT_RADII: [300, 200, 130, 80, 50],
+  // ヒント初期半径（画像の半分=500）、連打で半減
+  HINT_INITIAL_RADIUS: 500,
+  HINT_MIN_RADIUS: 30,
 } as const;
 
 // 画面モード
 export type ScreenMode = 'list' | 'game' | 'editor';
+
+// ヘルパー関数: 位置キーを生成
+export function makePositionKey(title: string, index: number): string {
+  return `${title}:${index}`;
+}
+
+// ヘルパー関数: 位置キーをパース
+export function parsePositionKey(key: string): { title: string; index: number } | null {
+  const lastColon = key.lastIndexOf(':');
+  if (lastColon === -1) return null;
+  const title = key.substring(0, lastColon);
+  const index = parseInt(key.substring(lastColon + 1), 10);
+  if (isNaN(index)) return null;
+  return { title, index };
+}
+
+// ヘルパー関数: パズルの総位置数を計算
+export function getTotalPositionCount(puzzle: Puzzle): number {
+  return puzzle.targets.reduce((sum, t) => sum + t.positions.length, 0);
+}
+
+// ヘルパー関数: ヒント半径を計算（レベルに応じて半減）
+export function getHintRadius(level: number): number {
+  const radius = CONSTANTS.HINT_INITIAL_RADIUS / Math.pow(2, level);
+  return Math.max(radius, CONSTANTS.HINT_MIN_RADIUS);
+}

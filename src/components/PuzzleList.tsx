@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PuzzleSummary } from '../types';
 import { fetchPuzzleList, getImageUrl } from '../services/puzzleService';
-import { getAllProgress, deleteCustomPuzzle, resetProgress, exportCustomPuzzleForServer } from '../services/storageService';
+import { getAllProgress, deleteCustomPuzzle, resetProgress, exportCustomPuzzleForServer, getCustomPuzzle } from '../services/storageService';
+import { uploadPuzzleToServer, validateGitHubToken } from '../services/githubService';
 
 interface Props {
   onSelectPuzzle: (puzzleId: string) => void;
@@ -29,8 +30,8 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refresh
       for (const puzzle of data) {
         const p = allProgress[puzzle.id];
         progressMap[puzzle.id] = {
-          found: p?.foundTargets.length || 0,
-          total: puzzle.targetCount,
+          found: p?.foundPositions?.length || 0,
+          total: puzzle.targetCount, // これは位置の総数
         };
       }
       setProgress(progressMap);
@@ -79,6 +80,73 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refresh
       alert(`エクスポートに失敗しました: ${err instanceof Error ? err.message : 'エラー'}`);
     }
   }, []);
+
+  // サーバーにアップロード（管理者機能）
+  const handleUploadToServer = useCallback(async (e: React.MouseEvent, puzzleId: string, puzzleName: string) => {
+    e.stopPropagation();
+    
+    // トークンを取得（localStorageから、または入力を促す）
+    let token = localStorage.getItem('github_pat');
+    
+    if (!token) {
+      token = prompt(
+        '🔐 管理者用機能\n\n' +
+        'GitHubのPersonal Access Token (PAT) を入力してください。\n' +
+        '必要な権限: repo (Contents: Read and write)\n\n' +
+        '※トークンはブラウザに保存されます'
+      );
+      
+      if (!token) return;
+      
+      // トークンを検証
+      const isValid = await validateGitHubToken(token);
+      if (!isValid) {
+        alert('トークンが無効です。正しいトークンを入力してください。');
+        return;
+      }
+      
+      localStorage.setItem('github_pat', token);
+    }
+    
+    // カスタムパズルを取得
+    const puzzle = getCustomPuzzle(puzzleId);
+    if (!puzzle) {
+      alert('パズルが見つかりません');
+      return;
+    }
+    
+    if (!confirm(`「${puzzleName}」をサーバーにアップロードしますか？\n\n※ GitHubリポジトリに直接追加されます`)) {
+      return;
+    }
+    
+    try {
+      const result = await uploadPuzzleToServer(token, {
+        id: puzzle.name,
+        name: puzzle.name,
+        targets: puzzle.targets,
+        imageData: puzzle.imageData,
+      });
+      
+      if (result.success) {
+        alert(result.message);
+        // カスタムパズルを削除（サーバーに移行したため）
+        if (confirm('サーバーにアップロードしたので、ローカルのカスタムパズルを削除しますか？')) {
+          deleteCustomPuzzle(puzzleId);
+          loadPuzzles();
+        }
+      } else {
+        // トークンが無効な場合はクリア
+        if (result.message.includes('Bad credentials') || result.message.includes('401')) {
+          localStorage.removeItem('github_pat');
+          alert('トークンが無効です。再度入力してください。\n\n' + result.message);
+        } else {
+          alert('アップロードに失敗しました:\n' + result.message);
+        }
+      }
+    } catch (err) {
+      alert('エラーが発生しました: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
+  }, [loadPuzzles]);
 
   if (loading) {
     return (
@@ -205,11 +273,18 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refresh
                     {/* カスタムパズルの操作ボタン */}
                     <div style={styles.customPuzzleButtons}>
                       <button 
+                        style={styles.uploadButton}
+                        onClick={(e) => handleUploadToServer(e, puzzle.id, puzzle.name)}
+                        title="サーバーにアップロード"
+                      >
+                        🚀
+                      </button>
+                      <button 
                         style={styles.exportButton}
                         onClick={(e) => handleExport(e, puzzle.id, puzzle.name)}
-                        title="サーバー用にエクスポート"
+                        title="ファイルをダウンロード"
                       >
-                        📤
+                        📥
                       </button>
                       <button 
                         style={styles.editButton}
@@ -353,6 +428,21 @@ const styles: Record<string, React.CSSProperties> = {
     left: '10px',
     display: 'flex',
     gap: '5px',
+    flexWrap: 'wrap',
+    maxWidth: '90px',
+  },
+  uploadButton: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(100, 149, 237, 0.95)',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
   },
   exportButton: {
     width: '36px',

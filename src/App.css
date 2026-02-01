@@ -104,6 +104,20 @@ button, a {
   }
 }
 
+@keyframes markerPop {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.4);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
 @keyframes hintPulse {
   0% {
     transform: scale(1);

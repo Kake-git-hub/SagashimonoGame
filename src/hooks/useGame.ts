@@ -1,11 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Puzzle, GameState, CONSTANTS, Progress, HintState } from '../types';
+import { Puzzle, GameState, CONSTANTS, Progress, HintState, makePositionKey, getTotalPositionCount, getHintRadius } from '../types';
 import { saveProgress, getProgress } from '../services/storageService';
 
 export function useGame(puzzle: Puzzle | null) {
   const [state, setState] = useState<GameState>({
     puzzle: null,
-    foundTargets: [],
+    foundPositions: new Set(),
     isCompleted: false,
     showHint: false,
     hintTarget: null,
@@ -19,7 +19,7 @@ export function useGame(puzzle: Puzzle | null) {
     if (!puzzle) {
       setState({
         puzzle: null,
-        foundTargets: [],
+        foundPositions: new Set(),
         isCompleted: false,
         showHint: false,
         hintTarget: null,
@@ -30,12 +30,13 @@ export function useGame(puzzle: Puzzle | null) {
 
     // 保存された進捗を復元
     const progress = getProgress(puzzle.id);
-    const foundTargets = progress?.foundTargets || [];
-    const isCompleted = progress?.completed || false;
+    const foundPositions = new Set(progress?.foundPositions || []);
+    const totalPositions = getTotalPositionCount(puzzle);
+    const isCompleted = progress?.completed || foundPositions.size >= totalPositions;
 
     setState({
       puzzle,
-      foundTargets,
+      foundPositions,
       isCompleted,
       showHint: false,
       hintTarget: null,
@@ -44,38 +45,43 @@ export function useGame(puzzle: Puzzle | null) {
   }, [puzzle]);
 
   // クリック位置をチェック（0-1000スケールの座標を受け取る）
+  // 見つかった場合は位置キー "title:index" を返す
   const checkTarget = useCallback((clickX: number, clickY: number): string | null => {
     if (!state.puzzle || state.isCompleted) return null;
 
     for (const target of state.puzzle.targets) {
-      // すでに発見済みならスキップ
-      if (state.foundTargets.includes(target.title)) continue;
+      for (let i = 0; i < target.positions.length; i++) {
+        const posKey = makePositionKey(target.title, i);
+        // すでに発見済みならスキップ
+        if (state.foundPositions.has(posKey)) continue;
 
-      // 複数座標のいずれかにヒットすればOK
-      for (const [targetX, targetY] of target.positions) {
+        const [targetX, targetY] = target.positions[i];
         const distance = Math.hypot(clickX - targetX, clickY - targetY);
         if (distance < CONSTANTS.HIT_RADIUS) {
-          return target.title;
+          return posKey;
         }
       }
     }
 
     return null;
-  }, [state.puzzle, state.foundTargets, state.isCompleted]);
+  }, [state.puzzle, state.foundPositions, state.isCompleted]);
 
-  // ターゲットを発見済みにする
-  const markFound = useCallback((title: string) => {
+  // 位置を発見済みにする
+  const markFound = useCallback((positionKey: string) => {
     setState(prev => {
       if (!prev.puzzle) return prev;
-      if (prev.foundTargets.includes(title)) return prev;
+      if (prev.foundPositions.has(positionKey)) return prev;
 
-      const newFoundTargets = [...prev.foundTargets, title];
-      const isCompleted = newFoundTargets.length === prev.puzzle.targets.length;
+      const newFoundPositions = new Set(prev.foundPositions);
+      newFoundPositions.add(positionKey);
+      
+      const totalPositions = getTotalPositionCount(prev.puzzle);
+      const isCompleted = newFoundPositions.size >= totalPositions;
 
       // 進捗を保存
       const progress: Progress = {
         puzzleId: prev.puzzle.id,
-        foundTargets: newFoundTargets,
+        foundPositions: Array.from(newFoundPositions),
         completed: isCompleted,
         lastPlayed: Date.now(),
       };
@@ -83,7 +89,7 @@ export function useGame(puzzle: Puzzle | null) {
 
       return {
         ...prev,
-        foundTargets: newFoundTargets,
+        foundPositions: newFoundPositions,
         isCompleted,
       };
     });
@@ -99,48 +105,70 @@ export function useGame(puzzle: Puzzle | null) {
     setState(prev => {
       if (!prev.puzzle) return prev;
 
-      // 未発見のターゲットからランダムに1つ選ぶ
-      const unfoundTargets = prev.puzzle.targets.filter(
-        t => !prev.foundTargets.includes(t.title)
-      );
+      // 未発見の位置を取得
+      const unfound: { target: string; positionIndex: number; position: [number, number] }[] = [];
+      for (const target of prev.puzzle.targets) {
+        for (let i = 0; i < target.positions.length; i++) {
+          const posKey = makePositionKey(target.title, i);
+          if (!prev.foundPositions.has(posKey)) {
+            unfound.push({
+              target: target.title,
+              positionIndex: i,
+              position: target.positions[i],
+            });
+          }
+        }
+      }
 
-      if (unfoundTargets.length === 0) return prev;
+      if (unfound.length === 0) return prev;
 
-      // 同じターゲットへの連打か、新しいターゲットか判定
+      // 同じターゲット・位置への連打か判定
       let nextLevel = 0;
-      let targetName: string;
+      let selectedTarget: string;
+      let selectedPositionIndex: number;
+      let selectedPosition: [number, number];
       let centerOffset: [number, number];
 
       if (prev.showHint && prev.hintState) {
-        // 既にヒント表示中 → レベルアップ（同じターゲット）
-        const currentTarget = unfoundTargets.find(t => t.title === prev.hintState!.target);
-        if (currentTarget) {
-          // 同じターゲットでレベルアップ
-          targetName = prev.hintState.target;
-          nextLevel = Math.min(prev.hintState.level + 1, CONSTANTS.HINT_RADII.length - 1);
+        // 既にヒント表示中
+        const stillUnfound = unfound.find(
+          u => u.target === prev.hintState!.target && u.positionIndex === prev.hintState!.positionIndex
+        );
+        
+        if (stillUnfound) {
+          // 同じ位置でレベルアップ
+          selectedTarget = prev.hintState.target;
+          selectedPositionIndex = prev.hintState.positionIndex;
+          selectedPosition = stillUnfound.position;
+          nextLevel = prev.hintState.level + 1;
           
-          // レベルが上がったらオフセットを再計算（より精密に）
-          const hintRadius = CONSTANTS.HINT_RADII[nextLevel];
-          centerOffset = calculateRandomOffset(currentTarget.positions[0], hintRadius);
+          // レベルが上がったらオフセットを再計算
+          const hintRadius = getHintRadius(nextLevel);
+          centerOffset = calculateRandomOffset(selectedPosition, hintRadius);
         } else {
-          // 前のターゲットが見つかった後の連打 → 新しいターゲット
-          const randomTarget = unfoundTargets[Math.floor(Math.random() * unfoundTargets.length)];
-          targetName = randomTarget.title;
+          // 前の位置が見つかった → 新しい位置
+          const random = unfound[Math.floor(Math.random() * unfound.length)];
+          selectedTarget = random.target;
+          selectedPositionIndex = random.positionIndex;
+          selectedPosition = random.position;
           nextLevel = 0;
-          const hintRadius = CONSTANTS.HINT_RADII[0];
-          centerOffset = calculateRandomOffset(randomTarget.positions[0], hintRadius);
+          const hintRadius = getHintRadius(0);
+          centerOffset = calculateRandomOffset(selectedPosition, hintRadius);
         }
       } else {
         // 新規ヒント
-        const randomTarget = unfoundTargets[Math.floor(Math.random() * unfoundTargets.length)];
-        targetName = randomTarget.title;
+        const random = unfound[Math.floor(Math.random() * unfound.length)];
+        selectedTarget = random.target;
+        selectedPositionIndex = random.positionIndex;
+        selectedPosition = random.position;
         nextLevel = 0;
-        const hintRadius = CONSTANTS.HINT_RADII[0];
-        centerOffset = calculateRandomOffset(randomTarget.positions[0], hintRadius);
+        const hintRadius = getHintRadius(0);
+        centerOffset = calculateRandomOffset(selectedPosition, hintRadius);
       }
 
       const newHintState: HintState = {
-        target: targetName,
+        target: selectedTarget,
+        positionIndex: selectedPositionIndex,
         level: nextLevel,
         centerOffset,
       };
@@ -148,7 +176,7 @@ export function useGame(puzzle: Puzzle | null) {
       return {
         ...prev,
         showHint: true,
-        hintTarget: targetName,
+        hintTarget: selectedTarget,
         hintState: newHintState,
       };
     });
@@ -164,25 +192,20 @@ export function useGame(puzzle: Puzzle | null) {
     }, CONSTANTS.HINT_DURATION);
   }, []);
 
-  // ランダムオフセットを計算（答えがヒント円内に収まる範囲で）
-  // 答えの位置からmaxOffset以内のランダムな位置を返す
+  // ランダムオフセットを計算
   function calculateRandomOffset(answerPos: [number, number], hintRadius: number): [number, number] {
-    // 答えの判定半径を考慮して、ヒント円の中心をずらせる最大距離
     const maxOffset = Math.max(0, hintRadius - CONSTANTS.HIT_RADIUS);
     
-    // ランダムな角度と距離
     const angle = Math.random() * Math.PI * 2;
     const distance = Math.random() * maxOffset;
     
     const offsetX = Math.cos(angle) * distance;
     const offsetY = Math.sin(angle) * distance;
     
-    // 画面外にはみ出ないよう調整
     const margin = hintRadius;
     const newX = Math.max(margin, Math.min(CONSTANTS.SCALE - margin, answerPos[0] + offsetX));
     const newY = Math.max(margin, Math.min(CONSTANTS.SCALE - margin, answerPos[1] + offsetY));
     
-    // オフセットとして返す（実際の中心位置 - 答えの位置）
     return [newX - answerPos[0], newY - answerPos[1]];
   }
 
@@ -195,10 +218,9 @@ export function useGame(puzzle: Puzzle | null) {
     setState(prev => {
       if (!prev.puzzle) return prev;
 
-      // 進捗をリセット
       const progress: Progress = {
         puzzleId: prev.puzzle.id,
-        foundTargets: [],
+        foundPositions: [],
         completed: false,
         lastPlayed: Date.now(),
       };
@@ -206,7 +228,7 @@ export function useGame(puzzle: Puzzle | null) {
 
       return {
         ...prev,
-        foundTargets: [],
+        foundPositions: new Set(),
         isCompleted: false,
         showHint: false,
         hintTarget: null,

@@ -1,26 +1,43 @@
-import { Target } from '../types';
+import { Target, makePositionKey } from '../types';
 
 interface Props {
   targets: Target[];
-  foundTargets: Set<string>;
+  foundPositions: Set<string>;
   displayMode: 'text' | 'thumbnail';
   thumbnails: Map<string, string>;
   layout: 'vertical' | 'horizontal';
 }
 
-export function TargetList({ targets, foundTargets, displayMode, thumbnails, layout }: Props) {
+export function TargetList({ targets, foundPositions, displayMode, thumbnails, layout }: Props) {
   const isVertical = layout === 'vertical';
+
+  // ターゲットを位置ごとに展開
+  const items: { target: Target; positionIndex: number; isFound: boolean }[] = [];
+  for (const target of targets) {
+    for (let i = 0; i < target.positions.length; i++) {
+      const posKey = makePositionKey(target.title, i);
+      items.push({
+        target,
+        positionIndex: i,
+        isFound: foundPositions.has(posKey),
+      });
+    }
+  }
 
   return (
     <div style={isVertical ? styles.listVertical : styles.listHorizontal}>
-      {targets.map(target => {
-        const isFound = foundTargets.has(target.title);
+      {items.map(({ target, positionIndex, isFound }) => {
+        const key = makePositionKey(target.title, positionIndex);
         const thumbnail = thumbnails.get(target.title);
+        // 複数ある場合は番号を表示
+        const displayTitle = target.positions.length > 1 
+          ? `${target.title} (${positionIndex + 1})`
+          : target.title;
 
         if (displayMode === 'thumbnail') {
           return (
             <div
-              key={target.title}
+              key={key}
               style={{
                 ...styles.thumbnailItem,
                 ...(isFound ? styles.thumbnailItemFound : {}),
@@ -47,7 +64,7 @@ export function TargetList({ targets, foundTargets, displayMode, thumbnails, lay
                   ...(isFound ? styles.foundText : {}),
                 }}
               >
-                {target.title}
+                {displayTitle}
               </span>
             </div>
           );
@@ -56,7 +73,7 @@ export function TargetList({ targets, foundTargets, displayMode, thumbnails, lay
         // テキストモード
         return (
           <div
-            key={target.title}
+            key={key}
             style={{
               ...styles.textItem,
               ...(isFound ? styles.textItemFound : {}),
@@ -69,7 +86,7 @@ export function TargetList({ targets, foundTargets, displayMode, thumbnails, lay
                 ...(isFound ? styles.foundText : {}),
               }}
             >
-              {target.title}
+              {displayTitle}
             </span>
           </div>
         );

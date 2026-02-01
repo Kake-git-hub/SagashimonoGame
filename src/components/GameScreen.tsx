@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Puzzle, Target, CONSTANTS } from '../types';
+import { Puzzle, Target, CONSTANTS, makePositionKey, getTotalPositionCount } from '../types';
 import { useGame } from '../hooks/useGame';
 import { useIsTablet } from '../hooks/useMediaQuery';
 import { useSettings } from '../hooks/useSettings';
@@ -97,17 +97,17 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
     const scaleX = (relX / displayWidth) * CONSTANTS.SCALE;
     const scaleY = (relY / displayHeight) * CONSTANTS.SCALE;
 
-    // ターゲットチェック
-    const foundTarget = game.checkTarget(scaleX, scaleY);
-    if (foundTarget) {
-      game.markFound(foundTarget);
-      setFoundAnimation(foundTarget);
+    // ターゲットチェック（位置キー "title:index" が返る）
+    const foundPosKey = game.checkTarget(scaleX, scaleY);
+    if (foundPosKey) {
+      game.markFound(foundPosKey);
+      setFoundAnimation(foundPosKey);
       setTimeout(() => setFoundAnimation(null), 1000);
     }
   }, [game, imageSize]);
 
-  // ターゲットの表示位置を計算（オフセット付き対応）
-  const getTargetPosition = useCallback((target: Target, offset?: [number, number]) => {
+  // 座標から表示位置を計算
+  const getPixelPosition = useCallback((x: number, y: number, offset?: [number, number]) => {
     const container = imageContainerRef.current;
     if (!container || !imageSize.width) return null;
 
@@ -129,8 +129,6 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
       offsetY = (rect.height - displayHeight) / 2;
     }
 
-    const [x, y] = target.positions[0];
-    // オフセットがあれば適用
     const finalX = x + (offset ? offset[0] : 0);
     const finalY = y + (offset ? offset[1] : 0);
     const pixelX = offsetX + (finalX / CONSTANTS.SCALE) * displayWidth;
@@ -139,7 +137,31 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
     return { x: pixelX, y: pixelY };
   }, [imageSize]);
 
-  const foundTargetsSet = new Set(game.foundTargets);
+  // ターゲットの表示位置を計算（HintOverlay用）
+  const getTargetPosition = useCallback((target: Target, offset?: [number, number]) => {
+    const [x, y] = target.positions[0];
+    return getPixelPosition(x, y, offset);
+  }, [getPixelPosition]);
+
+  // 進捗計算
+  const totalPositions = getTotalPositionCount(puzzle);
+  const foundCount = game.foundPositions.size;
+
+  // 発見済み位置のマーカーを生成
+  const foundMarkers: { key: string; x: number; y: number; position: [number, number] }[] = [];
+  for (const target of puzzle.targets) {
+    for (let i = 0; i < target.positions.length; i++) {
+      const posKey = makePositionKey(target.title, i);
+      if (game.foundPositions.has(posKey)) {
+        foundMarkers.push({
+          key: posKey,
+          x: target.positions[i][0],
+          y: target.positions[i][1],
+          position: target.positions[i],
+        });
+      }
+    }
+  }
 
   return (
     <div style={isTablet ? styles.containerLandscape : styles.containerPortrait}>
@@ -150,7 +172,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
         </button>
         <h1 style={styles.puzzleTitle}>{puzzle.name}</h1>
         <div style={styles.progress}>
-          {game.foundTargets.length} / {puzzle.targets.length}
+          {foundCount} / {totalPositions}
         </div>
       </header>
 
@@ -166,7 +188,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
             </div>
             <TargetList
               targets={puzzle.targets}
-              foundTargets={foundTargetsSet}
+              foundPositions={game.foundPositions}
               displayMode={settings.displayMode}
               thumbnails={thumbnails}
               layout="vertical"
@@ -196,17 +218,16 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
             draggable={false}
           />
 
-          {/* 発見済みマーカー */}
-          {puzzle.targets.map(target => {
-            if (!foundTargetsSet.has(target.title)) return null;
-            const pos = getTargetPosition(target);
+          {/* 発見済みマーカー - 各位置ごとに表示 */}
+          {foundMarkers.map(marker => {
+            const pos = getPixelPosition(marker.x, marker.y);
             if (!pos) return null;
             return (
               <TargetMarker
-                key={target.title}
+                key={marker.key}
                 x={pos.x}
                 y={pos.y}
-                isNew={foundAnimation === target.title}
+                isNew={foundAnimation === marker.key}
               />
             );
           })}
@@ -224,7 +245,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
         {/* 縦画面：下部折り畳みパネル */}
         {!isTablet && (
           <CollapsiblePanel
-            title={`さがすもの (${game.foundTargets.length}/${puzzle.targets.length})`}
+            title={`さがすもの (${foundCount}/${totalPositions})`}
             extra={
               <>
                 <button onClick={toggleDisplayMode} style={styles.toggleButtonSmall}>
@@ -242,7 +263,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
           >
             <TargetList
               targets={puzzle.targets}
-              foundTargets={foundTargetsSet}
+              foundPositions={game.foundPositions}
               displayMode={settings.displayMode}
               thumbnails={thumbnails}
               layout="horizontal"
