@@ -1,0 +1,117 @@
+{
+  "id": "うみのなか",
+  "name": "うみのなか",
+  "imageSrc": "puzzles/images/うみのなか.webp",
+  "targets": [
+    {
+      "title": "たからばこ",
+      "positions": [
+        {
+          "x": 166,
+          "y": 815,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "たからのちず",
+      "positions": [
+        {
+          "x": 443,
+          "y": 923,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "たこ",
+      "positions": [
+        {
+          "x": 864,
+          "y": 902,
+          "size": "large"
+        },
+        {
+          "x": 766,
+          "y": 217,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "かいぞくがいこつ",
+      "positions": [
+        {
+          "x": 912,
+          "y": 599,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "ぴんくのくらげ",
+      "positions": [
+        {
+          "x": 936,
+          "y": 147,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "にんぎょ",
+      "positions": [
+        {
+          "x": 296,
+          "y": 256,
+          "size": "large"
+        },
+        {
+          "x": 454,
+          "y": 191,
+          "size": "large"
+        },
+        {
+          "x": 666,
+          "y": 515,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "いっかく",
+      "positions": [
+        {
+          "x": 796,
+          "y": 103,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "うみがめ",
+      "positions": [
+        {
+          "x": 567,
+          "y": 947,
+          "size": "large"
+        },
+        {
+          "x": 228,
+          "y": 436,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "せんすいかん",
+      "positions": [
+        {
+          "x": 550,
+          "y": 610,
+          "size": "large"
+        }
+      ]
+    }
+  ]
+}
