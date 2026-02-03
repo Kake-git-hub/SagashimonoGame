@@ -10,5 +10,11 @@
     "name": "クリスマス",
     "thumbnail": "puzzles/images/クリスマス.webp",
     "targetCount": 14
+  },
+  {
+    "id": "ガレージ",
+    "name": "ガレージ",
+    "thumbnail": "puzzles/images/ガレージ.webp",
+    "targetCount": 17
   }
 ]
