@@ -94,6 +94,21 @@ async function uploadFileToGitHub(
   }
 }
 
+// Base64をUTF-8文字列としてデコード
+function decodeBase64Utf8(base64: string): string {
+  // 改行を除去
+  const cleanBase64 = base64.replace(/\n/g, '');
+  // atobはLatin-1として解釈するので、バイナリ文字列を取得
+  const binaryString = atob(cleanBase64);
+  // Uint8Arrayに変換
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  // TextDecoderでUTF-8としてデコード
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
 // index.jsonを取得
 async function getIndexJson(token: string): Promise<{ id: string; name: string; thumbnail: string; targetCount: number }[]> {
   const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/public/puzzles/index.json`;
@@ -110,15 +125,11 @@ async function getIndexJson(token: string): Promise<{ id: string; name: string; 
   }
 
   const data = await response.json();
-  let content = atob(data.content);
+  let content = decodeBase64Utf8(data.content);
   
   // BOM（Byte Order Mark）を除去
-  if (content.charCodeAt(0) === 0xFEFF || content.startsWith('\ufeff')) {
+  if (content.charCodeAt(0) === 0xFEFF) {
     content = content.slice(1);
-  }
-  // UTF-8 BOMがLatin-1として解釈された場合 (ï»¿)
-  if (content.startsWith('\xef\xbb\xbf')) {
-    content = content.slice(3);
   }
   
   return JSON.parse(content);
