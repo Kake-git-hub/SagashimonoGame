@@ -1,0 +1,137 @@
+{
+  "id": "おたからどうくつ",
+  "name": "おたからどうくつ",
+  "imageSrc": "puzzles/images/おたからどうくつ.webp",
+  "targets": [
+    {
+      "title": "おうかん",
+      "positions": [
+        {
+          "x": 425,
+          "y": 260,
+          "size": "large"
+        },
+        {
+          "x": 825,
+          "y": 500,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "きんのどらごん",
+      "positions": [
+        {
+          "x": 580,
+          "y": 350,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "おたからむし",
+      "positions": [
+        {
+          "x": 436,
+          "y": 934,
+          "size": "large"
+        },
+        {
+          "x": 705,
+          "y": 90,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "ぼうけんしゃ",
+      "positions": [
+        {
+          "x": 478,
+          "y": 850,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "かぎ",
+      "positions": [
+        {
+          "x": 94,
+          "y": 168,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "へるめっと",
+      "positions": [
+        {
+          "x": 683,
+          "y": 447,
+          "size": "large"
+        },
+        {
+          "x": 391,
+          "y": 615,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "あかいほうせき",
+      "positions": [
+        {
+          "x": 120,
+          "y": 550,
+          "size": "medium"
+        },
+        {
+          "x": 317,
+          "y": 460,
+          "size": "medium"
+        },
+        {
+          "x": 690,
+          "y": 800,
+          "size": "large"
+        },
+        {
+          "x": 433,
+          "y": 545,
+          "size": "large"
+        },
+        {
+          "x": 271,
+          "y": 769,
+          "size": "large"
+        },
+        {
+          "x": 739,
+          "y": 333,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "だいやもんど",
+      "positions": [
+        {
+          "x": 262,
+          "y": 965,
+          "size": "large"
+        },
+        {
+          "x": 256,
+          "y": 409,
+          "size": "large"
+        },
+        {
+          "x": 873,
+          "y": 742,
+          "size": "medium"
+        }
+      ]
+    }
+  ]
+}
