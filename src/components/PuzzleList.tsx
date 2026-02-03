@@ -230,12 +230,14 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
 
   // サーバーパズルとカスタムパズルを分離
   // カスタムパズルでもサーバーに同名のものがあればサーバーパズルとして扱う
-  const serverPuzzles = puzzles.filter(p => !p.id.startsWith('custom-'));
+  // server-edit- プレフィックスのパズルはローカル保存なのでカスタムパズルとして扱う
+  const serverPuzzles = puzzles.filter(p => !p.id.startsWith('custom-') && !p.id.startsWith('server-edit-'));
   const serverPuzzleNames = new Set(serverPuzzles.map(p => p.name));
   
   // カスタムパズルの中から、サーバーに同名のものがあるものは除外
+  // server-edit- プレフィックスのパズルもカスタムパズルとして表示
   const customPuzzles = puzzles.filter(p => 
-    p.id.startsWith('custom-') && !serverPuzzleNames.has(p.name)
+    (p.id.startsWith('custom-') || p.id.startsWith('server-edit-')) && !serverPuzzleNames.has(p.name)
   );
 
   return (
