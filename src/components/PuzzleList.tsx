@@ -257,9 +257,10 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
         </button>
       </header>
 
-      {/* サーバーパズル */}
-      {serverPuzzles.length > 0 && (
-        <div style={styles.puzzleGrid}>
+      <div style={styles.scrollContainer}>
+        {/* サーバーパズル */}
+        {serverPuzzles.length > 0 && (
+          <div style={styles.puzzleGrid}>
           {serverPuzzles.map(puzzle => {
             const p = progress[puzzle.id];
             const isCompleted = p && p.found === p.total;
@@ -434,20 +435,30 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
           ✏️ パズルをつくる
         </button>
       )}
+      </div>
     </div>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    minHeight: '100vh',
-    padding: '20px',
+    height: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
     backgroundColor: '#f5f5f5',
+    overflow: 'hidden',
   },
   header: {
     textAlign: 'center',
-    marginBottom: '30px',
+    padding: '20px 20px 10px',
     position: 'relative',
+    flexShrink: 0,
+  },
+  scrollContainer: {
+    flex: 1,
+    overflowY: 'auto',
+    padding: '10px 20px 20px',
+    WebkitOverflowScrolling: 'touch',
   },
   title: {
     fontSize: '2rem',
