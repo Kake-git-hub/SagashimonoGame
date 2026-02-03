@@ -16,5 +16,11 @@
     "name": "ガレージ",
     "thumbnail": "puzzles/images/ガレージ.webp",
     "targetCount": 17
+  },
+  {
+    "id": "ろぼっとのくに",
+    "name": "ろぼっとのくに",
+    "thumbnail": "puzzles/images/ろぼっとのくに.webp",
+    "targetCount": 11
   }
 ]
