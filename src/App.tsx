@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Puzzle, PuzzleSummary, ScreenMode, CustomPuzzle } from './types';
-import { fetchPuzzle, fetchPuzzleList } from './services/puzzleService';
+import { fetchPuzzle, fetchPuzzleList, fetchServerPuzzleForEdit } from './services/puzzleService';
 import { getCustomPuzzle } from './services/storageService';
 import { PuzzleList, GameScreen, PuzzleEditor } from './components';
 import './App.css';
@@ -79,6 +79,24 @@ function App() {
     }
   }, []);
 
+  // サーバーパズルを編集モードで開く（開発者モード用）
+  const handleEditServerPuzzle = useCallback(async (puzzleId: string) => {
+    setLoading(true);
+    try {
+      const puzzle = await fetchServerPuzzleForEdit(puzzleId);
+      if (puzzle) {
+        setEditPuzzle(puzzle);
+        setScreen('editor');
+      } else {
+        alert('パズルの取得に失敗しました');
+      }
+    } catch (err) {
+      alert('エラー: ' + (err instanceof Error ? err.message : 'Unknown'));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // パズル作成完了
   const handlePuzzleCreated = useCallback((_puzzleId: string) => {
     setListRefreshKey(k => k + 1);
@@ -139,6 +157,7 @@ function App() {
           onSelectPuzzle={handleSelectPuzzle}
           onOpenEditor={handleOpenEditor}
           onEditPuzzle={handleEditPuzzle}
+          onEditServerPuzzle={handleEditServerPuzzle}
           refreshKey={listRefreshKey}
           devMode={devMode}
           onToggleDevMode={toggleDevMode}

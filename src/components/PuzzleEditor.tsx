@@ -32,6 +32,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
   const [draggingMarker, setDraggingMarker] = useState<MarkerInfo | null>(null);
   const [saving, setSaving] = useState(false);
   const [imageSize, setImageSize] = useState<string>('');
+  const [markerSize, setMarkerSize] = useState<'small' | 'large'>('small'); // マーカーサイズ
 
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -564,6 +565,31 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
             <p style={styles.hint}>🖐️ マーカーをドラッグ → 位置調整</p>
             <p style={styles.hint}>📍 複数座標 → 「座標追加」ボタン</p>
           </div>
+
+          {/* マーカーサイズ選択 */}
+          <div style={styles.markerSizeSelector}>
+            <span style={styles.markerSizeLabel}>マーカーサイズ:</span>
+            <button
+              style={{
+                ...styles.markerSizeButton,
+                backgroundColor: markerSize === 'small' ? '#4a90d9' : '#ddd',
+                color: markerSize === 'small' ? 'white' : '#333',
+              }}
+              onClick={() => setMarkerSize('small')}
+            >
+              小
+            </button>
+            <button
+              style={{
+                ...styles.markerSizeButton,
+                backgroundColor: markerSize === 'large' ? '#4a90d9' : '#ddd',
+                color: markerSize === 'large' ? 'white' : '#333',
+              }}
+              onClick={() => setMarkerSize('large')}
+            >
+              大
+            </button>
+          </div>
         </div>
 
         {/* 右: 画像プレビュー */}
@@ -594,6 +620,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
                 const isSelected = selectedTarget === target.id;
                 const color = getTargetColor(target.id);
                 const targetIndex = targets.findIndex(t => t.id === target.id);
+                const markerPixelSize = markerSize === 'large' ? 64 : 32;
 
                 return target.positions.map((pos, posIndex) => {
                   const displayPos = getPositionDisplayCoords(pos);
@@ -608,6 +635,8 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
                       key={`${target.id}-${posIndex}`}
                       style={{
                         ...styles.marker,
+                        width: `${markerPixelSize}px`,
+                        height: `${markerPixelSize}px`,
                         left: displayPos.x,
                         top: displayPos.y,
                         backgroundColor: isDragging ? '#ff5722' : color,
@@ -619,7 +648,10 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
                       onMouseDown={e => handleMarkerMouseDown(e, marker)}
                       onTouchStart={e => handleMarkerTouchStart(e, marker)}
                     >
-                      <span style={styles.markerNumber}>
+                      <span style={{
+                        ...styles.markerNumber,
+                        fontSize: markerSize === 'large' ? '1rem' : '0.75rem',
+                      }}>
                         {target.positions.length > 1 
                           ? `${targetIndex + 1}-${posIndex + 1}` 
                           : `${targetIndex + 1}`}
@@ -884,7 +916,6 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   hintBox: {
-    marginTop: 'auto',
     padding: '15px',
     backgroundColor: '#e3f2fd',
     borderRadius: '10px',
@@ -893,6 +924,28 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.85rem',
     color: '#1565c0',
     margin: '5px 0',
+  },
+  markerSizeSelector: {
+    marginTop: '15px',
+    padding: '10px',
+    backgroundColor: '#fff3e0',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  },
+  markerSizeLabel: {
+    fontSize: '0.9rem',
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  markerSizeButton: {
+    padding: '8px 16px',
+    fontSize: '0.9rem',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontWeight: 'bold',
   },
   preview: {
     flex: 1,

@@ -8,12 +8,13 @@ interface Props {
   onSelectPuzzle: (puzzleId: string) => void;
   onOpenEditor: () => void;
   onEditPuzzle: (puzzleId: string) => void;
+  onEditServerPuzzle: (puzzleId: string) => void;
   refreshKey?: number;
   devMode: boolean;
   onToggleDevMode: () => void;
 }
 
-export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refreshKey, devMode, onToggleDevMode }: Props) {
+export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditServerPuzzle, refreshKey, devMode, onToggleDevMode }: Props) {
   const [puzzles, setPuzzles] = useState<PuzzleSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -280,9 +281,19 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refresh
                       🔄
                     </button>
                   )}
-                  {/* 開発者モード：サーバーパズルの削除ボタン */}
+                  {/* 開発者モード：サーバーパズルの編集・削除ボタン */}
                   {devMode && (
                     <div style={styles.devButtons}>
+                      <button 
+                        style={styles.editButtonSmall}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditServerPuzzle(puzzle.id);
+                        }}
+                        title="編集"
+                      >
+                        ✏️
+                      </button>
                       <button 
                         style={styles.deleteButtonSmall}
                         onClick={(e) => handleDeleteServerPuzzle(e, puzzle.id, puzzle.name)}
@@ -557,6 +568,19 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
   },
   editButton: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+  },
+  editButtonSmall: {
     width: '36px',
     height: '36px',
     borderRadius: '50%',

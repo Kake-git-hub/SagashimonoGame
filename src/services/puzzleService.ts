@@ -1,4 +1,4 @@
-import { Puzzle, PuzzleSummary } from '../types';
+import { Puzzle, PuzzleSummary, CustomPuzzle } from '../types';
 import { getCustomPuzzle, getCustomPuzzleSummaries } from './storageService';
 
 const BASE_URL = import.meta.env.BASE_URL;
@@ -40,6 +40,38 @@ export async function fetchPuzzle(id: string): Promise<Puzzle> {
     throw new Error(`パズル "${id}" の取得に失敗しました`);
   }
   return response.json();
+}
+
+// サーバーパズルを編集用に取得（画像をData URLに変換）
+export async function fetchServerPuzzleForEdit(id: string): Promise<CustomPuzzle | null> {
+  try {
+    const puzzle = await fetchPuzzle(id);
+    
+    // 画像をData URLに変換
+    const imageUrl = getImageUrl(puzzle.imageSrc);
+    const response = await fetch(imageUrl);
+    if (!response.ok) throw new Error('画像の取得に失敗');
+    
+    const blob = await response.blob();
+    const imageData = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+    
+    return {
+      id: `server-edit-${id}`, // サーバー編集用の特別なID
+      name: puzzle.name,
+      imageSrc: imageData, // Puzzle継承のため必要
+      imageData,
+      targets: puzzle.targets,
+      createdAt: Date.now(),
+    };
+  } catch (error) {
+    console.error('Failed to fetch server puzzle for edit:', error);
+    return null;
+  }
 }
 
 // 画像のフルURLを取得
