@@ -110,7 +110,17 @@ async function getIndexJson(token: string): Promise<{ id: string; name: string; 
   }
 
   const data = await response.json();
-  const content = atob(data.content);
+  let content = atob(data.content);
+  
+  // BOM（Byte Order Mark）を除去
+  if (content.charCodeAt(0) === 0xFEFF || content.startsWith('\ufeff')) {
+    content = content.slice(1);
+  }
+  // UTF-8 BOMがLatin-1として解釈された場合 (ï»¿)
+  if (content.startsWith('\xef\xbb\xbf')) {
+    content = content.slice(3);
+  }
+  
   return JSON.parse(content);
 }
 
