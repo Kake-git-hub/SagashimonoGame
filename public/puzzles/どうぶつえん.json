@@ -1,0 +1,247 @@
+{
+  "id": "どうぶつえん",
+  "name": "どうぶつえん",
+  "imageSrc": "puzzles/images/どうぶつえん.webp",
+  "targets": [
+    {
+      "title": "らいおん",
+      "positions": [
+        {
+          "x": 474,
+          "y": 439,
+          "size": "large"
+        },
+        {
+          "x": 468,
+          "y": 379,
+          "size": "large"
+        },
+        {
+          "x": 33,
+          "y": 295,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "なまけもの",
+      "positions": [
+        {
+          "x": 500,
+          "y": 60,
+          "size": "large"
+        },
+        {
+          "x": 949,
+          "y": 716,
+          "size": "large"
+        },
+        {
+          "x": 623,
+          "y": 940,
+          "size": "large"
+        },
+        {
+          "x": 557,
+          "y": 938,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "ぞう",
+      "positions": [
+        {
+          "x": 657,
+          "y": 367,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "パンダ",
+      "positions": [
+        {
+          "x": 920,
+          "y": 420,
+          "size": "medium"
+        },
+        {
+          "x": 850,
+          "y": 51,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "ふらみんご",
+      "positions": [
+        {
+          "x": 664,
+          "y": 238,
+          "size": "large"
+        },
+        {
+          "x": 481,
+          "y": 927,
+          "size": "large"
+        },
+        {
+          "x": 399,
+          "y": 938,
+          "size": "large"
+        },
+        {
+          "x": 154,
+          "y": 941,
+          "size": "large"
+        },
+        {
+          "x": 262,
+          "y": 676,
+          "size": "large"
+        },
+        {
+          "x": 620,
+          "y": 240,
+          "size": "medium"
+        },
+        {
+          "x": 695,
+          "y": 286,
+          "size": "medium"
+        },
+        {
+          "x": 702,
+          "y": 212,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "キリン",
+      "positions": [
+        {
+          "x": 80,
+          "y": 392,
+          "size": "large"
+        },
+        {
+          "x": 181,
+          "y": 398,
+          "size": "large"
+        },
+        {
+          "x": 274,
+          "y": 103,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "ワニ",
+      "positions": [
+        {
+          "x": 660,
+          "y": 709,
+          "size": "large"
+        },
+        {
+          "x": 352,
+          "y": 743,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "ふうせん",
+      "positions": [
+        {
+          "x": 220,
+          "y": 200,
+          "size": "medium"
+        },
+        {
+          "x": 424,
+          "y": 322,
+          "size": "medium"
+        },
+        {
+          "x": 234,
+          "y": 314,
+          "size": "medium"
+        },
+        {
+          "x": 534,
+          "y": 639,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "ペンギン",
+      "positions": [
+        {
+          "x": 520,
+          "y": 560,
+          "size": "medium"
+        },
+        {
+          "x": 618,
+          "y": 522,
+          "size": "medium"
+        },
+        {
+          "x": 682,
+          "y": 502,
+          "size": "medium"
+        },
+        {
+          "x": 808,
+          "y": 314,
+          "size": "medium"
+        },
+        {
+          "x": 693,
+          "y": 928,
+          "size": "medium"
+        },
+        {
+          "x": 752,
+          "y": 949,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "さるぺんぎん",
+      "positions": [
+        {
+          "x": 664,
+          "y": 67,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "とら",
+      "positions": [
+        {
+          "x": 731,
+          "y": 602,
+          "size": "large"
+        },
+        {
+          "x": 821,
+          "y": 856,
+          "size": "large"
+        },
+        {
+          "x": 159,
+          "y": 41,
+          "size": "large"
+        }
+      ]
+    }
+  ]
+}
