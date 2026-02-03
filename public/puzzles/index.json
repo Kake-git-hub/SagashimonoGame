@@ -28,5 +28,11 @@
     "name": "ハロウィン",
     "thumbnail": "puzzles/images/ハロウィン.webp",
     "targetCount": 14
+  },
+  {
+    "id": "うみのなか",
+    "name": "うみのなか",
+    "thumbnail": "puzzles/images/うみのなか.webp",
+    "targetCount": 13
   }
 ]
