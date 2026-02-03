@@ -52,5 +52,11 @@
     "name": "おたからどうくつ",
     "thumbnail": "puzzles/images/おたからどうくつ.webp",
     "targetCount": 18
+  },
+  {
+    "id": "ぷれぜんとのへや",
+    "name": "ぷれぜんとのへや",
+    "thumbnail": "puzzles/images/ぷれぜんとのへや.webp",
+    "targetCount": 29
   }
 ]
