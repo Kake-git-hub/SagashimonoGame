@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Puzzle, CONSTANTS, makePositionKey, getTotalPositionCount } from '../types';
+import { Puzzle, CONSTANTS, makePositionKey, getTotalPositionCount, normalizePosition, Position, MarkerSize } from '../types';
 import { useGame } from '../hooks/useGame';
 import { useIsTablet } from '../hooks/useMediaQuery';
 import { useSettings } from '../hooks/useSettings';
@@ -173,16 +173,17 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
   const foundCount = game.foundPositions.size;
 
   // 発見済み位置のマーカーを生成
-  const foundMarkers: { key: string; x: number; y: number; position: [number, number] }[] = [];
+  const foundMarkers: { key: string; x: number; y: number; size: MarkerSize }[] = [];
   for (const target of puzzle.targets) {
     for (let i = 0; i < target.positions.length; i++) {
       const posKey = makePositionKey(target.title, i);
       if (game.foundPositions.has(posKey)) {
+        const pos = normalizePosition(target.positions[i] as Position | [number, number]);
         foundMarkers.push({
           key: posKey,
-          x: target.positions[i][0],
-          y: target.positions[i][1],
-          position: target.positions[i],
+          x: pos.x,
+          y: pos.y,
+          size: pos.size,
         });
       }
     }
@@ -253,6 +254,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
                 x={pos.x}
                 y={pos.y}
                 isNew={foundAnimation === marker.key}
+                size={marker.size}
               />
             );
           })}

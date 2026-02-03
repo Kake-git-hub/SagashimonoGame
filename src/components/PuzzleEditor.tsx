@@ -1,18 +1,26 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Target, CONSTANTS, CustomPuzzle } from '../types';
+import { Target, CONSTANTS, CustomPuzzle, MarkerSize, Position, getMarkerPixelSize, isLegacyPosition } from '../types';
 import { saveCustomPuzzle } from '../services/storageService';
 import { compressImage, formatSize, estimateBase64Size } from '../services/imageService';
+import { uploadPuzzleToServer, validateGitHubToken } from '../services/githubService';
 
 interface Props {
   onBack: () => void;
   onPuzzleCreated?: (puzzleId: string) => void;
   editPuzzle?: CustomPuzzle | null; // 編集モード用
+  isServerPuzzle?: boolean; // サーバーパズル編集かどうか
+}
+
+interface EditorPosition {
+  x: number;
+  y: number;
+  size: MarkerSize;
 }
 
 interface EditorTarget {
   id: string;
   title: string;
-  positions: [number, number][];
+  positions: EditorPosition[];
 }
 
 interface MarkerInfo {
@@ -20,7 +28,7 @@ interface MarkerInfo {
   positionIndex: number;
 }
 
-export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
+export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzzle = false }: Props) {
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
   const [puzzleName, setPuzzleName] = useState('');
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -32,7 +40,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
   const [draggingMarker, setDraggingMarker] = useState<MarkerInfo | null>(null);
   const [saving, setSaving] = useState(false);
   const [imageSize, setImageSize] = useState<string>('');
-  const [markerSize, setMarkerSize] = useState<'small' | 'large'>('small'); // マーカーサイズ
+  const [defaultMarkerSize, setDefaultMarkerSize] = useState<MarkerSize>('medium'); // 新規追加時のデフォルトサイズ
 
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -49,7 +57,15 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
       setTargets(editPuzzle.targets.map((t, i) => ({
         id: `edit-${i}-${Date.now()}`,
         title: t.title,
-        positions: t.positions,
+        positions: t.positions.map(p => {
+          // 旧形式（配列）と新形式（オブジェクト）両方に対応
+          if (isLegacyPosition(p as Position | [number, number])) {
+            const [x, y] = p as unknown as [number, number];
+            return { x, y, size: 'medium' as MarkerSize };
+          }
+          const pos = p as unknown as Position;
+          return { x: pos.x, y: pos.y, size: pos.size };
+        }),
       })));
     }
   }, [editPuzzle]);
@@ -151,11 +167,11 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
     const newTarget: EditorTarget = {
       id: Date.now().toString(),
       title: `アイテム${targets.length + 1}`,
-      positions: [[500, 500]], // 中央に配置
+      positions: [{ x: 500, y: 500, size: defaultMarkerSize }], // 中央に配置
     };
     setTargets(prev => [...prev, newTarget]);
     setSelectedTarget(newTarget.id);
-  }, [targets.length]);
+  }, [targets.length, defaultMarkerSize]);
 
   // ターゲットに座標を追加
   const handleAddPosition = useCallback((targetId: string) => {
@@ -163,11 +179,22 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
       if (t.id !== targetId) return t;
       // 最後の座標から少しずらした位置に追加
       const lastPos = t.positions[t.positions.length - 1];
-      const newPos: [number, number] = [
-        Math.min(CONSTANTS.SCALE, lastPos[0] + 50),
-        Math.min(CONSTANTS.SCALE, lastPos[1] + 50)
-      ];
+      const newPos: EditorPosition = {
+        x: Math.min(CONSTANTS.SCALE, lastPos.x + 50),
+        y: Math.min(CONSTANTS.SCALE, lastPos.y + 50),
+        size: defaultMarkerSize,
+      };
       return { ...t, positions: [...t.positions, newPos] };
+    }));
+  }, [defaultMarkerSize]);
+
+  // 座標のサイズを変更
+  const handleChangePositionSize = useCallback((targetId: string, posIndex: number, size: MarkerSize) => {
+    setTargets(prev => prev.map(t => {
+      if (t.id !== targetId) return t;
+      const newPositions = [...t.positions];
+      newPositions[posIndex] = { ...newPositions[posIndex], size };
+      return { ...t, positions: newPositions };
     }));
   }, []);
 
@@ -200,7 +227,8 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
       setTargets(prev => prev.map(t => {
         if (t.id !== draggingMarker.targetId) return t;
         const newPositions = [...t.positions];
-        newPositions[draggingMarker.positionIndex] = coords;
+        const currentPos = newPositions[draggingMarker.positionIndex];
+        newPositions[draggingMarker.positionIndex] = { ...currentPos, x: coords[0], y: coords[1] };
         return { ...t, positions: newPositions };
       }));
     };
@@ -237,7 +265,8 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
       setTargets(prev => prev.map(t => {
         if (t.id !== draggingMarker.targetId) return t;
         const newPositions = [...t.positions];
-        newPositions[draggingMarker.positionIndex] = coords;
+        const currentPos = newPositions[draggingMarker.positionIndex];
+        newPositions[draggingMarker.positionIndex] = { ...currentPos, x: coords[0], y: coords[1] };
         return { ...t, positions: newPositions };
       }));
     };
@@ -278,13 +307,25 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
 
       const importedTargets: EditorTarget[] = parsed.map((item, index) => {
         // positions配列またはposition単体を処理
-        let positions: [number, number][];
+        let positions: EditorPosition[];
         if (Array.isArray(item.positions)) {
-          positions = item.positions;
+          positions = item.positions.map((p: unknown) => {
+            // 配列形式 [x, y] の場合
+            if (Array.isArray(p)) {
+              return { x: p[0], y: p[1], size: defaultMarkerSize };
+            }
+            // オブジェクト形式 { x, y, size } の場合
+            const pos = p as { x?: number; y?: number; size?: MarkerSize };
+            return {
+              x: pos.x ?? 500,
+              y: pos.y ?? 500,
+              size: pos.size ?? defaultMarkerSize,
+            };
+          });
         } else if (Array.isArray(item.position)) {
-          positions = [item.position];
+          positions = [{ x: item.position[0], y: item.position[1], size: defaultMarkerSize }];
         } else {
-          positions = [[500, 500]];
+          positions = [{ x: 500, y: 500, size: defaultMarkerSize }];
         }
 
         return {
@@ -300,7 +341,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
     } catch (err) {
       alert('JSONの解析に失敗しました: ' + (err instanceof Error ? err.message : '不明なエラー'));
     }
-  }, [jsonInput]);
+  }, [jsonInput, defaultMarkerSize]);
 
   // JSONエクスポート
   const exportJson = useCallback(() => {
@@ -338,29 +379,80 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
 
     setSaving(true);
     try {
-      // 編集モードなら既存IDを使用、新規ならID生成
-      const saveId = puzzleId || `custom-${Date.now()}`;
       const exportTargets: Target[] = targets.map(t => ({
         title: t.title,
-        positions: t.positions,
+        positions: t.positions.map(p => ({ x: p.x, y: p.y, size: p.size })),
       }));
 
-      const customPuzzle: CustomPuzzle = {
-        id: saveId,
-        name: puzzleName.trim(),
-        imageSrc: saveId,
-        imageData: imageSrc,
-        targets: exportTargets,
-        createdAt: editPuzzle?.createdAt || Date.now(),
-      };
+      // サーバーパズル編集の場合はサーバーにアップロード
+      if (isServerPuzzle && editPuzzle) {
+        // トークン取得
+        let token = localStorage.getItem('github_pat');
+        if (!token) {
+          token = prompt(
+            '🔐 サーバーパズルの更新\n\n' +
+            'GitHubのPersonal Access Token (PAT) を入力してください。\n' +
+            '必要な権限: repo (Contents: Read and write)'
+          );
+          
+          if (!token) {
+            setSaving(false);
+            return;
+          }
+          
+          const isValid = await validateGitHubToken(token);
+          if (!isValid) {
+            alert('トークンが無効です。');
+            setSaving(false);
+            return;
+          }
+          
+          localStorage.setItem('github_pat', token);
+        }
 
-      saveCustomPuzzle(customPuzzle);
-      alert(editPuzzle ? 'パズルを更新しました！' : 'パズルを保存しました！');
-      
-      if (onPuzzleCreated) {
-        onPuzzleCreated(saveId);
+        const result = await uploadPuzzleToServer(token, {
+          id: editPuzzle.name, // サーバーパズルはnameをIDとして使用
+          name: puzzleName.trim(),
+          targets: exportTargets,
+          imageData: imageSrc,
+        });
+
+        if (result.success) {
+          alert(result.message);
+          if (onPuzzleCreated) {
+            onPuzzleCreated(editPuzzle.name);
+          } else {
+            onBack();
+          }
+        } else {
+          if (result.message.includes('Bad credentials') || result.message.includes('401')) {
+            localStorage.removeItem('github_pat');
+            alert('トークンが無効です。再度入力してください。\n\n' + result.message);
+          } else {
+            alert('サーバーへのアップロードに失敗しました:\n' + result.message);
+          }
+        }
       } else {
-        onBack();
+        // ローカル保存（カスタムパズル）
+        const saveId = puzzleId || `custom-${Date.now()}`;
+
+        const customPuzzle: CustomPuzzle = {
+          id: saveId,
+          name: puzzleName.trim(),
+          imageSrc: saveId,
+          imageData: imageSrc,
+          targets: exportTargets,
+          createdAt: editPuzzle?.createdAt || Date.now(),
+        };
+
+        saveCustomPuzzle(customPuzzle);
+        alert(editPuzzle ? 'パズルを更新しました！' : 'パズルを保存しました！');
+        
+        if (onPuzzleCreated) {
+          onPuzzleCreated(saveId);
+        } else {
+          onBack();
+        }
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : '不明なエラー';
@@ -372,17 +464,16 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
     } finally {
       setSaving(false);
     }
-  }, [imageSrc, targets, puzzleName, puzzleId, editPuzzle, onBack, onPuzzleCreated]);
+  }, [imageSrc, targets, puzzleName, puzzleId, editPuzzle, isServerPuzzle, onBack, onPuzzleCreated]);
 
   // 座標の表示位置を計算
-  const getPositionDisplayCoords = useCallback((pos: [number, number]) => {
+  const getPositionDisplayCoords = useCallback((pos: EditorPosition) => {
     const info = getImageDisplayInfo();
     if (!info) return null;
 
     const { displayWidth, displayHeight, offsetX, offsetY } = info;
-    const [x, y] = pos;
-    const pixelX = offsetX + (x / CONSTANTS.SCALE) * displayWidth;
-    const pixelY = offsetY + (y / CONSTANTS.SCALE) * displayHeight;
+    const pixelX = offsetX + (pos.x / CONSTANTS.SCALE) * displayWidth;
+    const pixelY = offsetY + (pos.y / CONSTANTS.SCALE) * displayHeight;
 
     return { x: pixelX, y: pixelY };
   }, [getImageDisplayInfo]);
@@ -405,7 +496,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
           ← もどる
         </button>
         <h1 style={styles.title}>
-          {isEditMode ? '📝 パズル編集' : '✏️ パズル作成'}
+          {isServerPuzzle ? '🌐 サーバーパズル編集' : isEditMode ? '📝 パズル編集' : '✏️ パズル作成'}
         </h1>
         <div style={styles.headerButtons}>
           <button onClick={exportJson} style={styles.exportButton} disabled={targets.length === 0}>
@@ -419,7 +510,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
             }}
             disabled={!canComplete || saving}
           >
-            {saving ? '保存中...' : isEditMode ? '💾 更新' : '✅ 完成'}
+            {saving ? '保存中...' : isServerPuzzle ? '🚀 サーバーに保存' : isEditMode ? '💾 更新' : '✅ 完成'}
           </button>
         </div>
       </header>
@@ -528,8 +619,26 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
                         {target.positions.map((pos, posIndex) => (
                           <div key={posIndex} style={styles.positionItem}>
                             <span style={styles.positionLabel}>
-                              座標{posIndex + 1}: ({pos[0]}, {pos[1]})
+                              座標{posIndex + 1}: ({pos.x}, {pos.y})
                             </span>
+                            <div style={styles.sizeButtons}>
+                              {(['small', 'medium', 'large'] as MarkerSize[]).map(size => (
+                                <button
+                                  key={size}
+                                  style={{
+                                    ...styles.sizeButton,
+                                    backgroundColor: pos.size === size ? '#4a90d9' : '#ddd',
+                                    color: pos.size === size ? 'white' : '#333',
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleChangePositionSize(target.id, posIndex, size);
+                                  }}
+                                >
+                                  {size === 'small' ? '小' : size === 'medium' ? '中' : '大'}
+                                </button>
+                              ))}
+                            </div>
                             {target.positions.length > 1 && (
                               <button
                                 onClick={(e) => {
@@ -564,31 +673,25 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
             <p style={styles.hint}>💡 「追加」ボタン → ターゲット追加</p>
             <p style={styles.hint}>🖐️ マーカーをドラッグ → 位置調整</p>
             <p style={styles.hint}>📍 複数座標 → 「座標追加」ボタン</p>
+            <p style={styles.hint}>📐 サイズ: 小(16px) 中(32px) 大(64px)</p>
           </div>
 
-          {/* マーカーサイズ選択 */}
+          {/* デフォルトマーカーサイズ選択 */}
           <div style={styles.markerSizeSelector}>
-            <span style={styles.markerSizeLabel}>マーカーサイズ:</span>
-            <button
-              style={{
-                ...styles.markerSizeButton,
-                backgroundColor: markerSize === 'small' ? '#4a90d9' : '#ddd',
-                color: markerSize === 'small' ? 'white' : '#333',
-              }}
-              onClick={() => setMarkerSize('small')}
-            >
-              小
-            </button>
-            <button
-              style={{
-                ...styles.markerSizeButton,
-                backgroundColor: markerSize === 'large' ? '#4a90d9' : '#ddd',
-                color: markerSize === 'large' ? 'white' : '#333',
-              }}
-              onClick={() => setMarkerSize('large')}
-            >
-              大
-            </button>
+            <span style={styles.markerSizeLabel}>新規追加時のサイズ:</span>
+            {(['small', 'medium', 'large'] as MarkerSize[]).map(size => (
+              <button
+                key={size}
+                style={{
+                  ...styles.markerSizeButton,
+                  backgroundColor: defaultMarkerSize === size ? '#4a90d9' : '#ddd',
+                  color: defaultMarkerSize === size ? 'white' : '#333',
+                }}
+                onClick={() => setDefaultMarkerSize(size)}
+              >
+                {size === 'small' ? '小' : size === 'medium' ? '中' : '大'}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -616,11 +719,9 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
               />
 
               {/* ターゲットマーカー */}
-              {targets.map(target => {
+              {targets.map((target, targetIndex) => {
                 const isSelected = selectedTarget === target.id;
                 const color = getTargetColor(target.id);
-                const targetIndex = targets.findIndex(t => t.id === target.id);
-                const markerPixelSize = markerSize === 'large' ? 64 : 32;
 
                 return target.positions.map((pos, posIndex) => {
                   const displayPos = getPositionDisplayCoords(pos);
@@ -629,6 +730,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
                   const marker: MarkerInfo = { targetId: target.id, positionIndex: posIndex };
                   const isDragging = draggingMarker?.targetId === target.id && 
                                      draggingMarker?.positionIndex === posIndex;
+                  const markerPixelSize = getMarkerPixelSize(pos.size);
 
                   return (
                     <div
@@ -650,7 +752,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle }: Props) {
                     >
                       <span style={{
                         ...styles.markerNumber,
-                        fontSize: markerSize === 'large' ? '1rem' : '0.75rem',
+                        fontSize: markerPixelSize >= 32 ? '0.75rem' : '0.6rem',
                       }}>
                         {target.positions.length > 1 
                           ? `${targetIndex + 1}-${posIndex + 1}` 
@@ -885,13 +987,26 @@ const styles: Record<string, React.CSSProperties> = {
   positionItem: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: '8px',
     padding: '4px 0',
     fontSize: '0.8rem',
+    flexWrap: 'wrap',
   },
   positionLabel: {
     color: '#666',
     fontFamily: 'monospace',
+    minWidth: '100px',
+  },
+  sizeButtons: {
+    display: 'flex',
+    gap: '4px',
+  },
+  sizeButton: {
+    padding: '2px 6px',
+    fontSize: '0.7rem',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
   },
   smallDeleteButton: {
     width: '18px',

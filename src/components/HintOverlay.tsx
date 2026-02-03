@@ -1,4 +1,4 @@
-import { Target, HintState, getHintRadius } from '../types';
+import { Target, HintState, getHintRadius, normalizePosition, Position } from '../types';
 
 interface Props {
   target: Target;
@@ -9,13 +9,15 @@ interface Props {
 
 export function HintOverlay({ target, hintState, getPosition, scaleFactor }: Props) {
   // 指定された位置のヒントを表示
-  const targetPosition = target.positions[hintState.positionIndex];
-  if (!targetPosition) return null;
+  const rawPosition = target.positions[hintState.positionIndex];
+  if (!rawPosition) return null;
+  
+  const targetPosition = normalizePosition(rawPosition as Position | [number, number]);
 
   // オフセット付きで位置を計算
   const pos = getPosition(
-    targetPosition[0],
-    targetPosition[1],
+    targetPosition.x,
+    targetPosition.y,
     hintState.centerOffset
   );
   if (!pos) return null;

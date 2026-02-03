@@ -120,7 +120,7 @@ export async function uploadPuzzleToServer(
   puzzleData: {
     id: string;
     name: string;
-    targets: { title: string; positions: [number, number][] }[];
+    targets: { title: string; positions: { x: number; y: number; size: string }[] }[];
     imageData: string; // Base64 data URL
   }
 ): Promise<GitHubUploadResult> {

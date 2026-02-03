@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Puzzle, GameState, CONSTANTS, Progress, HintState, makePositionKey, getTotalPositionCount, getHintRadius } from '../types';
+import { Puzzle, GameState, CONSTANTS, Progress, HintState, makePositionKey, getTotalPositionCount, getHintRadius, normalizePosition, getHitRadius, Position } from '../types';
 import { saveProgress, getProgress } from '../services/storageService';
 
 export function useGame(puzzle: Puzzle | null) {
@@ -55,9 +55,10 @@ export function useGame(puzzle: Puzzle | null) {
         // すでに発見済みならスキップ
         if (state.foundPositions.has(posKey)) continue;
 
-        const [targetX, targetY] = target.positions[i];
-        const distance = Math.hypot(clickX - targetX, clickY - targetY);
-        if (distance < CONSTANTS.HIT_RADIUS) {
+        const pos = normalizePosition(target.positions[i] as Position | [number, number]);
+        const hitRadius = getHitRadius(pos.size);
+        const distance = Math.hypot(clickX - pos.x, clickY - pos.y);
+        if (distance < hitRadius) {
           return posKey;
         }
       }
@@ -106,15 +107,16 @@ export function useGame(puzzle: Puzzle | null) {
       if (!prev.puzzle) return prev;
 
       // 未発見の位置を取得
-      const unfound: { target: string; positionIndex: number; position: [number, number] }[] = [];
+      const unfound: { target: string; positionIndex: number; position: Position }[] = [];
       for (const target of prev.puzzle.targets) {
         for (let i = 0; i < target.positions.length; i++) {
           const posKey = makePositionKey(target.title, i);
           if (!prev.foundPositions.has(posKey)) {
+            const pos = normalizePosition(target.positions[i] as Position | [number, number]);
             unfound.push({
               target: target.title,
               positionIndex: i,
-              position: target.positions[i],
+              position: pos,
             });
           }
         }
@@ -126,7 +128,7 @@ export function useGame(puzzle: Puzzle | null) {
       let nextLevel = 0;
       let selectedTarget: string;
       let selectedPositionIndex: number;
-      let selectedPosition: [number, number];
+      let selectedPosition: Position;
       let centerOffset: [number, number];
 
       if (prev.hintState) {
@@ -193,8 +195,9 @@ export function useGame(puzzle: Puzzle | null) {
   }, []);
 
   // ランダムオフセットを計算
-  function calculateRandomOffset(answerPos: [number, number], hintRadius: number): [number, number] {
-    const maxOffset = Math.max(0, hintRadius - CONSTANTS.HIT_RADIUS);
+  function calculateRandomOffset(answerPos: Position, hintRadius: number): [number, number] {
+    const hitRadius = getHitRadius(answerPos.size);
+    const maxOffset = Math.max(0, hintRadius - hitRadius);
     
     const angle = Math.random() * Math.PI * 2;
     const distance = Math.random() * maxOffset;
@@ -203,10 +206,10 @@ export function useGame(puzzle: Puzzle | null) {
     const offsetY = Math.sin(angle) * distance;
     
     const margin = hintRadius;
-    const newX = Math.max(margin, Math.min(CONSTANTS.SCALE - margin, answerPos[0] + offsetX));
-    const newY = Math.max(margin, Math.min(CONSTANTS.SCALE - margin, answerPos[1] + offsetY));
+    const newX = Math.max(margin, Math.min(CONSTANTS.SCALE - margin, answerPos.x + offsetX));
+    const newY = Math.max(margin, Math.min(CONSTANTS.SCALE - margin, answerPos.y + offsetY));
     
-    return [newX - answerPos[0], newY - answerPos[1]];
+    return [newX - answerPos.x, newY - answerPos.y];
   }
 
   // ゲームをリセット

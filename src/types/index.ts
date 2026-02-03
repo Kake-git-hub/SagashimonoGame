@@ -1,7 +1,38 @@
+// マーカーサイズ
+export type MarkerSize = 'small' | 'medium' | 'large';
+
+// 位置情報（座標+サイズ）
+export interface Position {
+  x: number;
+  y: number;
+  size: MarkerSize;
+}
+
 // ターゲット（探すアイテム）
 export interface Target {
   title: string;
-  positions: [number, number][]; // [[x, y], ...] 0-1000スケール、複数回答可
+  positions: Position[]; // 0-1000スケール、複数回答可
+}
+
+// 旧形式の位置（後方互換用）
+export type LegacyPosition = [number, number];
+
+// 旧形式かどうかをチェック
+export function isLegacyPosition(pos: Position | LegacyPosition): pos is LegacyPosition {
+  return Array.isArray(pos);
+}
+
+// 旧形式から新形式に変換
+export function convertLegacyPosition(pos: LegacyPosition): Position {
+  return { x: pos[0], y: pos[1], size: 'medium' };
+}
+
+// 位置を正規化（旧形式も新形式も対応）
+export function normalizePosition(pos: Position | LegacyPosition): Position {
+  if (isLegacyPosition(pos)) {
+    return convertLegacyPosition(pos);
+  }
+  return pos;
 }
 
 // パズルデータ
@@ -61,8 +92,10 @@ export interface GameState {
 export const CONSTANTS = {
   // 座標スケール（画像左上(0,0)〜右下(1000,1000)）
   SCALE: 1000,
-  // 正解判定の半径（5%相当）
-  HIT_RADIUS: 50,
+  // マーカーサイズごとの判定半径（0-1000スケール）
+  HIT_RADIUS_SMALL: 16,
+  HIT_RADIUS_MEDIUM: 32,
+  HIT_RADIUS_LARGE: 64,
   // ヒント表示時間（ミリ秒）
   HINT_DURATION: 3000,
   // サムネイル切り抜きサイズ（片側）
@@ -74,6 +107,22 @@ export const CONSTANTS = {
   HINT_MIN_RADIUS: 62,
   HINT_MAX_LEVEL: 2, // 0,1,2の3段階
 } as const;
+
+// マーカーサイズから判定半径を取得
+export function getHitRadius(size: MarkerSize): number {
+  switch (size) {
+    case 'small': return CONSTANTS.HIT_RADIUS_SMALL;
+    case 'medium': return CONSTANTS.HIT_RADIUS_MEDIUM;
+    case 'large': return CONSTANTS.HIT_RADIUS_LARGE;
+    default: return CONSTANTS.HIT_RADIUS_MEDIUM;
+  }
+}
+
+// マーカーサイズからピクセルサイズを取得
+export function getMarkerPixelSize(size: MarkerSize): number {
+  // 判定半径と同じ値をピクセルサイズに使用
+  return getHitRadius(size);
+}
 
 // 画面モード
 export type ScreenMode = 'list' | 'game' | 'editor';

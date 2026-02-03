@@ -17,6 +17,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [listRefreshKey, setListRefreshKey] = useState(0);
   const [editPuzzle, setEditPuzzle] = useState<CustomPuzzle | null>(null);
+  const [isServerPuzzleEdit, setIsServerPuzzleEdit] = useState(false); // サーバーパズル編集フラグ
   const [devMode, setDevMode] = useState(() => localStorage.getItem(DEV_MODE_KEY) === 'true');
 
   // 開発者モード切り替え
@@ -67,6 +68,7 @@ function App() {
   // エディタを開く
   const handleOpenEditor = useCallback(() => {
     setEditPuzzle(null);
+    setIsServerPuzzleEdit(false);
     setScreen('editor');
   }, []);
 
@@ -75,6 +77,7 @@ function App() {
     const puzzle = getCustomPuzzle(puzzleId);
     if (puzzle) {
       setEditPuzzle(puzzle);
+      setIsServerPuzzleEdit(false);
       setScreen('editor');
     }
   }, []);
@@ -86,6 +89,7 @@ function App() {
       const puzzle = await fetchServerPuzzleForEdit(puzzleId);
       if (puzzle) {
         setEditPuzzle(puzzle);
+        setIsServerPuzzleEdit(true); // サーバーパズル編集フラグを立てる
         setScreen('editor');
       } else {
         alert('パズルの取得に失敗しました');
@@ -101,6 +105,7 @@ function App() {
   const handlePuzzleCreated = useCallback((_puzzleId: string) => {
     setListRefreshKey(k => k + 1);
     setEditPuzzle(null);
+    setIsServerPuzzleEdit(false);
     setScreen('list');
   }, []);
 
@@ -148,7 +153,14 @@ function App() {
       ) : null;
 
     case 'editor':
-      return <PuzzleEditor onBack={handleBackToList} onPuzzleCreated={handlePuzzleCreated} editPuzzle={editPuzzle} />;
+      return (
+        <PuzzleEditor 
+          onBack={handleBackToList} 
+          onPuzzleCreated={handlePuzzleCreated} 
+          editPuzzle={editPuzzle}
+          isServerPuzzle={isServerPuzzleEdit}
+        />
+      );
 
     case 'list':
     default:

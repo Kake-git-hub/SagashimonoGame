@@ -173,7 +173,16 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
       const result = await uploadPuzzleToServer(token, {
         id: puzzle.name,
         name: puzzle.name,
-        targets: puzzle.targets,
+        targets: puzzle.targets.map(t => ({
+          title: t.title,
+          positions: t.positions.map(p => {
+            // 旧形式の配列や新形式のオブジェクトに対応
+            if (Array.isArray(p)) {
+              return { x: p[0], y: p[1], size: 'medium' };
+            }
+            return { x: (p as { x: number }).x, y: (p as { y: number }).y, size: ((p as { size?: string }).size || 'medium') };
+          }),
+        })),
         imageData: puzzle.imageData,
       });
       

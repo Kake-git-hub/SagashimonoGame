@@ -1,4 +1,4 @@
-import { Target, CONSTANTS } from '../types';
+import { Target, CONSTANTS, normalizePosition, Position } from '../types';
 
 // サムネイルキャッシュ
 const thumbnailCache = new Map<string, string>();
@@ -33,9 +33,9 @@ export async function generateThumbnail(
         canvas.height = size;
 
         // 座標を実際のピクセル位置に変換（最初の座標を使用）
-        const [x, y] = target.positions[0];
-        const imgX = (x / CONSTANTS.SCALE) * img.width;
-        const imgY = (y / CONSTANTS.SCALE) * img.height;
+        const pos = normalizePosition(target.positions[0] as Position | [number, number]);
+        const imgX = (pos.x / CONSTANTS.SCALE) * img.width;
+        const imgY = (pos.y / CONSTANTS.SCALE) * img.height;
 
         // 切り抜き範囲を計算（中心からの範囲）
         const cropRadius = (CONSTANTS.THUMBNAIL_RADIUS / CONSTANTS.SCALE) * Math.min(img.width, img.height);
@@ -94,9 +94,9 @@ export async function generateAllThumbnails(
     canvas.width = size;
     canvas.height = size;
 
-    const [x, y] = target.positions[0];
-    const imgX = (x / CONSTANTS.SCALE) * img.width;
-    const imgY = (y / CONSTANTS.SCALE) * img.height;
+    const pos = normalizePosition(target.positions[0] as Position | [number, number]);
+    const imgX = (pos.x / CONSTANTS.SCALE) * img.width;
+    const imgY = (pos.y / CONSTANTS.SCALE) * img.height;
 
     const cropRadius = (CONSTANTS.THUMBNAIL_RADIUS / CONSTANTS.SCALE) * Math.min(img.width, img.height);
     const cropSize = cropRadius * 2;
