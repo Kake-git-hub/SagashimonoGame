@@ -66,6 +66,55 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
     };
   };
 
+  // ターゲットチェック共通処理（タッチハンドラーより先に定義）
+  const checkTargetAt = useCallback((clientX: number, clientY: number) => {
+    if (game.isCompleted) return;
+
+    const container = imageContainerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const containerAspect = rect.width / rect.height;
+    const imageAspect = imageSize.width / imageSize.height || 1;
+
+    let displayWidth: number, displayHeight: number, offsetX: number, offsetY: number;
+
+    if (containerAspect > imageAspect) {
+      displayHeight = rect.height;
+      displayWidth = displayHeight * imageAspect;
+      offsetX = (rect.width - displayWidth) / 2;
+      offsetY = 0;
+    } else {
+      displayWidth = rect.width;
+      displayHeight = displayWidth / imageAspect;
+      offsetX = 0;
+      offsetY = (rect.height - displayHeight) / 2;
+    }
+
+    // ズームとパンを考慮した座標変換
+    const scaledWidth = displayWidth * scale;
+    const scaledHeight = displayHeight * scale;
+    const scaledOffsetX = offsetX + (displayWidth - scaledWidth) / 2 + position.x;
+    const scaledOffsetY = offsetY + (displayHeight - scaledHeight) / 2 + position.y;
+
+    const relX = clientX - rect.left - scaledOffsetX;
+    const relY = clientY - rect.top - scaledOffsetY;
+
+    if (relX < 0 || relX > scaledWidth || relY < 0 || relY > scaledHeight) {
+      return;
+    }
+
+    const scaleX = (relX / scaledWidth) * CONSTANTS.SCALE;
+    const scaleY = (relY / scaledHeight) * CONSTANTS.SCALE;
+
+    const foundPosKey = game.checkTarget(scaleX, scaleY);
+    if (foundPosKey) {
+      game.markFound(foundPosKey);
+      setFoundAnimation(foundPosKey);
+      setTimeout(() => setFoundAnimation(null), 1000);
+    }
+  }, [game, imageSize, scale, position]);
+
   // タッチ開始
   const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     if (e.touches.length === 1) {
@@ -154,7 +203,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
         ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
         : null;
     }
-  }, []);
+  }, [checkTargetAt]);
 
   // マウスホイールでズーム（PC用）
   const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
@@ -172,56 +221,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
   // クリック処理（PC用）
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     checkTargetAt(e.clientX, e.clientY);
-  }, []);
-
-  // ターゲットチェック共通処理
-  const checkTargetAt = useCallback((clientX: number, clientY: number) => {
-    if (game.isCompleted) return;
-
-    const container = imageContainerRef.current;
-    if (!container) return;
-
-    const rect = container.getBoundingClientRect();
-    const containerAspect = rect.width / rect.height;
-    const imageAspect = imageSize.width / imageSize.height || 1;
-
-    let displayWidth: number, displayHeight: number, offsetX: number, offsetY: number;
-
-    if (containerAspect > imageAspect) {
-      displayHeight = rect.height;
-      displayWidth = displayHeight * imageAspect;
-      offsetX = (rect.width - displayWidth) / 2;
-      offsetY = 0;
-    } else {
-      displayWidth = rect.width;
-      displayHeight = displayWidth / imageAspect;
-      offsetX = 0;
-      offsetY = (rect.height - displayHeight) / 2;
-    }
-
-    // ズームとパンを考慮した座標変換
-    const scaledWidth = displayWidth * scale;
-    const scaledHeight = displayHeight * scale;
-    const scaledOffsetX = offsetX + (displayWidth - scaledWidth) / 2 + position.x;
-    const scaledOffsetY = offsetY + (displayHeight - scaledHeight) / 2 + position.y;
-
-    const relX = clientX - rect.left - scaledOffsetX;
-    const relY = clientY - rect.top - scaledOffsetY;
-
-    if (relX < 0 || relX > scaledWidth || relY < 0 || relY > scaledHeight) {
-      return;
-    }
-
-    const scaleX = (relX / scaledWidth) * CONSTANTS.SCALE;
-    const scaleY = (relY / scaledHeight) * CONSTANTS.SCALE;
-
-    const foundPosKey = game.checkTarget(scaleX, scaleY);
-    if (foundPosKey) {
-      game.markFound(foundPosKey);
-      setFoundAnimation(foundPosKey);
-      setTimeout(() => setFoundAnimation(null), 1000);
-    }
-  }, [game, imageSize, scale, position]);
+  }, [checkTargetAt]);
 
   // 表示サイズを計算して更新
   const updateDisplaySize = useCallback(() => {
@@ -506,13 +506,16 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     backgroundColor: '#16213e',
-    padding: '8px',
-    gap: '8px',
+    padding: '6px 8px',
+    gap: '6px',
     flexShrink: 0,
+    maxHeight: '60px',
   },
   topBarScroll: {
     flex: 1,
-    overflow: 'hidden',
+    overflowX: 'auto',
+    overflowY: 'hidden',
+    WebkitOverflowScrolling: 'touch',
   },
   topBarButtons: {
     display: 'flex',
