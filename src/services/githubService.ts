@@ -212,3 +212,103 @@ export async function validateGitHubToken(token: string): Promise<boolean> {
     return false;
   }
 }
+
+// GitHubからファイルを削除
+async function deleteFileFromGitHub(
+  token: string,
+  path: string,
+  message: string
+): Promise<GitHubUploadResult> {
+  const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`;
+  
+  try {
+    // まずファイルのSHAを取得
+    const existingResponse = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+      },
+    });
+    
+    if (!existingResponse.ok) {
+      return {
+        success: false,
+        message: 'ファイルが見つかりません',
+      };
+    }
+    
+    const existingData = await existingResponse.json();
+    const sha = existingData.sha;
+
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message,
+        sha,
+        branch: BRANCH,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || '削除に失敗しました');
+    }
+
+    return {
+      success: true,
+      message: '削除成功',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'エラーが発生しました',
+    };
+  }
+}
+
+// サーバーからパズルを削除
+export async function deleteServerPuzzle(
+  token: string,
+  puzzleId: string,
+  puzzleName: string
+): Promise<GitHubUploadResult> {
+  try {
+    // 1. 画像を削除
+    const imagePath = `public/puzzles/images/${puzzleId}.webp`;
+    await deleteFileFromGitHub(token, imagePath, `Delete puzzle image: ${puzzleName}`);
+
+    // 2. JSONファイルを削除
+    const jsonPath = `public/puzzles/${puzzleId}.json`;
+    await deleteFileFromGitHub(token, jsonPath, `Delete puzzle data: ${puzzleName}`);
+
+    // 3. index.jsonを更新
+    const currentIndex = await getIndexJson(token);
+    const newIndex = currentIndex.filter(p => p.id !== puzzleId);
+    
+    const indexResult = await uploadFileToGitHub(
+      token,
+      'public/puzzles/index.json',
+      JSON.stringify(newIndex, null, 2),
+      `Update index.json: remove ${puzzleName}`
+    );
+    
+    if (!indexResult.success) {
+      return indexResult;
+    }
+
+    return {
+      success: true,
+      message: `「${puzzleName}」をサーバーから削除しました。数分後にサイトに反映されます。`,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'エラーが発生しました',
+    };
+  }
+}

@@ -5,6 +5,9 @@ import { getCustomPuzzle } from './services/storageService';
 import { PuzzleList, GameScreen, PuzzleEditor } from './components';
 import './App.css';
 
+// 開発者モードのkey
+const DEV_MODE_KEY = 'sagashimono_dev_mode';
+
 function App() {
   const [screen, setScreen] = useState<ScreenMode>('list');
   const [puzzleList, setPuzzleList] = useState<PuzzleSummary[]>([]);
@@ -14,6 +17,20 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [listRefreshKey, setListRefreshKey] = useState(0);
   const [editPuzzle, setEditPuzzle] = useState<CustomPuzzle | null>(null);
+  const [devMode, setDevMode] = useState(() => localStorage.getItem(DEV_MODE_KEY) === 'true');
+
+  // 開発者モード切り替え
+  const toggleDevMode = useCallback(() => {
+    setDevMode(prev => {
+      const newValue = !prev;
+      if (newValue) {
+        localStorage.setItem(DEV_MODE_KEY, 'true');
+      } else {
+        localStorage.removeItem(DEV_MODE_KEY);
+      }
+      return newValue;
+    });
+  }, []);
 
   // パズル一覧を読み込む
   useEffect(() => {
@@ -123,6 +140,8 @@ function App() {
           onOpenEditor={handleOpenEditor}
           onEditPuzzle={handleEditPuzzle}
           refreshKey={listRefreshKey}
+          devMode={devMode}
+          onToggleDevMode={toggleDevMode}
         />
       );
   }

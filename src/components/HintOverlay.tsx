@@ -42,12 +42,6 @@ export function HintOverlay({ target, hintState, getPosition, scaleFactor }: Pro
       />
       {/* 中心の点 */}
       <div style={styles.pulseInner} />
-      {/* レベル表示 */}
-      {hintState.level > 0 && (
-        <div style={styles.levelBadge}>
-          ×{Math.pow(2, hintState.level)}
-        </div>
-      )}
     </div>
   );
 }
@@ -80,19 +74,6 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '50%',
     backgroundColor: '#ffc107',
     boxShadow: '0 0 15px rgba(255, 193, 7, 0.8)',
-  },
-  levelBadge: {
-    position: 'absolute',
-    top: '-24px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    backgroundColor: '#ff5722',
-    color: 'white',
-    padding: '3px 10px',
-    borderRadius: '12px',
-    fontSize: '14px',
-    fontWeight: 'bold',
-    whiteSpace: 'nowrap',
   },
 };
 

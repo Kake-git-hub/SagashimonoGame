@@ -2,16 +2,18 @@ import { useState, useEffect, useCallback } from 'react';
 import { PuzzleSummary } from '../types';
 import { fetchPuzzleList, getImageUrl } from '../services/puzzleService';
 import { getAllProgress, deleteCustomPuzzle, resetProgress, exportCustomPuzzleForServer, getCustomPuzzle } from '../services/storageService';
-import { uploadPuzzleToServer, validateGitHubToken } from '../services/githubService';
+import { uploadPuzzleToServer, validateGitHubToken, deleteServerPuzzle } from '../services/githubService';
 
 interface Props {
   onSelectPuzzle: (puzzleId: string) => void;
   onOpenEditor: () => void;
   onEditPuzzle: (puzzleId: string) => void;
   refreshKey?: number;
+  devMode: boolean;
+  onToggleDevMode: () => void;
 }
 
-export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refreshKey }: Props) {
+export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refreshKey, devMode, onToggleDevMode }: Props) {
   const [puzzles, setPuzzles] = useState<PuzzleSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +71,53 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refresh
     e.stopPropagation();
     onEditPuzzle(puzzleId);
   }, [onEditPuzzle]);
+
+  // サーバーパズルを削除（開発者モード）
+  const handleDeleteServerPuzzle = useCallback(async (e: React.MouseEvent, puzzleId: string, puzzleName: string) => {
+    e.stopPropagation();
+    
+    if (!confirm(`⚠️ サーバーから「${puzzleName}」を削除しますか？\n\nこの操作は取り消せません。`)) {
+      return;
+    }
+    
+    let token = localStorage.getItem('github_pat');
+    
+    if (!token) {
+      token = prompt(
+        '🔐 管理者用機能\n\n' +
+        'GitHubのPersonal Access Token (PAT) を入力してください。\n' +
+        '必要な権限: repo (Contents: Read and write)'
+      );
+      
+      if (!token) return;
+      
+      const isValid = await validateGitHubToken(token);
+      if (!isValid) {
+        alert('トークンが無効です。');
+        return;
+      }
+      
+      localStorage.setItem('github_pat', token);
+    }
+    
+    try {
+      const result = await deleteServerPuzzle(token, puzzleId, puzzleName);
+      
+      if (result.success) {
+        alert(result.message);
+        loadPuzzles();
+      } else {
+        if (result.message.includes('Bad credentials') || result.message.includes('401')) {
+          localStorage.removeItem('github_pat');
+          alert('トークンが無効です。再度入力してください。\n\n' + result.message);
+        } else {
+          alert('削除に失敗しました:\n' + result.message);
+        }
+      }
+    } catch (err) {
+      alert('エラーが発生しました: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
+  }, [loadPuzzles]);
 
   // エクスポートボタン（サーバー用にダウンロード）
   const handleExport = useCallback(async (e: React.MouseEvent, puzzleId: string, puzzleName: string) => {
@@ -183,7 +232,17 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refresh
     <div style={styles.container}>
       <header style={styles.header}>
         <h1 style={styles.title}>🔍 さがしものゲーム</h1>
-        <p style={styles.subtitle}>パズルをえらんでね</p>
+        <p style={styles.subtitle}>
+          {devMode ? '🔧 開発者モード' : 'パズルをえらんでね'}
+        </p>
+        {/* 開発者モード切り替え（タイトル5回タップで切り替え） */}
+        <button
+          style={styles.devModeToggle}
+          onClick={onToggleDevMode}
+          title={devMode ? '開発者モードを終了' : '開発者モードに切り替え'}
+        >
+          {devMode ? '🔓' : '🔒'}
+        </button>
       </header>
 
       {/* サーバーパズル */}
@@ -221,6 +280,18 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refresh
                       🔄
                     </button>
                   )}
+                  {/* 開発者モード：サーバーパズルの削除ボタン */}
+                  {devMode && (
+                    <div style={styles.devButtons}>
+                      <button 
+                        style={styles.deleteButtonSmall}
+                        onClick={(e) => handleDeleteServerPuzzle(e, puzzle.id, puzzle.name)}
+                        title="サーバーから削除"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <div style={styles.puzzleInfo}>
                   <h2 style={styles.puzzleName}>{puzzle.name}</h2>
@@ -248,8 +319,8 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refresh
         </div>
       )}
 
-      {/* カスタムパズルセクション */}
-      {customPuzzles.length > 0 && (
+      {/* カスタムパズルセクション（開発者モードのみ） */}
+      {devMode && customPuzzles.length > 0 && (
         <>
           <h2 style={styles.sectionTitle}>📝 じぶんでつくったパズル</h2>
           <div style={styles.puzzleGrid}>
@@ -335,9 +406,12 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, refresh
         </>
       )}
 
-      <button style={styles.editorButton} onClick={onOpenEditor}>
-        ✏️ パズルをつくる
-      </button>
+      {/* エディタボタン（開発者モードのみ） */}
+      {devMode && (
+        <button style={styles.editorButton} onClick={onOpenEditor}>
+          ✏️ パズルをつくる
+        </button>
+      )}
     </div>
   );
 }
@@ -351,6 +425,7 @@ const styles: Record<string, React.CSSProperties> = {
   header: {
     textAlign: 'center',
     marginBottom: '30px',
+    position: 'relative',
   },
   title: {
     fontSize: '2rem',
@@ -361,6 +436,24 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '1.1rem',
     color: '#666',
     margin: 0,
+  },
+  devModeToggle: {
+    position: 'absolute',
+    top: '0',
+    right: '10px',
+    padding: '8px 12px',
+    fontSize: '1.2rem',
+    backgroundColor: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    opacity: 0.5,
+  },
+  devButtons: {
+    position: 'absolute',
+    bottom: '8px',
+    right: '8px',
+    display: 'flex',
+    gap: '5px',
   },
   sectionTitle: {
     fontSize: '1.3rem',
