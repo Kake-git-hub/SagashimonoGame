@@ -1,0 +1,107 @@
+{
+  "id": "ろぼっとのくに",
+  "name": "ろぼっとのくに",
+  "imageSrc": "puzzles/images/ろぼっとのくに.webp",
+  "targets": [
+    {
+      "title": "ドラゴン",
+      "positions": [
+        {
+          "x": 862,
+          "y": 817,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "サンタのぼうし",
+      "positions": [
+        {
+          "x": 540,
+          "y": 920,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "コックさんロボット",
+      "positions": [
+        {
+          "x": 393,
+          "y": 502,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "とりロボット",
+      "positions": [
+        {
+          "x": 605,
+          "y": 748,
+          "size": "medium"
+        },
+        {
+          "x": 631,
+          "y": 434,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "ロボットのおうさま",
+      "positions": [
+        {
+          "x": 747,
+          "y": 278,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "きんいろのスパナ",
+      "positions": [
+        {
+          "x": 200,
+          "y": 390,
+          "size": "large"
+        },
+        {
+          "x": 376,
+          "y": 630,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "ろぼっとじゃないこども",
+      "positions": [
+        {
+          "x": 600,
+          "y": 850,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "あかいロボット",
+      "positions": [
+        {
+          "x": 332,
+          "y": 244,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "えんとつロボット",
+      "positions": [
+        {
+          "x": 928,
+          "y": 368,
+          "size": "large"
+        }
+      ]
+    }
+  ]
+}
