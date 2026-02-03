@@ -9,7 +9,6 @@ import { TargetList } from './TargetList';
 import { TargetMarker } from './TargetMarker';
 import { HintOverlay } from './HintOverlay';
 import { ClearOverlay } from './ClearOverlay';
-import { CollapsiblePanel } from './CollapsiblePanel';
 
 interface Props {
   puzzle: Puzzle;
@@ -28,6 +27,14 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
   const [thumbnails, setThumbnails] = useState<Map<string, string>>(new Map());
   const [foundAnimation, setFoundAnimation] = useState<string | null>(null);
 
+  // ズーム関連の状態
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const lastTouchRef = useRef<{ x: number; y: number; dist?: number } | null>(null);
+  const lastClickTimeRef = useRef(0);
+  const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
+  const isDraggingRef = useRef(false);
+
   // サムネイル生成
   useEffect(() => {
     if (settings.displayMode === 'thumbnail' && puzzle) {
@@ -42,69 +49,179 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
     setImageSize({ width: img.naturalWidth, height: img.naturalHeight, displayWidth: 0, displayHeight: 0 });
   }, []);
 
-  // クリック/タップ処理
-  const handleImageClick = useCallback((e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+  // 2点間の距離を計算
+  const getDistance = (touches: React.TouchList) => {
+    if (touches.length < 2) return 0;
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  // 2点の中心を計算
+  const getCenter = (touches: React.TouchList) => {
+    if (touches.length < 2) return { x: touches[0].clientX, y: touches[0].clientY };
+    return {
+      x: (touches[0].clientX + touches[1].clientX) / 2,
+      y: (touches[0].clientY + touches[1].clientY) / 2,
+    };
+  };
+
+  // タッチ開始
+  const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 1) {
+      lastTouchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      touchStartPosRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      if (scale > 1) {
+        isDraggingRef.current = true;
+      }
+    } else if (e.touches.length === 2) {
+      // ピンチズーム開始
+      const dist = getDistance(e.touches);
+      const center = getCenter(e.touches);
+      lastTouchRef.current = { x: center.x, y: center.y, dist };
+      isDraggingRef.current = true;
+    }
+  }, [scale]);
+
+  // タッチ移動
+  const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    if (!lastTouchRef.current) return;
+
+    if (e.touches.length === 2) {
+      // ピンチズーム
+      e.preventDefault();
+      const dist = getDistance(e.touches);
+      const center = getCenter(e.touches);
+      
+      if (lastTouchRef.current.dist) {
+        const scaleChange = dist / lastTouchRef.current.dist;
+        setScale(prev => Math.min(Math.max(prev * scaleChange, 1), 5));
+      }
+      
+      // パン（2本指でドラッグ）
+      const dx = center.x - lastTouchRef.current.x;
+      const dy = center.y - lastTouchRef.current.y;
+      setPosition(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+      
+      lastTouchRef.current = { x: center.x, y: center.y, dist };
+      isDraggingRef.current = true;
+    } else if (e.touches.length === 1 && scale > 1) {
+      // 1本指でパン（ズーム中のみ）
+      e.preventDefault();
+      const dx = e.touches[0].clientX - lastTouchRef.current.x;
+      const dy = e.touches[0].clientY - lastTouchRef.current.y;
+      setPosition(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+      lastTouchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      isDraggingRef.current = true;
+    }
+  }, [scale]);
+
+  // タッチ終了
+  const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 0) {
+      // ダブルタップでズームリセット
+      const now = Date.now();
+      if (now - lastClickTimeRef.current < 300) {
+        setScale(1);
+        setPosition({ x: 0, y: 0 });
+        lastTouchRef.current = null;
+        touchStartPosRef.current = null;
+        isDraggingRef.current = false;
+        lastClickTimeRef.current = 0;
+        return;
+      }
+      lastClickTimeRef.current = now;
+      
+      // シングルタップでターゲットチェック
+      if (touchStartPosRef.current && e.changedTouches.length > 0) {
+        const touch = e.changedTouches[0];
+        const startTouch = touchStartPosRef.current;
+        const dx = touch.clientX - startTouch.x;
+        const dy = touch.clientY - startTouch.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // 移動距離が小さい場合のみタップとして処理
+        if (distance < 15) {
+          checkTargetAt(touch.clientX, touch.clientY);
+        }
+      }
+      
+      isDraggingRef.current = false;
+      lastTouchRef.current = null;
+      touchStartPosRef.current = null;
+    } else {
+      lastTouchRef.current = e.touches.length > 0 
+        ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
+        : null;
+    }
+  }, []);
+
+  // マウスホイールでズーム（PC用）
+  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    const newScale = Math.min(Math.max(scale * delta, 1), 5);
+    setScale(newScale);
+    
+    // ズームがリセットされたら位置もリセット
+    if (newScale <= 1) {
+      setPosition({ x: 0, y: 0 });
+    }
+  }, [scale]);
+
+  // クリック処理（PC用）
+  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    checkTargetAt(e.clientX, e.clientY);
+  }, []);
+
+  // ターゲットチェック共通処理
+  const checkTargetAt = useCallback((clientX: number, clientY: number) => {
     if (game.isCompleted) return;
 
     const container = imageContainerRef.current;
     if (!container) return;
 
     const rect = container.getBoundingClientRect();
-    const img = container.querySelector('img');
-    if (!img) return;
-
-    // 画像の表示領域を計算（object-fit: contain を考慮）
     const containerAspect = rect.width / rect.height;
     const imageAspect = imageSize.width / imageSize.height || 1;
 
     let displayWidth: number, displayHeight: number, offsetX: number, offsetY: number;
 
     if (containerAspect > imageAspect) {
-      // コンテナが横長 → 画像は高さに合わせる
       displayHeight = rect.height;
       displayWidth = displayHeight * imageAspect;
       offsetX = (rect.width - displayWidth) / 2;
       offsetY = 0;
     } else {
-      // コンテナが縦長 → 画像は幅に合わせる
       displayWidth = rect.width;
       displayHeight = displayWidth / imageAspect;
       offsetX = 0;
       offsetY = (rect.height - displayHeight) / 2;
     }
 
-    // クリック位置を取得
-    let clientX: number, clientY: number;
-    if ('touches' in e) {
-      if (e.touches.length === 0) return;
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
+    // ズームとパンを考慮した座標変換
+    const scaledWidth = displayWidth * scale;
+    const scaledHeight = displayHeight * scale;
+    const scaledOffsetX = offsetX + (displayWidth - scaledWidth) / 2 + position.x;
+    const scaledOffsetY = offsetY + (displayHeight - scaledHeight) / 2 + position.y;
 
-    // コンテナ内の相対位置
-    const relX = clientX - rect.left - offsetX;
-    const relY = clientY - rect.top - offsetY;
+    const relX = clientX - rect.left - scaledOffsetX;
+    const relY = clientY - rect.top - scaledOffsetY;
 
-    // 画像外のクリックは無視
-    if (relX < 0 || relX > displayWidth || relY < 0 || relY > displayHeight) {
+    if (relX < 0 || relX > scaledWidth || relY < 0 || relY > scaledHeight) {
       return;
     }
 
-    // 0-1000スケールに変換
-    const scaleX = (relX / displayWidth) * CONSTANTS.SCALE;
-    const scaleY = (relY / displayHeight) * CONSTANTS.SCALE;
+    const scaleX = (relX / scaledWidth) * CONSTANTS.SCALE;
+    const scaleY = (relY / scaledHeight) * CONSTANTS.SCALE;
 
-    // ターゲットチェック（位置キー "title:index" が返る）
     const foundPosKey = game.checkTarget(scaleX, scaleY);
     if (foundPosKey) {
       game.markFound(foundPosKey);
       setFoundAnimation(foundPosKey);
       setTimeout(() => setFoundAnimation(null), 1000);
     }
-  }, [game, imageSize]);
+  }, [game, imageSize, scale, position]);
 
   // 表示サイズを計算して更新
   const updateDisplaySize = useCallback(() => {
@@ -135,7 +252,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
     return () => window.removeEventListener('resize', updateDisplaySize);
   }, [updateDisplaySize]);
 
-  // 座標から表示位置を計算
+  // 座標から表示位置を計算（ズーム対応）
   const getPixelPosition = useCallback((x: number, y: number, offset?: [number, number]) => {
     const container = imageContainerRef.current;
     if (!container || !imageSize.width || !imageSize.displayWidth) return null;
@@ -158,15 +275,25 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
       offsetY = (rect.height - displayHeight) / 2;
     }
 
+    // ズームとパンを考慮
+    const scaledWidth = displayWidth * scale;
+    const scaledHeight = displayHeight * scale;
+    const scaledOffsetX = offsetX + (displayWidth - scaledWidth) / 2 + position.x;
+    const scaledOffsetY = offsetY + (displayHeight - scaledHeight) / 2 + position.y;
+
     const finalX = x + (offset ? offset[0] : 0);
     const finalY = y + (offset ? offset[1] : 0);
-    const pixelX = offsetX + (finalX / CONSTANTS.SCALE) * displayWidth;
-    const pixelY = offsetY + (finalY / CONSTANTS.SCALE) * displayHeight;
+    const pixelX = scaledOffsetX + (finalX / CONSTANTS.SCALE) * scaledWidth;
+    const pixelY = scaledOffsetY + (finalY / CONSTANTS.SCALE) * scaledHeight;
 
     return { x: pixelX, y: pixelY };
-  }, [imageSize]);
+  }, [imageSize, scale, position]);
 
-  // 未使用のgetTargetPositionを削除
+  // ズームリセット
+  const resetZoom = useCallback(() => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  }, []);
 
   // 進捗計算
   const totalPositions = getTotalPositionCount(puzzle);
@@ -190,7 +317,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
   }
 
   return (
-    <div style={isTablet ? styles.containerLandscape : styles.containerPortrait}>
+    <div style={styles.container}>
       {/* ヘッダー */}
       <header style={styles.header}>
         <button onClick={onBack} style={styles.backButton}>
@@ -201,6 +328,38 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
           {foundCount} / {totalPositions}
         </div>
       </header>
+
+      {/* 縦画面：上部お題バー */}
+      {!isTablet && (
+        <div style={styles.topBar}>
+          <div style={styles.topBarScroll}>
+            <TargetList
+              targets={puzzle.targets}
+              foundPositions={game.foundPositions}
+              displayMode={settings.displayMode}
+              thumbnails={thumbnails}
+              layout="horizontal"
+            />
+          </div>
+          <div style={styles.topBarButtons}>
+            <button onClick={toggleDisplayMode} style={styles.topBarButton}>
+              {settings.displayMode === 'text' ? '🖼️' : '📝'}
+            </button>
+            <button 
+              onClick={game.triggerHint} 
+              style={styles.topBarButton}
+              disabled={game.isCompleted || game.showHint}
+            >
+              💡
+            </button>
+            {scale > 1 && (
+              <button onClick={resetZoom} style={styles.topBarButton}>
+                🔍
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <div style={isTablet ? styles.mainLandscape : styles.mainPortrait}>
         {/* 横画面：左サイドバー */}
@@ -219,13 +378,20 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
               thumbnails={thumbnails}
               layout="vertical"
             />
-            <button 
-              onClick={game.triggerHint} 
-              style={styles.hintButton}
-              disabled={game.isCompleted || game.showHint}
-            >
-              {game.hintState && game.hintState.level > 0 ? '💡 もっとヒント！' : '💡 ヒント'}
-            </button>
+            <div style={styles.sidebarButtons}>
+              <button 
+                onClick={game.triggerHint} 
+                style={styles.hintButton}
+                disabled={game.isCompleted || game.showHint}
+              >
+                {game.hintState && game.hintState.level > 0 ? '💡 もっとヒント！' : '💡 ヒント'}
+              </button>
+              {scale > 1 && (
+                <button onClick={resetZoom} style={styles.zoomResetButton}>
+                  🔍 リセット
+                </button>
+              )}
+            </div>
           </aside>
         )}
 
@@ -233,13 +399,19 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
         <div
           ref={imageContainerRef}
           style={styles.imageContainer}
-          onClick={handleImageClick}
-          onTouchStart={handleImageClick}
+          onClick={handleClick}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onWheel={handleWheel}
         >
           <img
             src={getImageUrl(puzzle.imageSrc)}
             alt={puzzle.name}
-            style={styles.gameImage}
+            style={{
+              ...styles.gameImage,
+              transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+            }}
             onLoad={handleImageLoad}
             draggable={false}
           />
@@ -265,39 +437,17 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
               target={puzzle.targets.find(t => t.title === game.hintTarget)!}
               hintState={game.hintState}
               getPosition={getPixelPosition}
-              scaleFactor={imageSize.displayWidth / CONSTANTS.SCALE}
+              scaleFactor={(imageSize.displayWidth * scale) / CONSTANTS.SCALE}
             />
           )}
-        </div>
 
-        {/* 縦画面：下部折り畳みパネル */}
-        {!isTablet && (
-          <CollapsiblePanel
-            title={`さがすもの (${foundCount}/${totalPositions})`}
-            extra={
-              <>
-                <button onClick={toggleDisplayMode} style={styles.toggleButtonSmall}>
-                  {settings.displayMode === 'text' ? '🖼️' : '📝'}
-                </button>
-                <button 
-                  onClick={game.triggerHint} 
-                  style={styles.hintButtonSmall}
-                  disabled={game.isCompleted || game.showHint}
-                >
-                  {game.hintState && game.hintState.level > 0 ? '🔍' : '💡'}
-                </button>
-              </>
-            }
-          >
-            <TargetList
-              targets={puzzle.targets}
-              foundPositions={game.foundPositions}
-              displayMode={settings.displayMode}
-              thumbnails={thumbnails}
-              layout="horizontal"
-            />
-          </CollapsiblePanel>
-        )}
+          {/* ズームインジケーター */}
+          {scale > 1 && (
+            <div style={styles.zoomIndicator}>
+              {Math.round(scale * 100)}%
+            </div>
+          )}
+        </div>
       </div>
 
       {/* クリア画面 */}
@@ -315,14 +465,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  containerLandscape: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100vh',
-    backgroundColor: '#1a1a2e',
-    overflow: 'hidden',
-  },
-  containerPortrait: {
+  container: {
     display: 'flex',
     flexDirection: 'column',
     height: '100vh',
@@ -333,14 +476,14 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '10px 15px',
+    padding: '8px 12px',
     backgroundColor: '#16213e',
     color: 'white',
     flexShrink: 0,
   },
   backButton: {
-    padding: '8px 15px',
-    fontSize: '1rem',
+    padding: '6px 12px',
+    fontSize: '0.9rem',
     backgroundColor: 'transparent',
     color: 'white',
     border: '1px solid rgba(255,255,255,0.3)',
@@ -349,15 +492,40 @@ const styles: Record<string, React.CSSProperties> = {
   },
   puzzleTitle: {
     margin: 0,
-    fontSize: '1.2rem',
+    fontSize: '1rem',
     fontWeight: 'bold',
   },
   progress: {
-    fontSize: '1.1rem',
+    fontSize: '1rem',
     fontWeight: 'bold',
     backgroundColor: 'rgba(255,255,255,0.1)',
-    padding: '5px 15px',
+    padding: '4px 12px',
     borderRadius: '20px',
+  },
+  topBar: {
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: '#16213e',
+    padding: '8px',
+    gap: '8px',
+    flexShrink: 0,
+  },
+  topBarScroll: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+  topBarButtons: {
+    display: 'flex',
+    gap: '4px',
+    flexShrink: 0,
+  },
+  topBarButton: {
+    padding: '8px 12px',
+    fontSize: '1.2rem',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
   },
   mainLandscape: {
     display: 'flex',
@@ -389,20 +557,18 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 'bold',
     marginBottom: '5px',
   },
+  sidebarButtons: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    marginTop: 'auto',
+  },
   toggleButton: {
     padding: '5px 10px',
     fontSize: '1.2rem',
     backgroundColor: 'rgba(255,255,255,0.1)',
     border: 'none',
     borderRadius: '8px',
-    cursor: 'pointer',
-  },
-  toggleButtonSmall: {
-    padding: '5px 8px',
-    fontSize: '1rem',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    border: 'none',
-    borderRadius: '6px',
     cursor: 'pointer',
   },
   hintButton: {
@@ -414,14 +580,14 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '10px',
     cursor: 'pointer',
     fontWeight: 'bold',
-    marginTop: 'auto',
   },
-  hintButtonSmall: {
-    padding: '5px 10px',
-    fontSize: '1rem',
-    backgroundColor: '#ffc107',
+  zoomResetButton: {
+    padding: '10px',
+    fontSize: '0.9rem',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    color: 'white',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '10px',
     cursor: 'pointer',
   },
   imageContainer: {
@@ -431,7 +597,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    touchAction: 'manipulation',
+    touchAction: 'none',
   },
   gameImage: {
     maxWidth: '100%',
@@ -439,5 +605,17 @@ const styles: Record<string, React.CSSProperties> = {
     objectFit: 'contain',
     userSelect: 'none',
     pointerEvents: 'none',
+    transformOrigin: 'center center',
+    transition: 'none',
+  },
+  zoomIndicator: {
+    position: 'absolute',
+    bottom: '10px',
+    right: '10px',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    color: 'white',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    fontSize: '0.8rem',
   },
 };
