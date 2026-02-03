@@ -368,9 +368,23 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
           <aside style={styles.sidebar}>
             <div style={styles.sidebarHeader}>
               <span>さがすもの</span>
-              <button onClick={toggleDisplayMode} style={styles.toggleButton}>
-                {settings.displayMode === 'text' ? '🖼️' : '📝'}
-              </button>
+              <div style={styles.sidebarHeaderButtons}>
+                <button onClick={toggleDisplayMode} style={styles.toggleButton}>
+                  {settings.displayMode === 'text' ? '🖼️' : '📝'}
+                </button>
+                <button 
+                  onClick={game.triggerHint} 
+                  style={styles.hintButtonSmall}
+                  disabled={game.isCompleted || game.showHint}
+                >
+                  💡
+                </button>
+                {scale > 1 && (
+                  <button onClick={resetZoom} style={styles.toggleButton}>
+                    🔍
+                  </button>
+                )}
+              </div>
             </div>
             <div style={styles.sidebarList}>
               <TargetList
@@ -380,20 +394,6 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
                 thumbnails={thumbnails}
                 layout="vertical"
               />
-            </div>
-            <div style={styles.sidebarButtons}>
-              <button 
-                onClick={game.triggerHint} 
-                style={styles.hintButton}
-                disabled={game.isCompleted || game.showHint}
-              >
-                {game.hintState && game.hintState.level > 0 ? '💡 もっとヒント！' : '💡 ヒント'}
-              </button>
-              {scale > 1 && (
-                <button onClick={resetZoom} style={styles.zoomResetButton}>
-                  🔍 リセット
-                </button>
-              )}
             </div>
           </aside>
         )}
@@ -564,21 +564,27 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '5px',
     flexShrink: 0,
   },
+  sidebarHeaderButtons: {
+    display: 'flex',
+    gap: '4px',
+  },
   sidebarList: {
     flex: 1,
     overflowY: 'auto',
     minHeight: 0,
   },
-  sidebarButtons: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-    marginTop: 'auto',
-  },
   toggleButton: {
     padding: '5px 10px',
     fontSize: '1.2rem',
     backgroundColor: 'rgba(255,255,255,0.1)',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+  },
+  hintButtonSmall: {
+    padding: '5px 10px',
+    fontSize: '1.2rem',
+    backgroundColor: '#ffc107',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
@@ -592,15 +598,6 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '10px',
     cursor: 'pointer',
     fontWeight: 'bold',
-  },
-  zoomResetButton: {
-    padding: '10px',
-    fontSize: '0.9rem',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
   },
   imageContainer: {
     flex: 1,
