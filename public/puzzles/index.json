@@ -22,5 +22,11 @@
     "name": "ろぼっとのくに",
     "thumbnail": "puzzles/images/ろぼっとのくに.webp",
     "targetCount": 11
+  },
+  {
+    "id": "ハロウィン",
+    "name": "ハロウィン",
+    "thumbnail": "puzzles/images/ハロウィン.webp",
+    "targetCount": 14
   }
 ]
