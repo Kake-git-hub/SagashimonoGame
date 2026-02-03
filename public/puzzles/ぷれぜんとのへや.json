@@ -1,0 +1,217 @@
+{
+  "id": "ぷれぜんとのへや",
+  "name": "ぷれぜんとのへや",
+  "imageSrc": "puzzles/images/ぷれぜんとのへや.webp",
+  "targets": [
+    {
+      "title": "ろぼっと",
+      "positions": [
+        {
+          "x": 740,
+          "y": 55,
+          "size": "medium"
+        },
+        {
+          "x": 190,
+          "y": 330,
+          "size": "medium"
+        },
+        {
+          "x": 610,
+          "y": 705,
+          "size": "large"
+        },
+        {
+          "x": 815,
+          "y": 755,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "きしゃ",
+      "positions": [
+        {
+          "x": 120,
+          "y": 60,
+          "size": "large"
+        },
+        {
+          "x": 406,
+          "y": 485,
+          "size": "medium"
+        },
+        {
+          "x": 365,
+          "y": 805,
+          "size": "large"
+        },
+        {
+          "x": 780,
+          "y": 850,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "すのーどーむ",
+      "positions": [
+        {
+          "x": 120,
+          "y": 359,
+          "size": "medium"
+        },
+        {
+          "x": 184,
+          "y": 834,
+          "size": "medium"
+        },
+        {
+          "x": 805,
+          "y": 215,
+          "size": "medium"
+        },
+        {
+          "x": 795,
+          "y": 55,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "くつした",
+      "positions": [
+        {
+          "x": 297,
+          "y": 251,
+          "size": "large"
+        },
+        {
+          "x": 685,
+          "y": 235,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "にんぎょう",
+      "positions": [
+        {
+          "x": 539,
+          "y": 478,
+          "size": "large"
+        },
+        {
+          "x": 257,
+          "y": 687,
+          "size": "large"
+        },
+        {
+          "x": 822,
+          "y": 351,
+          "size": "medium"
+        },
+        {
+          "x": 674,
+          "y": 405,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "さる",
+      "positions": [
+        {
+          "x": 429,
+          "y": 197,
+          "size": "large"
+        },
+        {
+          "x": 455,
+          "y": 395,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "くま",
+      "positions": [
+        {
+          "x": 346,
+          "y": 609,
+          "size": "large"
+        },
+        {
+          "x": 359,
+          "y": 359,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "ぞう",
+      "positions": [
+        {
+          "x": 39,
+          "y": 313,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "とら",
+      "positions": [
+        {
+          "x": 231,
+          "y": 151,
+          "size": "medium"
+        },
+        {
+          "x": 255,
+          "y": 43,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "らいおん",
+      "positions": [
+        {
+          "x": 47,
+          "y": 151,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "きりん",
+      "positions": [
+        {
+          "x": 958,
+          "y": 161,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "ぎたー",
+      "positions": [
+        {
+          "x": 710,
+          "y": 744,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "さんた",
+      "positions": [
+        {
+          "x": 130,
+          "y": 454,
+          "size": "medium"
+        }
+      ]
+    }
+  ]
+}
