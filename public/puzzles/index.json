@@ -1,14 +1,14 @@
-﻿[
+[
   {
-    "id": "どうぶつえん",
-    "name": "どうぶつえん",
-    "thumbnail": "puzzles/images/どうぶつえん.webp",
+    "id": "ã©ãã¶ã¤ãã",
+    "name": "ã©ãã¶ã¤ãã",
+    "thumbnail": "puzzles/images/ã©ãã¶ã¤ãã.webp",
     "targetCount": 37
   },
   {
-    "id": "おもちゃのへや",
-    "name": "おもちゃのへや",
-    "thumbnail": "puzzles/images/おもちゃのへや.webp",
+    "id": "ããã¡ãã®ã¸ã",
+    "name": "ããã¡ãã®ã¸ã",
+    "thumbnail": "puzzles/images/ããã¡ãã®ã¸ã.webp",
     "targetCount": 15
   }
 ]
