@@ -34,5 +34,11 @@
     "name": "うみのなか",
     "thumbnail": "puzzles/images/うみのなか.webp",
     "targetCount": 13
+  },
+  {
+    "id": "どうぶつえん",
+    "name": "どうぶつえん",
+    "thumbnail": "puzzles/images/どうぶつえん.webp",
+    "targetCount": 37
   }
 ]
