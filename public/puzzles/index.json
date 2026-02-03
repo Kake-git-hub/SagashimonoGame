@@ -4,5 +4,11 @@
     "name": "おもちゃのへや",
     "thumbnail": "puzzles/images/おもちゃのへや.webp",
     "targetCount": 15
+  },
+  {
+    "id": "クリスマス",
+    "name": "クリスマス",
+    "thumbnail": "puzzles/images/クリスマス.webp",
+    "targetCount": 14
   }
 ]
