@@ -6,9 +6,10 @@ interface Props {
   displayMode: 'text' | 'thumbnail';
   thumbnails: Map<string, string>;
   layout: 'vertical' | 'horizontal';
+  compact?: boolean;  // コンパクト表示（縦画面用）
 }
 
-export function TargetList({ targets, foundPositions, displayMode, thumbnails, layout }: Props) {
+export function TargetList({ targets, foundPositions, displayMode, thumbnails, layout, compact = false }: Props) {
   const isVertical = layout === 'vertical';
 
   // ターゲットごとに発見数を集計
@@ -39,6 +40,10 @@ export function TargetList({ targets, foundPositions, displayMode, thumbnails, l
         const progressText = totalCount > 1 ? `${foundCount}/${totalCount} ` : '';
         const checkboxIcon = isComplete ? '☑' : foundCount > 0 ? '◐' : '☐';
 
+        // コンパクトモードのサイズ
+        const wrapperSize = compact ? 40 : 60;
+        const itemMinWidth = compact ? 50 : 70;
+
         if (displayMode === 'thumbnail') {
           return (
             <div
@@ -46,9 +51,10 @@ export function TargetList({ targets, foundPositions, displayMode, thumbnails, l
               style={{
                 ...styles.thumbnailItem,
                 ...(isComplete ? styles.thumbnailItemFound : {}),
+                minWidth: itemMinWidth,
               }}
             >
-              <div style={styles.thumbnailWrapper}>
+              <div style={{...styles.thumbnailWrapper, width: wrapperSize, height: wrapperSize}}>
                 {thumbnail ? (
                   <img
                     src={thumbnail}
@@ -61,7 +67,7 @@ export function TargetList({ targets, foundPositions, displayMode, thumbnails, l
                 ) : (
                   <div style={styles.thumbnailPlaceholder}>?</div>
                 )}
-                {isComplete && <div style={styles.checkMark}>✓</div>}
+                {isComplete && <div style={{...styles.checkMark, fontSize: compact ? '1.2rem' : '2rem'}}>✓</div>}
                 {/* 複数ある場合は進捗バッジ */}
                 {totalCount > 1 && !isComplete && foundCount > 0 && (
                   <div style={styles.progressBadge}>{foundCount}/{totalCount}</div>
@@ -71,6 +77,8 @@ export function TargetList({ targets, foundPositions, displayMode, thumbnails, l
                 style={{
                   ...styles.thumbnailTitle,
                   ...(isComplete ? styles.foundText : {}),
+                  maxWidth: itemMinWidth,
+                  fontSize: compact ? '0.65rem' : '0.75rem',
                 }}
               >
                 {target.title}
@@ -119,9 +127,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   listHorizontal: {
     display: 'flex',
-    flexWrap: 'wrap',
-    gap: '10px',
-    padding: '10px 0',
+    flexWrap: 'nowrap',
+    gap: '8px',
+    padding: '4px 0',
+    whiteSpace: 'nowrap',
   },
   // テキストモード
   textItem: {

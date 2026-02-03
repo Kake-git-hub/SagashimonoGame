@@ -339,6 +339,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
               displayMode={settings.displayMode}
               thumbnails={thumbnails}
               layout="horizontal"
+              compact
             />
           </div>
           <div style={styles.topBarButtons}>
@@ -371,13 +372,15 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
                 {settings.displayMode === 'text' ? '🖼️' : '📝'}
               </button>
             </div>
-            <TargetList
-              targets={puzzle.targets}
-              foundPositions={game.foundPositions}
-              displayMode={settings.displayMode}
-              thumbnails={thumbnails}
-              layout="vertical"
-            />
+            <div style={styles.sidebarList}>
+              <TargetList
+                targets={puzzle.targets}
+                foundPositions={game.foundPositions}
+                displayMode={settings.displayMode}
+                thumbnails={thumbnails}
+                layout="vertical"
+              />
+            </div>
             <div style={styles.sidebarButtons}>
               <button 
                 onClick={game.triggerHint} 
@@ -548,8 +551,8 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: '10px',
-    overflowY: 'auto',
     flexShrink: 0,
+    overflow: 'hidden',
   },
   sidebarHeader: {
     display: 'flex',
@@ -559,6 +562,12 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '1rem',
     fontWeight: 'bold',
     marginBottom: '5px',
+    flexShrink: 0,
+  },
+  sidebarList: {
+    flex: 1,
+    overflowY: 'auto',
+    minHeight: 0,
   },
   sidebarButtons: {
     display: 'flex',
