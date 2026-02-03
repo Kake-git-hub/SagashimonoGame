@@ -40,5 +40,11 @@
     "name": "どうぶつえん",
     "thumbnail": "puzzles/images/どうぶつえん.webp",
     "targetCount": 37
+  },
+  {
+    "id": "こおりのくに",
+    "name": "こおりのくに",
+    "thumbnail": "puzzles/images/こおりのくに.webp",
+    "targetCount": 10
   }
 ]
