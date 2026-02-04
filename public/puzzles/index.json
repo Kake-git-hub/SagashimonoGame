@@ -58,5 +58,11 @@
     "name": "ぷれぜんとのへや",
     "thumbnail": "puzzles/images/ぷれぜんとのへや.webp",
     "targetCount": 29
+  },
+  {
+    "id": "まりおわーるど",
+    "name": "まりおわーるど",
+    "thumbnail": "puzzles/images/まりおわーるど.webp",
+    "targetCount": 23
   }
 ]
