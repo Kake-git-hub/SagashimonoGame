@@ -60,15 +60,15 @@
     "targetCount": 26
   },
   {
-    "id": "さんりお",
-    "name": "さんりお",
-    "thumbnail": "puzzles/images/さんりお.webp",
-    "targetCount": 28
-  },
-  {
     "id": "ガレージ",
     "name": "ガレージ",
     "thumbnail": "puzzles/images/ガレージ.webp",
     "targetCount": 18
+  },
+  {
+    "id": "さんりお",
+    "name": "さんりお",
+    "thumbnail": "puzzles/images/さんりお.webp",
+    "targetCount": 32
   }
 ]
