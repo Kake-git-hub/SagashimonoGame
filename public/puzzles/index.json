@@ -42,12 +42,6 @@
     "targetCount": 29
   },
   {
-    "id": "まりおわーるど",
-    "name": "まりおわーるど",
-    "thumbnail": "puzzles/images/まりおわーるど.webp",
-    "targetCount": 23
-  },
-  {
     "id": "きっちん",
     "name": "きっちん",
     "thumbnail": "puzzles/images/きっちん.webp",
@@ -64,5 +58,11 @@
     "name": "どうぶつえん",
     "thumbnail": "puzzles/images/どうぶつえん.webp",
     "targetCount": 37
+  },
+  {
+    "id": "まりおわーるど",
+    "name": "まりおわーるど",
+    "thumbnail": "puzzles/images/まりおわーるど.webp",
+    "targetCount": 26
   }
 ]
