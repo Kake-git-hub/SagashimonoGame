@@ -62,6 +62,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
 
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const targetListRef = useRef<HTMLDivElement>(null);
   const [imageNaturalSize, setImageNaturalSize] = useState({ width: 0, height: 0 });
   const [containerRect, setContainerRect] = useState<DOMRect | null>(null);
   const justDraggedRef = useRef(false); // ドラッグ直後フラグ（クリック誤判定防止）
@@ -191,10 +192,16 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
     const newTarget: EditorTarget = {
       id: Date.now().toString(),
       title: `アイテム${targets.length + 1}`,
-      positions: [{ type: 'circle', x: 500, y: 500, size: 'large' }], // 中央に配置
+      positions: [], // 空のまま追加（丸追加/ポリゴン追加は別ボタンで）
     };
     setTargets(prev => [...prev, newTarget]);
     setSelectedTarget(newTarget.id);
+    // リストの一番下にスクロール
+    setTimeout(() => {
+      if (targetListRef.current) {
+        targetListRef.current.scrollTop = targetListRef.current.scrollHeight;
+      }
+    }, 50);
   }, [targets.length]);
 
   // ターゲットに円形座標を追加
@@ -239,7 +246,6 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
   const handleDeletePosition = useCallback((targetId: string, posIndex: number) => {
     setTargets(prev => prev.map(t => {
       if (t.id !== targetId) return t;
-      if (t.positions.length <= 1) return t; // 最低1つは残す
       const newPositions = t.positions.filter((_, i) => i !== posIndex);
       return { ...t, positions: newPositions };
     }));
@@ -433,6 +439,12 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
       return;
     }
 
+    const emptyTargets = targets.filter(t => t.positions.length === 0);
+    if (emptyTargets.length > 0) {
+      alert(`「${emptyTargets.map(t => t.title).join('、')}」にマーカーがありません。\n「丸追加」または「ポリゴン追加」で座標を追加してください。`);
+      return;
+    }
+
     if (!puzzleName.trim()) {
       alert('パズル名を入力してください');
       return;
@@ -566,7 +578,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
     // ドラッグ中やターゲット未選択時は何もしない
     if (draggingMarker || !selectedTarget) return;
     
-    // ポリゴンモードの場合
+    // ポリゴン描画中の場合のみ頂点追加
     if (drawMode === 'polygon') {
       const coords = clientToScaleCoords(e.clientX, e.clientY);
       if (!coords) return;
@@ -608,7 +620,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
     setDrawingPolygon(prev => prev.slice(0, -1));
   }, []);
 
-  const canComplete = imageSrc && targets.length > 0 && puzzleName.trim();
+  const canComplete = imageSrc && targets.length > 0 && puzzleName.trim() && targets.every(t => t.positions.length > 0);
 
   // ターゲットの色を取得
   const getTargetColor = (targetId: string) => {
@@ -710,7 +722,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
               </div>
             )}
 
-            <div style={styles.targetList}>
+            <div style={styles.targetList} ref={targetListRef}>
               {targets.map((target, index) => {
                 const isSelected = selectedTarget === target.id;
                 const color = getTargetColor(target.id);
@@ -745,7 +757,30 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
                         ×
                       </button>
                     </div>
-                    {isSelected && (
+                    {/* 丸追加・ポリゴン追加ボタン */}
+                    <div style={styles.addMarkerButtons}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddPosition(target.id);
+                        }}
+                        style={styles.addCircleButton}
+                      >
+                        ⭕ 丸追加
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedTarget(target.id);
+                          setDrawMode('polygon');
+                          setDrawingPolygon([]);
+                        }}
+                        style={styles.addPolygonButton}
+                      >
+                        📐 ポリゴン追加
+                      </button>
+                    </div>
+                    {isSelected && target.positions.length > 0 && (
                       <div style={styles.positionList}>
                         {target.positions.map((pos, posIndex) => (
                           <div key={posIndex} style={styles.positionItem}>
@@ -754,17 +789,15 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
                                 <span style={styles.positionLabel}>
                                   📐 ポリゴン ({pos.points.length}頂点)
                                 </span>
-                                {target.positions.length > 1 && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeletePosition(target.id, posIndex);
-                                    }}
-                                    style={styles.smallDeleteButton}
-                                  >
-                                    ×
-                                  </button>
-                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeletePosition(target.id, posIndex);
+                                  }}
+                                  style={styles.smallDeleteButton}
+                                >
+                                  ×
+                                </button>
                               </>
                             ) : (
                               <>
@@ -789,37 +822,19 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
                                     </button>
                                   ))}
                                 </div>
-                                {target.positions.length > 1 && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeletePosition(target.id, posIndex);
-                                    }}
-                                    style={styles.smallDeleteButton}
-                                  >
-                                    ×
-                                  </button>
-                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeletePosition(target.id, posIndex);
+                                  }}
+                                  style={styles.smallDeleteButton}
+                                >
+                                  ×
+                                </button>
                               </>
                             )}
                           </div>
                         ))}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (drawMode === 'polygon') {
-                              // ポリゴンモードの場合は描画開始を促す
-                              setSelectedTarget(target.id);
-                              setDrawingPolygon([]);
-                              alert('画像上をクリックしてポリゴンの頂点を追加してください');
-                            } else {
-                              handleAddPosition(target.id);
-                            }
-                          }}
-                          style={styles.addPositionButton}
-                        >
-                          {drawMode === 'polygon' ? '+ ポリゴン追加' : '+ 座標追加'}
-                        </button>
                       </div>
                     )}
                   </div>
@@ -830,50 +845,18 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
 
           {/* お題追加ボタン */}
           <button
-            onClick={() => {
-              if (drawMode === 'polygon') {
-                alert('ポリゴンモード中は「お題追加」できません。\n円形モードに切り替えてから追加してください。');
-                return;
-              }
-              handleAddTarget();
-            }}
+            onClick={() => handleAddTarget()}
             style={styles.addTargetBigButton}
           >
             ➕ お題追加
           </button>
 
-          {/* 描画モード選択 */}
-          <div style={styles.drawModeSelector}>
-            <span style={styles.drawModeLabel}>描画モード:</span>
-            <div style={styles.drawModeButtons}>
-              <button
-                style={{
-                  ...styles.drawModeButton,
-                  backgroundColor: drawMode === 'circle' ? '#4a90d9' : '#ddd',
-                  color: drawMode === 'circle' ? 'white' : '#333',
-                }}
-                onClick={() => { setDrawMode('circle'); setDrawingPolygon([]); }}
-              >
-                ⭕ 円形
-              </button>
-              <button
-                style={{
-                  ...styles.drawModeButton,
-                  backgroundColor: drawMode === 'polygon' ? '#4a90d9' : '#ddd',
-                  color: drawMode === 'polygon' ? 'white' : '#333',
-                }}
-                onClick={() => setDrawMode('polygon')}
-              >
-                📐 ポリゴン
-              </button>
-            </div>
-          </div>
-
-          {/* ポリゴン描画中のコントロール */}
+          {/* ポリゴン編集パネル */}
           {drawMode === 'polygon' && (
             <div style={styles.polygonControls}>
+              <p style={styles.polygonTitle}>📐 ポリゴン編集中</p>
               <p style={styles.polygonInfo}>
-                📍 画像をクリックして頂点を追加 ({drawingPolygon.length}点)
+                画像をクリックして頂点を追加 ({drawingPolygon.length}点)
               </p>
               <div style={styles.polygonButtons}>
                 <button 
@@ -887,17 +870,13 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
                   ↩️ 戻す
                 </button>
                 <button 
-                  onClick={handleCancelPolygon}
-                  disabled={drawingPolygon.length === 0}
-                  style={{
-                    ...styles.polygonControlButton,
-                    opacity: drawingPolygon.length === 0 ? 0.5 : 1,
-                  }}
+                  onClick={() => { handleCancelPolygon(); setDrawMode('circle'); }}
+                  style={styles.polygonControlButton}
                 >
-                  ❌ キャンセル
+                  ❌ やめる
                 </button>
                 <button 
-                  onClick={handleFinishPolygon}
+                  onClick={() => { handleFinishPolygon(); setDrawMode('circle'); }}
                   disabled={drawingPolygon.length < 3}
                   style={{
                     ...styles.polygonFinishButton,
@@ -911,10 +890,10 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
           )}
 
           <div style={styles.hintBox}>
-            <p style={styles.hint}>💡 「追加」ボタン → ターゲット追加</p>
+            <p style={styles.hint}>💡 「お題追加」→ ターゲット追加</p>
             <p style={styles.hint}>🖐️ マーカーをドラッグ → 位置調整</p>
-            <p style={styles.hint}>📍 複数座標 → 「座標追加」ボタン</p>
-            <p style={styles.hint}>📐 サイズ: 小(16px) 中(32px) 大(64px)</p>
+            <p style={styles.hint}>⭕ 「丸追加」→ 円形マーカー追加</p>
+            <p style={styles.hint}>📐 「ポリゴン追加」→ 多角形マーカー</p>
           </div>
         </div>
 
@@ -1332,6 +1311,34 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     fontSize: '0.8rem',
   },
+  addMarkerButtons: {
+    display: 'flex',
+    gap: '6px',
+    marginTop: '6px',
+    paddingLeft: '28px',
+  },
+  addCircleButton: {
+    flex: 1,
+    padding: '5px 8px',
+    fontSize: '0.75rem',
+    fontWeight: 'bold',
+    backgroundColor: '#e3f2fd',
+    color: '#1565c0',
+    border: '1px solid #90caf9',
+    borderRadius: '6px',
+    cursor: 'pointer',
+  },
+  addPolygonButton: {
+    flex: 1,
+    padding: '5px 8px',
+    fontSize: '0.75rem',
+    fontWeight: 'bold',
+    backgroundColor: '#fff3e0',
+    color: '#e65100',
+    border: '1px solid #ffcc80',
+    borderRadius: '6px',
+    cursor: 'pointer',
+  },
   addPositionButton: {
     marginTop: '5px',
     padding: '4px 10px',
@@ -1492,6 +1499,12 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: '#fff3e0',
     borderRadius: '8px',
     border: '2px solid #ff9800',
+  },
+  polygonTitle: {
+    margin: '0 0 6px 0',
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    color: '#e65100',
   },
   polygonInfo: {
     margin: '0 0 10px 0',
