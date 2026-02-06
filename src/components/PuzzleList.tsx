@@ -249,22 +249,32 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
     );
   }
 
-  // サーバーパズルとカスタムパズルを分離
-  // カスタムパズルでもサーバーに同名のものがあればサーバーパズルとして扱う
-  // server-edit- プレフィックスのパズルはローカル保存なのでカスタムパズルとして扱う
-  const serverPuzzles = puzzles.filter(p => !p.id.startsWith('custom-') && !p.id.startsWith('server-edit-'));
-  const serverPuzzleNames = new Set(serverPuzzles.map(p => p.name));
-  
-  // カスタムパズルの中から、サーバーに同名のものがあるものは除外
-  // server-edit- プレフィックスのパズルもカスタムパズルとして表示
-  const customPuzzles = puzzles.filter(p => 
-    (p.id.startsWith('custom-') || p.id.startsWith('server-edit-')) && !serverPuzzleNames.has(p.name)
+  // サーバーパズルとカスタムパズルを統合表示
+  // カスタムパズルでもサーバーに同名のものがあれば除外
+  const serverPuzzleNames = new Set(
+    puzzles.filter(p => !p.id.startsWith('custom-') && !p.id.startsWith('server-edit-')).map(p => p.name)
   );
+  
+  // 全パズルを統合（同名のカスタムパズルは除外）
+  const allPuzzles = puzzles.filter(p => {
+    if (p.id.startsWith('custom-') || p.id.startsWith('server-edit-')) {
+      return !serverPuzzleNames.has(p.name);
+    }
+    return true;
+  });
+  
+  // パズルがカスタム（ローカル）かどうか判定
+  const isCustomPuzzle = (id: string) => id.startsWith('custom-') || id.startsWith('server-edit-');
 
   return (
     <div style={styles.container}>
       <header style={styles.header}>
-        <h1 style={styles.title} onClick={handleTitleTap}>🔍 さがしものゲーム</h1>
+        <div style={styles.titleRow}>
+          <h1 style={styles.title} onClick={handleTitleTap}>🔍 さがしものゲーム</h1>
+          <button style={styles.createButton} onClick={onOpenEditor}>
+            ＋ つくる
+          </button>
+        </div>
         <p style={styles.subtitle}>
           {devMode ? '🔧 開発者モード' : 'パズルをえらんでね'}
         </p>
@@ -281,13 +291,14 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
       </header>
 
       <div style={styles.scrollContainer}>
-        {/* サーバーパズル */}
-        {serverPuzzles.length > 0 && (
+        {/* 全パズル統合表示 */}
+        {allPuzzles.length > 0 && (
           <div style={styles.puzzleGrid}>
-          {serverPuzzles.map(puzzle => {
+          {allPuzzles.map(puzzle => {
             const p = progress[puzzle.id];
             const isCompleted = p && p.found === p.total;
             const hasProgress = p && p.found > 0;
+            const isCustom = isCustomPuzzle(puzzle.id);
 
             return (
               <div
@@ -295,6 +306,7 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
                 style={{
                   ...styles.puzzleCard,
                   ...(isCompleted ? styles.completedCard : {}),
+                  ...(isCustom ? styles.customCard : {}),
                 }}
                 onClick={() => onSelectPuzzle(puzzle.id)}
               >
@@ -316,8 +328,45 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
                       🔄
                     </button>
                   )}
-                  {/* 開発者モード：サーバーパズルの編集・削除ボタン */}
-                  {devMode && (
+                  {/* カスタムパズル：編集・削除は常時表示、アップロード・ダウンロードは開発者モードのみ */}
+                  {isCustom && (
+                    <div style={styles.customPuzzleButtons}>
+                      {devMode && (
+                        <>
+                          <button 
+                            style={styles.uploadButton}
+                            onClick={(e) => handleUploadToServer(e, puzzle.id, puzzle.name)}
+                            title="サーバーにアップロード"
+                          >
+                            🚀
+                          </button>
+                          <button 
+                            style={styles.exportButton}
+                            onClick={(e) => handleExport(e, puzzle.id, puzzle.name)}
+                            title="ファイルをダウンロード"
+                          >
+                            📥
+                          </button>
+                        </>
+                      )}
+                      <button 
+                        style={styles.editButton}
+                        onClick={(e) => handleEdit(e, puzzle.id)}
+                        title="編集"
+                      >
+                        ✏️
+                      </button>
+                      <button 
+                        style={styles.deleteButtonSmall}
+                        onClick={(e) => handleDeletePuzzle(e, puzzle.id, puzzle.name)}
+                        title="削除"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  )}
+                  {/* サーバーパズル：編集・削除は開発者モードのみ */}
+                  {!isCustom && devMode && (
                     <div style={styles.devButtons}>
                       <button 
                         style={styles.editButtonSmall}
@@ -340,7 +389,10 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
                   )}
                 </div>
                 <div style={styles.puzzleInfo}>
-                  <h2 style={styles.puzzleName}>{puzzle.name}</h2>
+                  <h2 style={styles.puzzleName}>
+                    {isCustom && <span style={styles.customBadge}>📝</span>}
+                    {puzzle.name}
+                  </h2>
                   {p && (
                     <div style={styles.progressBar}>
                       <div
@@ -364,100 +416,6 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
           })}
         </div>
       )}
-
-      {/* カスタムパズルセクション（開発者モードのみ） */}
-      {devMode && customPuzzles.length > 0 && (
-        <>
-          <h2 style={styles.sectionTitle}>📝 じぶんでつくったパズル</h2>
-          <div style={styles.puzzleGrid}>
-            {customPuzzles.map(puzzle => {
-              const p = progress[puzzle.id];
-              const isCompleted = p && p.found === p.total;
-              const hasProgress = p && p.found > 0;
-
-              return (
-                <div
-                  key={puzzle.id}
-                  style={{
-                    ...styles.puzzleCard,
-                    ...(isCompleted ? styles.completedCard : {}),
-                  }}
-                  onClick={() => onSelectPuzzle(puzzle.id)}
-                >
-                  <div style={styles.thumbnailContainer}>
-                    <img
-                      src={getImageUrl(puzzle.thumbnail)}
-                      alt={puzzle.name}
-                      style={styles.thumbnail}
-                    />
-                    {isCompleted && (
-                      <div style={styles.completedBadge}>✅ クリア！</div>
-                    )}
-                    {/* カスタムパズルの操作ボタン */}
-                    <div style={styles.customPuzzleButtons}>
-                      <button 
-                        style={styles.uploadButton}
-                        onClick={(e) => handleUploadToServer(e, puzzle.id, puzzle.name)}
-                        title="サーバーにアップロード"
-                      >
-                        🚀
-                      </button>
-                      <button 
-                        style={styles.exportButton}
-                        onClick={(e) => handleExport(e, puzzle.id, puzzle.name)}
-                        title="ファイルをダウンロード"
-                      >
-                        📥
-                      </button>
-                      <button 
-                        style={styles.editButton}
-                        onClick={(e) => handleEdit(e, puzzle.id)}
-                        title="編集"
-                      >
-                        ✏️
-                      </button>
-                      <button 
-                        style={styles.deleteButtonSmall}
-                        onClick={(e) => handleDeletePuzzle(e, puzzle.id, puzzle.name)}
-                        title="削除"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
-                  <div style={styles.puzzleInfo}>
-                    <h2 style={styles.puzzleName}>{puzzle.name}</h2>
-                    {p && (
-                      <div style={styles.progressBar}>
-                        <div
-                          style={{
-                            ...styles.progressFill,
-                            width: `${(p.found / p.total) * 100}%`,
-                            backgroundColor: isCompleted ? '#4caf50' : '#4a90d9',
-                          }}
-                        />
-                        <span style={styles.progressText}>
-                          {p.found} / {p.total}
-                        </span>
-                      </div>
-                    )}
-                    {hasProgress && !isCompleted && (
-                      <span style={styles.continueLabel}>つづきから</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
-
-      {/* エディタボタン（開発者モードのみ） */}
-      {devMode && (
-        <button style={styles.editorButton} onClick={onOpenEditor}>
-          ✏️ パズルをつくる
-        </button>
-      )}
       </div>
     </div>
   );
@@ -477,6 +435,13 @@ const styles: Record<string, React.CSSProperties> = {
     position: 'relative',
     flexShrink: 0,
   },
+  titleRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '12px',
+    marginBottom: '10px',
+  },
   scrollContainer: {
     flex: 1,
     overflowY: 'auto',
@@ -486,7 +451,20 @@ const styles: Record<string, React.CSSProperties> = {
   title: {
     fontSize: '2rem',
     color: '#333',
-    margin: '0 0 10px 0',
+    margin: 0,
+  },
+  createButton: {
+    padding: '8px 16px',
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    backgroundColor: '#ff9800',
+    color: 'white',
+    border: 'none',
+    borderRadius: '20px',
+    cursor: 'pointer',
+    boxShadow: '0 2px 8px rgba(255, 152, 0, 0.4)',
+    whiteSpace: 'nowrap' as const,
+    flexShrink: 0,
   },
   subtitle: {
     fontSize: '1.1rem',
@@ -555,6 +533,12 @@ const styles: Record<string, React.CSSProperties> = {
   },
   completedCard: {
     boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
+  },
+  customCard: {
+    border: '2px dashed #ff9800',
+  },
+  customBadge: {
+    marginRight: '4px',
   },
   thumbnailContainer: {
     position: 'relative',
@@ -706,16 +690,5 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#4a90d9',
     fontWeight: 'bold',
   },
-  editorButton: {
-    display: 'block',
-    margin: '40px auto 20px',
-    padding: '15px 30px',
-    fontSize: '1.1rem',
-    backgroundColor: '#ff9800',
-    color: 'white',
-    border: 'none',
-    borderRadius: '30px',
-    cursor: 'pointer',
-    boxShadow: '0 4px 12px rgba(255, 152, 0, 0.4)',
-  },
+
 };
