@@ -255,16 +255,20 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
     puzzles.filter(p => !p.id.startsWith('custom-') && !p.id.startsWith('server-edit-')).map(p => p.name)
   );
   
-  // 全パズルを統合（同名のカスタムパズルは除外）
+  // パズルがカスタム（ローカル）かどうか判定
+  const isCustomPuzzle = (id: string) => id.startsWith('custom-') || id.startsWith('server-edit-');
+
+  // 全パズルを統合（同名のカスタムパズルは除外）→ ローカルパズルを先頭に
   const allPuzzles = puzzles.filter(p => {
-    if (p.id.startsWith('custom-') || p.id.startsWith('server-edit-')) {
+    if (isCustomPuzzle(p.id)) {
       return !serverPuzzleNames.has(p.name);
     }
     return true;
+  }).sort((a, b) => {
+    const aCustom = isCustomPuzzle(a.id) ? 0 : 1;
+    const bCustom = isCustomPuzzle(b.id) ? 0 : 1;
+    return aCustom - bCustom;
   });
-  
-  // パズルがカスタム（ローカル）かどうか判定
-  const isCustomPuzzle = (id: string) => id.startsWith('custom-') || id.startsWith('server-edit-');
 
   return (
     <div style={styles.container}>
