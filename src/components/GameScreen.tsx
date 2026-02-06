@@ -367,7 +367,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
             </button>
             {scale > 1 && (
               <button onClick={resetZoom} style={styles.topBarButton}>
-                🔍
+                ↺
               </button>
             )}
           </div>
@@ -386,7 +386,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
                 </button>
                 {scale > 1 && (
                   <button onClick={resetZoom} style={styles.toggleButton}>
-                    🔍
+                    ↺
                   </button>
                 )}
               </div>
@@ -518,12 +518,13 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'flex-end',
   },
   backButton: {
-    padding: '6px 10px',
-    fontSize: '1.2rem',
+    padding: '6px 12px',
+    fontSize: '1.6rem',
     backgroundColor: 'transparent',
     color: 'white',
     border: 'none',
     cursor: 'pointer',
+    lineHeight: 1,
   },
   puzzleTitle: {
     margin: 0,

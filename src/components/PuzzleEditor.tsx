@@ -798,11 +798,18 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleAddPosition(target.id);
+                            if (drawMode === 'polygon') {
+                              // ポリゴンモードの場合は描画開始を促す
+                              setSelectedTarget(target.id);
+                              setDrawingPolygon([]);
+                              alert('画像上をクリックしてポリゴンの頂点を追加してください');
+                            } else {
+                              handleAddPosition(target.id);
+                            }
                           }}
                           style={styles.addPositionButton}
                         >
-                          + 座標追加
+                          {drawMode === 'polygon' ? '+ ポリゴン追加' : '+ 座標追加'}
                         </button>
                       </div>
                     )}
@@ -810,13 +817,6 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
                 );
               })}
             </div>
-          </div>
-
-          <div style={styles.hintBox}>
-            <p style={styles.hint}>💡 「追加」ボタン → ターゲット追加</p>
-            <p style={styles.hint}>🖐️ マーカーをドラッグ → 位置調整</p>
-            <p style={styles.hint}>📍 複数座標 → 「座標追加」ボタン</p>
-            <p style={styles.hint}>📐 サイズ: 小(16px) 中(32px) 大(64px)</p>
           </div>
 
           {/* デフォルトマーカーサイズ選択 */}
@@ -904,6 +904,13 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
               </div>
             </div>
           )}
+
+          <div style={styles.hintBox}>
+            <p style={styles.hint}>💡 「追加」ボタン → ターゲット追加</p>
+            <p style={styles.hint}>🖐️ マーカーをドラッグ → 位置調整</p>
+            <p style={styles.hint}>📍 複数座標 → 「座標追加」ボタン</p>
+            <p style={styles.hint}>📐 サイズ: 小(16px) 中(32px) 大(64px)</p>
+          </div>
         </div>
 
         {/* 右: 画像プレビュー */}
