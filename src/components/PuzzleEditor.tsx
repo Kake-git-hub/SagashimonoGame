@@ -54,7 +54,6 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
   const [draggingMarker, setDraggingMarker] = useState<MarkerInfo | null>(null);
   const [saving, setSaving] = useState(false);
   const [imageSize, setImageSize] = useState<string>('');
-  const [defaultMarkerSize, setDefaultMarkerSize] = useState<MarkerSize>('medium'); // 新規追加時のデフォルトサイズ
   
   // ポリゴン描画用の状態
   const [drawMode, setDrawMode] = useState<DrawMode>('circle');
@@ -64,6 +63,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageNaturalSize, setImageNaturalSize] = useState({ width: 0, height: 0 });
   const [containerRect, setContainerRect] = useState<DOMRect | null>(null);
+  const justDraggedRef = useRef(false); // ドラッグ直後フラグ（クリック誤判定防止）
 
   // 編集モードの初期化
   useEffect(() => {
@@ -190,11 +190,11 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
     const newTarget: EditorTarget = {
       id: Date.now().toString(),
       title: `アイテム${targets.length + 1}`,
-      positions: [{ type: 'circle', x: 500, y: 500, size: defaultMarkerSize }], // 中央に配置
+      positions: [{ type: 'circle', x: 500, y: 500, size: 'large' }], // 中央に配置
     };
     setTargets(prev => [...prev, newTarget]);
     setSelectedTarget(newTarget.id);
-  }, [targets.length, defaultMarkerSize]);
+  }, [targets.length]);
 
   // ターゲットに円形座標を追加
   const handleAddPosition = useCallback((targetId: string) => {
@@ -215,11 +215,11 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
         type: 'circle',
         x: Math.min(CONSTANTS.SCALE, baseX + 50),
         y: Math.min(CONSTANTS.SCALE, baseY + 50),
-        size: defaultMarkerSize,
+        size: 'large',
       };
       return { ...t, positions: [...t.positions, newPos] };
     }));
-  }, [defaultMarkerSize]);
+  }, []);
 
   // 座標のサイズを変更（円形のみ）
   const handleChangePositionSize = useCallback((targetId: string, posIndex: number, size: MarkerSize) => {
@@ -279,6 +279,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
     };
 
     const handleMouseUp = () => {
+      justDraggedRef.current = true;
       setDraggingMarker(null);
     };
 
@@ -325,6 +326,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
     };
 
     const handleTouchEnd = () => {
+      justDraggedRef.current = true;
       setDraggingMarker(null);
     };
 
@@ -365,7 +367,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
           positions = item.positions.map((p: unknown) => {
             // 配列形式 [x, y] の場合
             if (Array.isArray(p)) {
-              return { type: 'circle', x: p[0], y: p[1], size: defaultMarkerSize } as CircleEditorPosition;
+              return { type: 'circle', x: p[0], y: p[1], size: 'large' } as CircleEditorPosition;
             }
             // ポリゴン形式 { type: 'polygon', points: [...] } の場合
             const pos = p as { type?: string; x?: number; y?: number; size?: MarkerSize; points?: { x: number; y: number }[] };
@@ -377,13 +379,13 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
               type: 'circle',
               x: pos.x ?? 500,
               y: pos.y ?? 500,
-              size: pos.size ?? defaultMarkerSize,
+              size: pos.size ?? 'large',
             } as CircleEditorPosition;
           });
         } else if (Array.isArray(item.position)) {
-          positions = [{ type: 'circle', x: item.position[0], y: item.position[1], size: defaultMarkerSize }];
+          positions = [{ type: 'circle', x: item.position[0], y: item.position[1], size: 'large' }];
         } else {
-          positions = [{ type: 'circle', x: 500, y: 500, size: defaultMarkerSize }];
+          positions = [{ type: 'circle', x: 500, y: 500, size: 'large' }];
         }
 
         return {
@@ -399,7 +401,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
     } catch (err) {
       alert('JSONの解析に失敗しました: ' + (err instanceof Error ? err.message : '不明なエラー'));
     }
-  }, [jsonInput, defaultMarkerSize]);
+  }, [jsonInput]);
 
   // JSONエクスポート
   const exportJson = useCallback(() => {
@@ -555,6 +557,11 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
 
   // 画像クリック時の処理（ポリゴン描画用）
   const handleImageClick = useCallback((e: React.MouseEvent) => {
+    // ドラッグ直後は無視（ドラッグ終了後のclickイベント誤判定防止）
+    if (justDraggedRef.current) {
+      justDraggedRef.current = false;
+      return;
+    }
     // ドラッグ中やターゲット未選択時は何もしない
     if (draggingMarker || !selectedTarget) return;
     
@@ -819,23 +826,13 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
             </div>
           </div>
 
-          {/* デフォルトマーカーサイズ選択 */}
-          <div style={styles.markerSizeSelector}>
-            <span style={styles.markerSizeLabel}>新規追加時のサイズ:</span>
-            {(['small', 'medium', 'large'] as MarkerSize[]).map(size => (
-              <button
-                key={size}
-                style={{
-                  ...styles.markerSizeButton,
-                  backgroundColor: defaultMarkerSize === size ? '#4a90d9' : '#ddd',
-                  color: defaultMarkerSize === size ? 'white' : '#333',
-                }}
-                onClick={() => setDefaultMarkerSize(size)}
-              >
-                {size === 'small' ? '小' : size === 'medium' ? '中' : '大'}
-              </button>
-            ))}
-          </div>
+          {/* お題追加ボタン */}
+          <button
+            onClick={handleAddTarget}
+            style={styles.addTargetBigButton}
+          >
+            ➕ お題追加
+          </button>
 
           {/* 描画モード選択 */}
           <div style={styles.drawModeSelector}>
@@ -1442,6 +1439,19 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
     zIndex: 60,
     touchAction: 'none',
+  },
+  addTargetBigButton: {
+    width: '100%',
+    padding: '14px',
+    fontSize: '1.1rem',
+    fontWeight: 'bold',
+    backgroundColor: '#ff9800',
+    color: 'white',
+    border: 'none',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    boxShadow: '0 2px 8px rgba(255, 152, 0, 0.4)',
+    marginBottom: '8px',
   },
   drawModeSelector: {
     padding: '10px',
