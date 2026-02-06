@@ -20,6 +20,11 @@
           "x": 981,
           "y": 624,
           "size": "medium"
+        },
+        {
+          "x": 980,
+          "y": 840,
+          "size": "medium"
         }
       ]
     },
@@ -29,7 +34,7 @@
         {
           "x": 340,
           "y": 280,
-          "size": "medium"
+          "size": "large"
         }
       ]
     },
@@ -37,29 +42,49 @@
       "title": "くっぱ",
       "positions": [
         {
-          "x": 680,
-          "y": 100,
-          "size": "medium"
-        },
-        {
           "x": 660,
           "y": 480,
-          "size": "medium"
+          "size": "large"
         },
         {
           "x": 420,
           "y": 650,
-          "size": "medium"
+          "size": "large"
         },
         {
           "x": 420,
           "y": 880,
-          "size": "medium"
+          "size": "large"
         },
         {
           "x": 496,
           "y": 522,
-          "size": "medium"
+          "size": "large"
+        },
+        {
+          "type": "polygon",
+          "points": [
+            {
+              "x": 594,
+              "y": 57
+            },
+            {
+              "x": 626,
+              "y": 151
+            },
+            {
+              "x": 747,
+              "y": 169
+            },
+            {
+              "x": 773,
+              "y": 93
+            },
+            {
+              "x": 702,
+              "y": 1
+            }
+          ]
         }
       ]
     },
@@ -125,6 +150,11 @@
           "x": 710,
           "y": 760,
           "size": "medium"
+        },
+        {
+          "x": 820,
+          "y": 481,
+          "size": "medium"
         }
       ]
     },
@@ -147,9 +177,9 @@
       "title": "ろぜった",
       "positions": [
         {
-          "x": 134,
-          "y": 431,
-          "size": "medium"
+          "x": 137,
+          "y": 436,
+          "size": "large"
         }
       ]
     },
@@ -157,9 +187,9 @@
       "title": "でいじー",
       "positions": [
         {
-          "x": 819,
-          "y": 280,
-          "size": "medium"
+          "x": 814,
+          "y": 279,
+          "size": "large"
         }
       ]
     },
@@ -169,6 +199,16 @@
         {
           "x": 270,
           "y": 725,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "ワルイージ",
+      "positions": [
+        {
+          "x": 564,
+          "y": 436,
           "size": "medium"
         }
       ]
