@@ -394,7 +394,6 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
                 </div>
                 <div style={styles.puzzleInfo}>
                   <h2 style={styles.puzzleName}>
-                    {isCustom && <span style={styles.customBadge}>📝</span>}
                     {puzzle.name}
                   </h2>
                   {p && (
