@@ -530,7 +530,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
           createdAt: editPuzzle?.createdAt || Date.now(),
         };
 
-        saveCustomPuzzle(customPuzzle);
+        await saveCustomPuzzle(customPuzzle);
         alert(editPuzzle ? 'パズルを更新しました！' : 'パズルを保存しました！');
         
         if (onPuzzleCreated) {

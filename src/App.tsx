@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Puzzle, PuzzleSummary, ScreenMode, CustomPuzzle } from './types';
 import { fetchPuzzle, fetchPuzzleList, fetchServerPuzzleForEdit } from './services/puzzleService';
-import { getCustomPuzzle } from './services/storageService';
+import { getCustomPuzzle, migrateFromLocalStorage } from './services/storageService';
 import { PuzzleList, GameScreen, PuzzleEditor } from './components';
 import './App.css';
 
@@ -30,6 +30,13 @@ function App() {
         localStorage.removeItem(DEV_MODE_KEY);
       }
       return newValue;
+    });
+  }, []);
+
+  // 初回起動時に localStorage → IndexedDB 移行
+  useEffect(() => {
+    migrateFromLocalStorage().then(() => {
+      setListRefreshKey(k => k + 1);
     });
   }, []);
 
@@ -73,8 +80,8 @@ function App() {
   }, []);
 
   // 編集モードでエディタを開く
-  const handleEditPuzzle = useCallback((puzzleId: string) => {
-    const puzzle = getCustomPuzzle(puzzleId);
+  const handleEditPuzzle = useCallback(async (puzzleId: string) => {
+    const puzzle = await getCustomPuzzle(puzzleId);
     if (puzzle) {
       setEditPuzzle(puzzle);
       setIsServerPuzzleEdit(false);

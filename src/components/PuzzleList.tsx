@@ -71,10 +71,10 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
   }, [loadPuzzles, refreshKey]);
 
   // カスタムパズルの削除
-  const handleDeletePuzzle = useCallback((e: React.MouseEvent, puzzleId: string, puzzleName: string) => {
+  const handleDeletePuzzle = useCallback(async (e: React.MouseEvent, puzzleId: string, puzzleName: string) => {
     e.stopPropagation();
     if (confirm(`「${puzzleName}」を削除しますか？`)) {
-      deleteCustomPuzzle(puzzleId);
+      await deleteCustomPuzzle(puzzleId);
       loadPuzzles();
     }
   }, [loadPuzzles]);
@@ -180,7 +180,7 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
     }
     
     // カスタムパズルを取得
-    const puzzle = getCustomPuzzle(puzzleId);
+    const puzzle = await getCustomPuzzle(puzzleId);
     if (!puzzle) {
       alert('パズルが見つかりません');
       return;
@@ -211,7 +211,7 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
         alert(result.message);
         // カスタムパズルを削除（サーバーに移行したため）
         if (confirm('サーバーにアップロードしたので、ローカルのカスタムパズルを削除しますか？')) {
-          deleteCustomPuzzle(puzzleId);
+          await deleteCustomPuzzle(puzzleId);
           loadPuzzles();
         }
       } else {

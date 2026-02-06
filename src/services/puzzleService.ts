@@ -12,7 +12,7 @@ export async function fetchPuzzleList(): Promise<PuzzleSummary[]> {
   const serverPuzzles: PuzzleSummary[] = await response.json();
   
   // カスタムパズルを追加
-  const customSummaries = getCustomPuzzleSummaries();
+  const customSummaries = await getCustomPuzzleSummaries();
   
   return [...serverPuzzles, ...customSummaries];
 }
@@ -21,7 +21,7 @@ export async function fetchPuzzleList(): Promise<PuzzleSummary[]> {
 export async function fetchPuzzle(id: string): Promise<Puzzle> {
   // カスタムパズルの場合
   if (id.startsWith('custom-')) {
-    const customPuzzle = getCustomPuzzle(id);
+    const customPuzzle = await getCustomPuzzle(id);
     if (customPuzzle) {
       // CustomPuzzleをPuzzleに変換（imageDataをimageSrcとして使用）
       return {
