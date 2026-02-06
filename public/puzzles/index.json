@@ -12,12 +12,6 @@
     "targetCount": 14
   },
   {
-    "id": "ガレージ",
-    "name": "ガレージ",
-    "thumbnail": "puzzles/images/ガレージ.webp",
-    "targetCount": 17
-  },
-  {
     "id": "ろぼっとのくに",
     "name": "ろぼっとのくに",
     "thumbnail": "puzzles/images/ろぼっとのくに.webp",
@@ -70,5 +64,11 @@
     "name": "さんりお",
     "thumbnail": "puzzles/images/さんりお.webp",
     "targetCount": 28
+  },
+  {
+    "id": "ガレージ",
+    "name": "ガレージ",
+    "thumbnail": "puzzles/images/ガレージ.webp",
+    "targetCount": 18
   }
 ]
