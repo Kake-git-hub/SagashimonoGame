@@ -148,11 +148,16 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
       const originalDataUrl = reader.result as string;
       
       try {
-        // 圧縮
+        // 圧縮（ターゲットサイズ以下まで段階的に圧縮）
         const compressedDataUrl = await compressImage(originalDataUrl);
         const size = estimateBase64Size(compressedDataUrl);
         setImageSrc(compressedDataUrl);
         setImageSize(formatSize(size));
+        
+        // 圧縮後のサイズが大きい場合は警告
+        if (size > 1024 * 1024) {
+          console.warn(`圧縮後も画像が大きい: ${formatSize(size)}`);
+        }
       } catch (err) {
         console.error('Image compression failed:', err);
         // 圧縮失敗時はそのまま使用
@@ -759,29 +764,6 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
                         ×
                       </button>
                     </div>
-                    {/* 丸追加・ポリゴン追加ボタン */}
-                    <div style={styles.addMarkerButtons}>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAddPosition(target.id);
-                        }}
-                        style={styles.addCircleButton}
-                      >
-                        ⭕ 丸追加
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedTarget(target.id);
-                          setDrawMode('polygon');
-                          setDrawingPolygon([]);
-                        }}
-                        style={styles.addPolygonButton}
-                      >
-                        📐 ポリゴン追加
-                      </button>
-                    </div>
                     {isSelected && target.positions.length > 0 && (
                       <div style={styles.positionList}>
                         {target.positions.map((pos, posIndex) => (
@@ -839,6 +821,29 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
                         ))}
                       </div>
                     )}
+                    {/* 丸追加・ポリゴン追加ボタン */}
+                    <div style={styles.addMarkerButtons}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddPosition(target.id);
+                        }}
+                        style={styles.addCircleButton}
+                      >
+                        ⭕ 丸追加
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedTarget(target.id);
+                          setDrawMode('polygon');
+                          setDrawingPolygon([]);
+                        }}
+                        style={styles.addPolygonButton}
+                      >
+                        📐 ポリゴン追加
+                      </button>
+                    </div>
                   </div>
                 );
               })}
