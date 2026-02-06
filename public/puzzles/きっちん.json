@@ -1,0 +1,122 @@
+{
+  "id": "きっちん",
+  "name": "きっちん",
+  "imageSrc": "puzzles/images/きっちん.webp",
+  "targets": [
+    {
+      "title": "ねずみ",
+      "positions": [
+        {
+          "x": 180,
+          "y": 380,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "かえるのおうさま",
+      "positions": [
+        {
+          "x": 220,
+          "y": 580,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "こびと",
+      "positions": [
+        {
+          "x": 330,
+          "y": 620,
+          "size": "medium"
+        },
+        {
+          "x": 940,
+          "y": 460,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "あひる",
+      "positions": [
+        {
+          "x": 430,
+          "y": 280,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "きゃんでぃすてぃっく",
+      "positions": [
+        {
+          "x": 410,
+          "y": 420,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "ほしのくっきー",
+      "positions": [
+        {
+          "x": 540,
+          "y": 840,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "かぎ",
+      "positions": [
+        {
+          "x": 400,
+          "y": 800,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "がらすのくつ",
+      "positions": [
+        {
+          "x": 567,
+          "y": 461,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "たからばこ",
+      "positions": [
+        {
+          "x": 853,
+          "y": 586,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "ねこ",
+      "positions": [
+        {
+          "x": 70,
+          "y": 490,
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "ぎゅうにゅう",
+      "positions": [
+        {
+          "x": 685,
+          "y": 782,
+          "size": "medium"
+        }
+      ]
+    }
+  ]
+}
