@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { PuzzleSummary } from '../types';
 import { fetchPuzzleList, getImageUrl } from '../services/puzzleService';
 import { getAllProgress, deleteCustomPuzzle, resetProgress, exportCustomPuzzleForServer, getCustomPuzzle } from '../services/storageService';
@@ -19,6 +19,27 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<Record<string, { found: number; total: number }>>({});
+  const [showDevToggle, setShowDevToggle] = useState(devMode); // 開発者モードが有効なら最初から表示
+  const titleTapCountRef = useRef(0);
+  const titleTapTimerRef = useRef<number | null>(null);
+
+  // タイトルタップ処理
+  const handleTitleTap = useCallback(() => {
+    titleTapCountRef.current += 1;
+    
+    if (titleTapTimerRef.current) {
+      clearTimeout(titleTapTimerRef.current);
+    }
+    
+    if (titleTapCountRef.current >= 10) {
+      setShowDevToggle(true);
+      titleTapCountRef.current = 0;
+    } else {
+      titleTapTimerRef.current = window.setTimeout(() => {
+        titleTapCountRef.current = 0;
+      }, 2000);
+    }
+  }, []);
 
   const loadPuzzles = useCallback(async () => {
     try {
@@ -243,18 +264,20 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
   return (
     <div style={styles.container}>
       <header style={styles.header}>
-        <h1 style={styles.title}>🔍 さがしものゲーム</h1>
+        <h1 style={styles.title} onClick={handleTitleTap}>🔍 さがしものゲーム</h1>
         <p style={styles.subtitle}>
           {devMode ? '🔧 開発者モード' : 'パズルをえらんでね'}
         </p>
-        {/* 開発者モード切り替え（タイトル5回タップで切り替え） */}
-        <button
-          style={styles.devModeToggle}
-          onClick={onToggleDevMode}
-          title={devMode ? '開発者モードを終了' : '開発者モードに切り替え'}
-        >
-          {devMode ? '🔓' : '🔒'}
-        </button>
+        {/* 開発者モード切り替え（タイトル10回タップで表示） */}
+        {showDevToggle && (
+          <button
+            style={styles.devModeToggle}
+            onClick={onToggleDevMode}
+            title={devMode ? '開発者モードを終了' : '開発者モードに切り替え'}
+          >
+            {devMode ? '🔓' : '🔒'}
+          </button>
+        )}
       </header>
 
       <div style={styles.scrollContainer}>
