@@ -1,0 +1,206 @@
+{
+  "id": "さんりお",
+  "name": "さんりお",
+  "imageSrc": "puzzles/images/さんりお.webp",
+  "targets": [
+    {
+      "title": "はろーきてぃ",
+      "positions": [
+        {
+          "x": 120,
+          "y": 150,
+          "size": "large"
+        },
+        {
+          "x": 490,
+          "y": 480,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "まいめろでぃ",
+      "positions": [
+        {
+          "x": 850,
+          "y": 280,
+          "size": "large"
+        },
+        {
+          "x": 380,
+          "y": 450,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "くろみ",
+      "positions": [
+        {
+          "x": 640,
+          "y": 380,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "きき＆らら（りとるついんすたーず）",
+      "positions": [
+        {
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "しなもろーる",
+      "positions": [
+        {
+          "x": 820,
+          "y": 400,
+          "size": "large"
+        },
+        {
+          "x": 560,
+          "y": 720,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "ぽむぽむぷりん",
+      "positions": [
+        {
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "ぐでたま",
+      "positions": [
+        {
+          "x": 230,
+          "y": 40,
+          "size": "large"
+        },
+        {
+          "x": 320,
+          "y": 60,
+          "size": "large"
+        },
+        {
+          "x": 450,
+          "y": 40,
+          "size": "large"
+        },
+        {
+          "x": 350,
+          "y": 630,
+          "size": "large"
+        },
+        {
+          "x": 440,
+          "y": 630,
+          "size": "large"
+        },
+        {
+          "x": 630,
+          "y": 660,
+          "size": "large"
+        },
+        {
+          "x": 50,
+          "y": 930,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "けろけろけろっぴ",
+      "positions": [
+        {
+          "x": 650,
+          "y": 280,
+          "size": "large"
+        },
+        {
+          "x": 50,
+          "y": 550,
+          "size": "large"
+        },
+        {
+          "x": 430,
+          "y": 910,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "ばっどばつまる",
+      "positions": [
+        {
+          "x": 52,
+          "y": 429,
+          "size": "large"
+        },
+        {
+          "size": "medium"
+        }
+      ]
+    },
+    {
+      "title": "ぽちゃっこ",
+      "positions": [
+        {
+          "x": 740,
+          "y": 260,
+          "size": "large"
+        },
+        {
+          "x": 430,
+          "y": 800,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "たきしーどさむ",
+      "positions": [
+        {
+          "x": 180,
+          "y": 390,
+          "size": "large"
+        },
+        {
+          "x": 670,
+          "y": 800,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "はんぎょどん",
+      "positions": [
+        {
+          "x": 300,
+          "y": 840,
+          "size": "large"
+        }
+      ]
+    },
+    {
+      "title": "あひるのぺっくる",
+      "positions": [
+        {
+          "x": 940,
+          "y": 470,
+          "size": "large"
+        },
+        {
+          "x": 790,
+          "y": 810,
+          "size": "large"
+        }
+      ]
+    }
+  ]
+}
