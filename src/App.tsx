@@ -159,6 +159,7 @@ function App() {
           onPuzzleCreated={handlePuzzleCreated} 
           editPuzzle={editPuzzle}
           isServerPuzzle={isServerPuzzleEdit}
+          devMode={devMode}
         />
       );
 

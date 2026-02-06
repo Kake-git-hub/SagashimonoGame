@@ -9,6 +9,7 @@ interface Props {
   onPuzzleCreated?: (puzzleId: string) => void;
   editPuzzle?: CustomPuzzle | null; // 編集モード用
   isServerPuzzle?: boolean; // サーバーパズル編集かどうか
+  devMode?: boolean; // 開発者モード
 }
 
 // 円形の座標
@@ -42,7 +43,7 @@ interface MarkerInfo {
   pointIndex?: number; // ポリゴンの頂点インデックス
 }
 
-export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzzle = false }: Props) {
+export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzzle = false, devMode = false }: Props) {
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
   const [puzzleName, setPuzzleName] = useState('');
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -628,9 +629,11 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
           {isServerPuzzle ? '🌐 サーバーパズル編集' : isEditMode ? '📝 パズル編集' : '✏️ パズル作成'}
         </h1>
         <div style={styles.headerButtons}>
-          <button onClick={exportJson} style={styles.exportButton} disabled={targets.length === 0}>
-            📥 JSON
-          </button>
+          {devMode && (
+            <button onClick={exportJson} style={styles.exportButton} disabled={targets.length === 0}>
+              📥 JSON
+            </button>
+          )}
           <button 
             onClick={handleComplete} 
             style={{
@@ -681,17 +684,16 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
           <div style={styles.section}>
             <div style={styles.sectionHeader}>
               <label style={styles.label}>ターゲット ({targets.length})</label>
-              <div style={styles.buttonGroup}>
-                <button onClick={handleAddTarget} style={styles.addButton}>
-                  ➕ 追加
-                </button>
-                <button
-                  onClick={() => setShowJsonImport(!showJsonImport)}
-                  style={styles.smallButton}
-                >
-                  📋 JSON
-                </button>
-              </div>
+              {devMode && (
+                <div style={styles.buttonGroup}>
+                  <button
+                    onClick={() => setShowJsonImport(!showJsonImport)}
+                    style={styles.smallButton}
+                  >
+                    📋 JSON
+                  </button>
+                </div>
+              )}
             </div>
 
             {showJsonImport && (
@@ -828,7 +830,13 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
 
           {/* お題追加ボタン */}
           <button
-            onClick={handleAddTarget}
+            onClick={() => {
+              if (drawMode === 'polygon') {
+                alert('ポリゴンモード中は「お題追加」できません。\n円形モードに切り替えてから追加してください。');
+                return;
+              }
+              handleAddTarget();
+            }}
             style={styles.addTargetBigButton}
           >
             ➕ お題追加
@@ -1442,8 +1450,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   addTargetBigButton: {
     width: '100%',
-    padding: '14px',
-    fontSize: '1.1rem',
+    padding: '10px',
+    fontSize: '1rem',
     fontWeight: 'bold',
     backgroundColor: '#ff9800',
     color: 'white',
