@@ -64,5 +64,11 @@
     "name": "まりおわーるど",
     "thumbnail": "puzzles/images/まりおわーるど.webp",
     "targetCount": 26
+  },
+  {
+    "id": "さんりお",
+    "name": "さんりお",
+    "thumbnail": "puzzles/images/さんりお.webp",
+    "targetCount": 28
   }
 ]
