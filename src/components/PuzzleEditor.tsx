@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { Target, CONSTANTS, CustomPuzzle, MarkerSize, Position, getMarkerPixelSize, isLegacyPosition, isPolygonPosition, CirclePosition } from '../types';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { Target, CONSTANTS, CustomPuzzle, MarkerSize, Position, getMarkerPixelSize, isLegacyPosition, isPolygonPosition, CirclePosition, PolygonPosition } from '../types';
 import { saveCustomPuzzle } from '../services/storageService';
 import { compressImage, formatSize, estimateBase64Size } from '../services/imageService';
 import { uploadPuzzleToServer, validateGitHubToken } from '../services/githubService';
@@ -11,11 +11,24 @@ interface Props {
   isServerPuzzle?: boolean; // サーバーパズル編集かどうか
 }
 
-interface EditorPosition {
+// 円形の座標
+interface CircleEditorPosition {
+  type: 'circle';
   x: number;
   y: number;
   size: MarkerSize;
 }
+
+// ポリゴンの座標
+interface PolygonEditorPosition {
+  type: 'polygon';
+  points: { x: number; y: number }[];
+}
+
+type EditorPosition = CircleEditorPosition | PolygonEditorPosition;
+
+// 描画モード
+type DrawMode = 'circle' | 'polygon';
 
 interface EditorTarget {
   id: string;
@@ -26,6 +39,7 @@ interface EditorTarget {
 interface MarkerInfo {
   targetId: string;
   positionIndex: number;
+  pointIndex?: number; // ポリゴンの頂点インデックス
 }
 
 export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzzle = false }: Props) {
@@ -41,6 +55,10 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
   const [saving, setSaving] = useState(false);
   const [imageSize, setImageSize] = useState<string>('');
   const [defaultMarkerSize, setDefaultMarkerSize] = useState<MarkerSize>('medium'); // 新規追加時のデフォルトサイズ
+  
+  // ポリゴン描画用の状態
+  const [drawMode, setDrawMode] = useState<DrawMode>('circle');
+  const [drawingPolygon, setDrawingPolygon] = useState<{ x: number; y: number }[]>([]); // 描画中のポリゴン頂点
 
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -61,15 +79,15 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
           // 旧形式（配列）と新形式（オブジェクト）両方に対応
           if (isLegacyPosition(p as Position | [number, number])) {
             const [x, y] = p as unknown as [number, number];
-            return { x, y, size: 'medium' as MarkerSize };
+            return { type: 'circle', x, y, size: 'medium' as MarkerSize } as CircleEditorPosition;
           }
           const pos = p as unknown as Position;
-          // ポリゴンの場合はスキップ（エディタでは円形のみサポート）
+          // ポリゴンの場合
           if (isPolygonPosition(pos)) {
-            return { x: 0, y: 0, size: 'medium' as MarkerSize };
+            return { type: 'polygon', points: pos.points } as PolygonEditorPosition;
           }
           const circlePos = pos as CirclePosition;
-          return { x: circlePos.x, y: circlePos.y, size: circlePos.size };
+          return { type: 'circle', x: circlePos.x, y: circlePos.y, size: circlePos.size } as CircleEditorPosition;
         }),
       })));
     }
@@ -172,33 +190,46 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
     const newTarget: EditorTarget = {
       id: Date.now().toString(),
       title: `アイテム${targets.length + 1}`,
-      positions: [{ x: 500, y: 500, size: defaultMarkerSize }], // 中央に配置
+      positions: [{ type: 'circle', x: 500, y: 500, size: defaultMarkerSize }], // 中央に配置
     };
     setTargets(prev => [...prev, newTarget]);
     setSelectedTarget(newTarget.id);
   }, [targets.length, defaultMarkerSize]);
 
-  // ターゲットに座標を追加
+  // ターゲットに円形座標を追加
   const handleAddPosition = useCallback((targetId: string) => {
     setTargets(prev => prev.map(t => {
       if (t.id !== targetId) return t;
       // 最後の座標から少しずらした位置に追加
       const lastPos = t.positions[t.positions.length - 1];
-      const newPos: EditorPosition = {
-        x: Math.min(CONSTANTS.SCALE, lastPos.x + 50),
-        y: Math.min(CONSTANTS.SCALE, lastPos.y + 50),
+      let baseX = 500, baseY = 500;
+      if (lastPos.type === 'circle') {
+        baseX = lastPos.x;
+        baseY = lastPos.y;
+      } else if (lastPos.type === 'polygon' && lastPos.points.length > 0) {
+        // ポリゴンの最後の点を基準
+        baseX = lastPos.points[0].x;
+        baseY = lastPos.points[0].y;
+      }
+      const newPos: CircleEditorPosition = {
+        type: 'circle',
+        x: Math.min(CONSTANTS.SCALE, baseX + 50),
+        y: Math.min(CONSTANTS.SCALE, baseY + 50),
         size: defaultMarkerSize,
       };
       return { ...t, positions: [...t.positions, newPos] };
     }));
   }, [defaultMarkerSize]);
 
-  // 座標のサイズを変更
+  // 座標のサイズを変更（円形のみ）
   const handleChangePositionSize = useCallback((targetId: string, posIndex: number, size: MarkerSize) => {
     setTargets(prev => prev.map(t => {
       if (t.id !== targetId) return t;
       const newPositions = [...t.positions];
-      newPositions[posIndex] = { ...newPositions[posIndex], size };
+      const pos = newPositions[posIndex];
+      if (pos.type === 'circle') {
+        newPositions[posIndex] = { ...pos, size };
+      }
       return { ...t, positions: newPositions };
     }));
   }, []);
@@ -233,7 +264,16 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
         if (t.id !== draggingMarker.targetId) return t;
         const newPositions = [...t.positions];
         const currentPos = newPositions[draggingMarker.positionIndex];
-        newPositions[draggingMarker.positionIndex] = { ...currentPos, x: coords[0], y: coords[1] };
+        
+        if (currentPos.type === 'circle') {
+          newPositions[draggingMarker.positionIndex] = { ...currentPos, x: coords[0], y: coords[1] };
+        } else if (currentPos.type === 'polygon' && draggingMarker.pointIndex !== undefined) {
+          // ポリゴンの頂点をドラッグ
+          const newPoints = [...currentPos.points];
+          newPoints[draggingMarker.pointIndex] = { x: coords[0], y: coords[1] };
+          newPositions[draggingMarker.positionIndex] = { ...currentPos, points: newPoints };
+        }
+        
         return { ...t, positions: newPositions };
       }));
     };
@@ -271,7 +311,15 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
         if (t.id !== draggingMarker.targetId) return t;
         const newPositions = [...t.positions];
         const currentPos = newPositions[draggingMarker.positionIndex];
-        newPositions[draggingMarker.positionIndex] = { ...currentPos, x: coords[0], y: coords[1] };
+        
+        if (currentPos.type === 'circle') {
+          newPositions[draggingMarker.positionIndex] = { ...currentPos, x: coords[0], y: coords[1] };
+        } else if (currentPos.type === 'polygon' && draggingMarker.pointIndex !== undefined) {
+          const newPoints = [...currentPos.points];
+          newPoints[draggingMarker.pointIndex] = { x: coords[0], y: coords[1] };
+          newPositions[draggingMarker.positionIndex] = { ...currentPos, points: newPoints };
+        }
+        
         return { ...t, positions: newPositions };
       }));
     };
@@ -317,20 +365,25 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
           positions = item.positions.map((p: unknown) => {
             // 配列形式 [x, y] の場合
             if (Array.isArray(p)) {
-              return { x: p[0], y: p[1], size: defaultMarkerSize };
+              return { type: 'circle', x: p[0], y: p[1], size: defaultMarkerSize } as CircleEditorPosition;
             }
-            // オブジェクト形式 { x, y, size } の場合
-            const pos = p as { x?: number; y?: number; size?: MarkerSize };
+            // ポリゴン形式 { type: 'polygon', points: [...] } の場合
+            const pos = p as { type?: string; x?: number; y?: number; size?: MarkerSize; points?: { x: number; y: number }[] };
+            if (pos.type === 'polygon' && Array.isArray(pos.points)) {
+              return { type: 'polygon', points: pos.points } as PolygonEditorPosition;
+            }
+            // 円形形式 { x, y, size } の場合
             return {
+              type: 'circle',
               x: pos.x ?? 500,
               y: pos.y ?? 500,
               size: pos.size ?? defaultMarkerSize,
-            };
+            } as CircleEditorPosition;
           });
         } else if (Array.isArray(item.position)) {
-          positions = [{ x: item.position[0], y: item.position[1], size: defaultMarkerSize }];
+          positions = [{ type: 'circle', x: item.position[0], y: item.position[1], size: defaultMarkerSize }];
         } else {
-          positions = [{ x: 500, y: 500, size: defaultMarkerSize }];
+          positions = [{ type: 'circle', x: 500, y: 500, size: defaultMarkerSize }];
         }
 
         return {
@@ -386,7 +439,12 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
     try {
       const exportTargets: Target[] = targets.map(t => ({
         title: t.title,
-        positions: t.positions.map(p => ({ x: p.x, y: p.y, size: p.size })),
+        positions: t.positions.map(p => {
+          if (p.type === 'polygon') {
+            return { type: 'polygon', points: p.points } as PolygonPosition;
+          }
+          return { x: p.x, y: p.y, size: p.size } as CirclePosition;
+        }),
       }));
 
       // サーバーパズル編集の場合はサーバーにアップロード
@@ -471,8 +529,8 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
     }
   }, [imageSrc, targets, puzzleName, puzzleId, editPuzzle, isServerPuzzle, onBack, onPuzzleCreated]);
 
-  // 座標の表示位置を計算
-  const getPositionDisplayCoords = useCallback((pos: EditorPosition) => {
+  // 座標の表示位置を計算（円形用）
+  const getPositionDisplayCoords = useCallback((pos: CircleEditorPosition) => {
     const info = getImageDisplayInfo();
     if (!info) return null;
 
@@ -482,6 +540,65 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
 
     return { x: pixelX, y: pixelY };
   }, [getImageDisplayInfo]);
+
+  // 任意の点の表示位置を計算
+  const getPointDisplayCoords = useCallback((x: number, y: number) => {
+    const info = getImageDisplayInfo();
+    if (!info) return null;
+
+    const { displayWidth, displayHeight, offsetX, offsetY } = info;
+    const pixelX = offsetX + (x / CONSTANTS.SCALE) * displayWidth;
+    const pixelY = offsetY + (y / CONSTANTS.SCALE) * displayHeight;
+
+    return { x: pixelX, y: pixelY };
+  }, [getImageDisplayInfo]);
+
+  // 画像クリック時の処理（ポリゴン描画用）
+  const handleImageClick = useCallback((e: React.MouseEvent) => {
+    // ドラッグ中やターゲット未選択時は何もしない
+    if (draggingMarker || !selectedTarget) return;
+    
+    // ポリゴンモードの場合
+    if (drawMode === 'polygon') {
+      const coords = clientToScaleCoords(e.clientX, e.clientY);
+      if (!coords) return;
+      
+      const newPoint = { x: coords[0], y: coords[1] };
+      setDrawingPolygon(prev => [...prev, newPoint]);
+    }
+  }, [draggingMarker, selectedTarget, drawMode, clientToScaleCoords]);
+
+  // ポリゴンを確定（閉じる）
+  const handleFinishPolygon = useCallback(() => {
+    if (drawingPolygon.length < 3) {
+      alert('ポリゴンには少なくとも3点必要です');
+      return;
+    }
+    
+    if (!selectedTarget) return;
+    
+    const newPolygon: PolygonEditorPosition = {
+      type: 'polygon',
+      points: [...drawingPolygon],
+    };
+    
+    setTargets(prev => prev.map(t => {
+      if (t.id !== selectedTarget) return t;
+      return { ...t, positions: [...t.positions, newPolygon] };
+    }));
+    
+    setDrawingPolygon([]);
+  }, [drawingPolygon, selectedTarget]);
+
+  // ポリゴン描画をキャンセル
+  const handleCancelPolygon = useCallback(() => {
+    setDrawingPolygon([]);
+  }, []);
+
+  // 描画中のポリゴンから1点戻す
+  const handleUndoPolygonPoint = useCallback(() => {
+    setDrawingPolygon(prev => prev.slice(0, -1));
+  }, []);
 
   const canComplete = imageSrc && targets.length > 0 && puzzleName.trim();
 
@@ -623,37 +740,58 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
                       <div style={styles.positionList}>
                         {target.positions.map((pos, posIndex) => (
                           <div key={posIndex} style={styles.positionItem}>
-                            <span style={styles.positionLabel}>
-                              座標{posIndex + 1}: ({pos.x}, {pos.y})
-                            </span>
-                            <div style={styles.sizeButtons}>
-                              {(['small', 'medium', 'large'] as MarkerSize[]).map(size => (
-                                <button
-                                  key={size}
-                                  style={{
-                                    ...styles.sizeButton,
-                                    backgroundColor: pos.size === size ? '#4a90d9' : '#ddd',
-                                    color: pos.size === size ? 'white' : '#333',
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleChangePositionSize(target.id, posIndex, size);
-                                  }}
-                                >
-                                  {size === 'small' ? '小' : size === 'medium' ? '中' : '大'}
-                                </button>
-                              ))}
-                            </div>
-                            {target.positions.length > 1 && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeletePosition(target.id, posIndex);
-                                }}
-                                style={styles.smallDeleteButton}
-                              >
-                                ×
-                              </button>
+                            {pos.type === 'polygon' ? (
+                              <>
+                                <span style={styles.positionLabel}>
+                                  📐 ポリゴン ({pos.points.length}頂点)
+                                </span>
+                                {target.positions.length > 1 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeletePosition(target.id, posIndex);
+                                    }}
+                                    style={styles.smallDeleteButton}
+                                  >
+                                    ×
+                                  </button>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <span style={styles.positionLabel}>
+                                  座標{posIndex + 1}: ({pos.x}, {pos.y})
+                                </span>
+                                <div style={styles.sizeButtons}>
+                                  {(['small', 'medium', 'large'] as MarkerSize[]).map(size => (
+                                    <button
+                                      key={size}
+                                      style={{
+                                        ...styles.sizeButton,
+                                        backgroundColor: pos.size === size ? '#4a90d9' : '#ddd',
+                                        color: pos.size === size ? 'white' : '#333',
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleChangePositionSize(target.id, posIndex, size);
+                                      }}
+                                    >
+                                      {size === 'small' ? '小' : size === 'medium' ? '中' : '大'}
+                                    </button>
+                                  ))}
+                                </div>
+                                {target.positions.length > 1 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeletePosition(target.id, posIndex);
+                                    }}
+                                    style={styles.smallDeleteButton}
+                                  >
+                                    ×
+                                  </button>
+                                )}
+                              </>
                             )}
                           </div>
                         ))}
@@ -698,6 +836,74 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
               </button>
             ))}
           </div>
+
+          {/* 描画モード選択 */}
+          <div style={styles.drawModeSelector}>
+            <span style={styles.drawModeLabel}>描画モード:</span>
+            <div style={styles.drawModeButtons}>
+              <button
+                style={{
+                  ...styles.drawModeButton,
+                  backgroundColor: drawMode === 'circle' ? '#4a90d9' : '#ddd',
+                  color: drawMode === 'circle' ? 'white' : '#333',
+                }}
+                onClick={() => { setDrawMode('circle'); setDrawingPolygon([]); }}
+              >
+                ⭕ 円形
+              </button>
+              <button
+                style={{
+                  ...styles.drawModeButton,
+                  backgroundColor: drawMode === 'polygon' ? '#4a90d9' : '#ddd',
+                  color: drawMode === 'polygon' ? 'white' : '#333',
+                }}
+                onClick={() => setDrawMode('polygon')}
+              >
+                📐 ポリゴン
+              </button>
+            </div>
+          </div>
+
+          {/* ポリゴン描画中のコントロール */}
+          {drawMode === 'polygon' && (
+            <div style={styles.polygonControls}>
+              <p style={styles.polygonInfo}>
+                📍 画像をクリックして頂点を追加 ({drawingPolygon.length}点)
+              </p>
+              <div style={styles.polygonButtons}>
+                <button 
+                  onClick={handleUndoPolygonPoint}
+                  disabled={drawingPolygon.length === 0}
+                  style={{
+                    ...styles.polygonControlButton,
+                    opacity: drawingPolygon.length === 0 ? 0.5 : 1,
+                  }}
+                >
+                  ↩️ 戻す
+                </button>
+                <button 
+                  onClick={handleCancelPolygon}
+                  disabled={drawingPolygon.length === 0}
+                  style={{
+                    ...styles.polygonControlButton,
+                    opacity: drawingPolygon.length === 0 ? 0.5 : 1,
+                  }}
+                >
+                  ❌ キャンセル
+                </button>
+                <button 
+                  onClick={handleFinishPolygon}
+                  disabled={drawingPolygon.length < 3}
+                  style={{
+                    ...styles.polygonFinishButton,
+                    opacity: drawingPolygon.length < 3 ? 0.5 : 1,
+                  }}
+                >
+                  ✅ 確定
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 右: 画像プレビュー */}
@@ -706,6 +912,7 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
             <div
               ref={imageContainerRef}
               style={styles.imageContainer}
+              onClick={handleImageClick}
             >
               <img
                 src={imageSrc}
@@ -729,6 +936,57 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
                 const color = getTargetColor(target.id);
 
                 return target.positions.map((pos, posIndex) => {
+                  // ポリゴンの場合
+                  if (pos.type === 'polygon') {
+                    const points = pos.points.map(p => getPointDisplayCoords(p.x, p.y));
+                    if (points.some(p => !p)) return null;
+                    
+                    const validPoints = points.filter((p): p is { x: number; y: number } => p !== null);
+                    const pathData = validPoints.map((p, i) => 
+                      `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`
+                    ).join(' ') + ' Z';
+                    
+                    return (
+                      <React.Fragment key={`${target.id}-${posIndex}`}>
+                        {/* ポリゴンの塗りつぶし */}
+                        <svg style={styles.polygonSvg}>
+                          <path
+                            d={pathData}
+                            fill={color}
+                            fillOpacity={isSelected ? 0.4 : 0.2}
+                            stroke={color}
+                            strokeWidth={isSelected ? 3 : 2}
+                          />
+                        </svg>
+                        {/* 頂点のドラッグハンドル */}
+                        {isSelected && validPoints.map((p, pointIndex) => (
+                          <div
+                            key={`point-${pointIndex}`}
+                            style={{
+                              ...styles.polygonPoint,
+                              left: p.x,
+                              top: p.y,
+                              backgroundColor: color,
+                            }}
+                            onMouseDown={e => handleMarkerMouseDown(e, { 
+                              targetId: target.id, 
+                              positionIndex: posIndex,
+                              pointIndex 
+                            })}
+                            onTouchStart={e => handleMarkerTouchStart(e, {
+                              targetId: target.id,
+                              positionIndex: posIndex,
+                              pointIndex
+                            })}
+                          >
+                            {pointIndex + 1}
+                          </div>
+                        ))}
+                      </React.Fragment>
+                    );
+                  }
+
+                  // 円形の場合
                   const displayPos = getPositionDisplayCoords(pos);
                   if (!displayPos) return null;
 
@@ -767,6 +1025,42 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
                   );
                 });
               })}
+
+              {/* 描画中のポリゴン */}
+              {drawingPolygon.length > 0 && (
+                <>
+                  <svg style={styles.polygonSvg}>
+                    <path
+                      d={drawingPolygon.map((p, i) => {
+                        const displayP = getPointDisplayCoords(p.x, p.y);
+                        if (!displayP) return '';
+                        return `${i === 0 ? 'M' : 'L'} ${displayP.x} ${displayP.y}`;
+                      }).join(' ')}
+                      fill="none"
+                      stroke="#ff5722"
+                      strokeWidth={2}
+                      strokeDasharray="5,5"
+                    />
+                  </svg>
+                  {drawingPolygon.map((p, i) => {
+                    const displayP = getPointDisplayCoords(p.x, p.y);
+                    if (!displayP) return null;
+                    return (
+                      <div
+                        key={`drawing-${i}`}
+                        style={{
+                          ...styles.polygonPoint,
+                          left: displayP.x,
+                          top: displayP.y,
+                          backgroundColor: '#ff5722',
+                        }}
+                      >
+                        {i + 1}
+                      </div>
+                    );
+                  })}
+                </>
+              )}
             </div>
           ) : (
             <div style={styles.placeholder}>
@@ -1114,5 +1408,91 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#999',
     fontSize: '1.2rem',
     textAlign: 'center',
+  },
+  // ポリゴン関連スタイル
+  polygonSvg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none',
+  },
+  polygonPoint: {
+    position: 'absolute',
+    width: '20px',
+    height: '20px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transform: 'translate(-50%, -50%)',
+    color: 'white',
+    fontSize: '0.65rem',
+    fontWeight: 'bold',
+    cursor: 'grab',
+    border: '2px solid white',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+    zIndex: 60,
+    touchAction: 'none',
+  },
+  drawModeSelector: {
+    padding: '10px',
+    backgroundColor: '#fff',
+    borderRadius: '8px',
+    border: '1px solid #ddd',
+  },
+  drawModeLabel: {
+    fontSize: '0.85rem',
+    fontWeight: 'bold',
+    color: '#333',
+    display: 'block',
+    marginBottom: '8px',
+  },
+  drawModeButtons: {
+    display: 'flex',
+    gap: '8px',
+  },
+  drawModeButton: {
+    flex: 1,
+    padding: '8px 12px',
+    fontSize: '0.9rem',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  polygonControls: {
+    padding: '10px',
+    backgroundColor: '#fff3e0',
+    borderRadius: '8px',
+    border: '2px solid #ff9800',
+  },
+  polygonInfo: {
+    margin: '0 0 10px 0',
+    fontSize: '0.85rem',
+    color: '#e65100',
+  },
+  polygonButtons: {
+    display: 'flex',
+    gap: '6px',
+    flexWrap: 'wrap',
+  },
+  polygonControlButton: {
+    padding: '6px 12px',
+    fontSize: '0.8rem',
+    backgroundColor: '#fff',
+    border: '1px solid #ddd',
+    borderRadius: '6px',
+    cursor: 'pointer',
+  },
+  polygonFinishButton: {
+    padding: '6px 12px',
+    fontSize: '0.8rem',
+    backgroundColor: '#4caf50',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
   },
 };

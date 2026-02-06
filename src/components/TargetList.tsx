@@ -7,9 +7,10 @@ interface Props {
   thumbnails: Map<string, string>;
   layout: 'vertical' | 'horizontal';
   compact?: boolean;  // コンパクト表示（縦画面用）
+  onTargetClick?: (targetTitle: string) => void;  // ターゲットタップ時のコールバック
 }
 
-export function TargetList({ targets, foundPositions, displayMode, thumbnails, layout, compact = false }: Props) {
+export function TargetList({ targets, foundPositions, displayMode, thumbnails, layout, compact = false, onTargetClick }: Props) {
   const isVertical = layout === 'vertical';
 
   // ターゲットごとに発見数を集計
@@ -44,14 +45,23 @@ export function TargetList({ targets, foundPositions, displayMode, thumbnails, l
         const wrapperSize = compact ? 40 : 60;
         const itemMinWidth = compact ? 50 : 70;
 
+        // タップ時のハンドラー（未完了の場合のみ）
+        const handleClick = () => {
+          if (!isComplete && onTargetClick) {
+            onTargetClick(target.title);
+          }
+        };
+
         if (displayMode === 'thumbnail') {
           return (
             <div
               key={target.title}
+              onClick={handleClick}
               style={{
                 ...styles.thumbnailItem,
                 ...(isComplete ? styles.thumbnailItemFound : {}),
                 minWidth: itemMinWidth,
+                cursor: isComplete ? 'default' : 'pointer',
               }}
             >
               <div style={{...styles.thumbnailWrapper, width: wrapperSize, height: wrapperSize}}>
@@ -91,9 +101,11 @@ export function TargetList({ targets, foundPositions, displayMode, thumbnails, l
         return (
           <div
             key={target.title}
+            onClick={handleClick}
             style={{
               ...styles.textItem,
               ...(isComplete ? styles.textItemFound : foundCount > 0 ? styles.textItemPartial : {}),
+              cursor: isComplete ? 'default' : 'pointer',
             }}
           >
             <span style={styles.checkbox}>

@@ -106,8 +106,8 @@ export function useGame(puzzle: Puzzle | null) {
     });
   }, []);
 
-  // ヒントを表示（連打で段階的に狭まる）
-  const triggerHint = useCallback(() => {
+  // 特定のターゲットのヒントを表示
+  const showHintForTarget = useCallback((targetTitle: string) => {
     // 前のタイマーをクリア
     if (hintTimerRef.current) {
       clearTimeout(hintTimerRef.current);
@@ -116,71 +116,46 @@ export function useGame(puzzle: Puzzle | null) {
     setState(prev => {
       if (!prev.puzzle) return prev;
 
-      // 未発見の位置を取得
-      const unfound: { target: string; positionIndex: number; position: Position }[] = [];
-      for (const target of prev.puzzle.targets) {
-        for (let i = 0; i < target.positions.length; i++) {
-          const posKey = makePositionKey(target.title, i);
-          if (!prev.foundPositions.has(posKey)) {
-            const pos = normalizePosition(target.positions[i] as Position | [number, number]);
-            unfound.push({
-              target: target.title,
-              positionIndex: i,
-              position: pos,
-            });
-          }
+      // 指定されたターゲットの未発見の位置を取得
+      const target = prev.puzzle.targets.find(t => t.title === targetTitle);
+      if (!target) return prev;
+
+      const unfoundPositions: { positionIndex: number; position: Position }[] = [];
+      for (let i = 0; i < target.positions.length; i++) {
+        const posKey = makePositionKey(target.title, i);
+        if (!prev.foundPositions.has(posKey)) {
+          const pos = normalizePosition(target.positions[i] as Position | [number, number]);
+          unfoundPositions.push({ positionIndex: i, position: pos });
         }
       }
 
-      if (unfound.length === 0) return prev;
+      // このターゲットがすべて発見済みなら何もしない
+      if (unfoundPositions.length === 0) return prev;
 
+      // 最初の未発見位置を選択
+      const selected = unfoundPositions[0];
+      
       // 同じターゲット・位置への連打か判定（hintStateが残っていれば継続）
       let nextLevel = 0;
-      let selectedTarget: string;
-      let selectedPositionIndex: number;
-      let selectedPosition: Position;
       let centerOffset: [number, number];
 
-      if (prev.hintState) {
-        // 前回のヒント状態がある
-        const stillUnfound = unfound.find(
-          u => u.target === prev.hintState!.target && u.positionIndex === prev.hintState!.positionIndex
-        );
-        
-        if (stillUnfound) {
-          // 同じ位置でレベルアップ
-          selectedTarget = prev.hintState.target;
-          selectedPositionIndex = prev.hintState.positionIndex;
-          selectedPosition = stillUnfound.position;
-          nextLevel = prev.hintState.level + 1;
-          
-          // レベルが上がったらオフセットを再計算
-          const hintRadius = getHintRadius(nextLevel);
-          centerOffset = calculateRandomOffset(selectedPosition, hintRadius);
-        } else {
-          // 前の位置が見つかった → 新しい位置
-          const random = unfound[Math.floor(Math.random() * unfound.length)];
-          selectedTarget = random.target;
-          selectedPositionIndex = random.positionIndex;
-          selectedPosition = random.position;
-          nextLevel = 0;
-          const hintRadius = getHintRadius(0);
-          centerOffset = calculateRandomOffset(selectedPosition, hintRadius);
-        }
+      if (prev.hintState && 
+          prev.hintState.target === targetTitle && 
+          prev.hintState.positionIndex === selected.positionIndex) {
+        // 同じ位置でレベルアップ
+        nextLevel = prev.hintState.level + 1;
+        const hintRadius = getHintRadius(nextLevel);
+        centerOffset = calculateRandomOffset(selected.position, hintRadius);
       } else {
-        // 新規ヒント
-        const random = unfound[Math.floor(Math.random() * unfound.length)];
-        selectedTarget = random.target;
-        selectedPositionIndex = random.positionIndex;
-        selectedPosition = random.position;
+        // 新しいターゲットまたは位置
         nextLevel = 0;
         const hintRadius = getHintRadius(0);
-        centerOffset = calculateRandomOffset(selectedPosition, hintRadius);
+        centerOffset = calculateRandomOffset(selected.position, hintRadius);
       }
 
       const newHintState: HintState = {
-        target: selectedTarget,
-        positionIndex: selectedPositionIndex,
+        target: targetTitle,
+        positionIndex: selected.positionIndex,
         level: nextLevel,
         centerOffset,
       };
@@ -188,7 +163,7 @@ export function useGame(puzzle: Puzzle | null) {
       return {
         ...prev,
         showHint: true,
-        hintTarget: selectedTarget,
+        hintTarget: targetTitle,
         hintState: newHintState,
       };
     });
@@ -267,7 +242,7 @@ export function useGame(puzzle: Puzzle | null) {
     ...state,
     checkTarget,
     markFound,
-    triggerHint,
+    showHintForTarget,
     resetGame,
   };
 }

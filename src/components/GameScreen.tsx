@@ -334,12 +334,16 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
     <div style={styles.container}>
       {/* ヘッダー */}
       <header style={styles.header}>
-        <button onClick={onBack} style={styles.backButton}>
-          ← もどる
-        </button>
+        <div style={styles.headerLeft}>
+          <button onClick={onBack} style={styles.backButton}>
+            ←
+          </button>
+        </div>
         <h1 style={styles.puzzleTitle}>{puzzle.name}</h1>
-        <div style={styles.progress}>
-          {foundCount} / {totalPositions}
+        <div style={styles.headerRight}>
+          <span style={styles.progress}>
+            {foundCount}/{totalPositions}
+          </span>
         </div>
       </header>
 
@@ -354,18 +358,12 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
               thumbnails={thumbnails}
               layout="horizontal"
               compact
+              onTargetClick={game.showHintForTarget}
             />
           </div>
           <div style={styles.topBarButtons}>
             <button onClick={toggleDisplayMode} style={styles.topBarButton}>
               {settings.displayMode === 'text' ? '🖼️' : '📝'}
-            </button>
-            <button 
-              onClick={game.triggerHint} 
-              style={styles.topBarButton}
-              disabled={game.isCompleted || game.showHint}
-            >
-              💡
             </button>
             {scale > 1 && (
               <button onClick={resetZoom} style={styles.topBarButton}>
@@ -386,13 +384,6 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
                 <button onClick={toggleDisplayMode} style={styles.toggleButton}>
                   {settings.displayMode === 'text' ? '🖼️' : '📝'}
                 </button>
-                <button 
-                  onClick={game.triggerHint} 
-                  style={styles.hintButtonSmall}
-                  disabled={game.isCompleted || game.showHint}
-                >
-                  💡
-                </button>
                 {scale > 1 && (
                   <button onClick={resetZoom} style={styles.toggleButton}>
                     🔍
@@ -407,6 +398,7 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
                 displayMode={settings.displayMode}
                 thumbnails={thumbnails}
                 layout="vertical"
+                onTargetClick={game.showHintForTarget}
               />
             </div>
           </aside>
@@ -517,26 +509,32 @@ const styles: Record<string, React.CSSProperties> = {
     color: 'white',
     flexShrink: 0,
   },
+  headerLeft: {
+    flex: '0 0 50px',
+  },
+  headerRight: {
+    flex: '0 0 50px',
+    display: 'flex',
+    justifyContent: 'flex-end',
+  },
   backButton: {
-    padding: '6px 12px',
-    fontSize: '0.9rem',
+    padding: '6px 10px',
+    fontSize: '1.2rem',
     backgroundColor: 'transparent',
     color: 'white',
-    border: '1px solid rgba(255,255,255,0.3)',
-    borderRadius: '20px',
+    border: 'none',
     cursor: 'pointer',
   },
   puzzleTitle: {
     margin: 0,
     fontSize: '1rem',
     fontWeight: 'bold',
+    textAlign: 'center',
+    flex: 1,
   },
   progress: {
-    fontSize: '1rem',
+    fontSize: '0.9rem',
     fontWeight: 'bold',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    padding: '4px 12px',
-    borderRadius: '20px',
   },
   topBar: {
     display: 'flex',
@@ -613,24 +611,6 @@ const styles: Record<string, React.CSSProperties> = {
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-  },
-  hintButtonSmall: {
-    padding: '5px 10px',
-    fontSize: '1.2rem',
-    backgroundColor: '#ffc107',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-  },
-  hintButton: {
-    padding: '12px',
-    fontSize: '1rem',
-    backgroundColor: '#ffc107',
-    color: '#333',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
   },
   imageContainer: {
     flex: 1,
