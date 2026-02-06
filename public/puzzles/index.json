@@ -30,12 +30,6 @@
     "targetCount": 14
   },
   {
-    "id": "うみのなか",
-    "name": "うみのなか",
-    "thumbnail": "puzzles/images/うみのなか.webp",
-    "targetCount": 13
-  },
-  {
     "id": "どうぶつえん",
     "name": "どうぶつえん",
     "thumbnail": "puzzles/images/どうぶつえん.webp",
@@ -64,5 +58,11 @@
     "name": "きっちん",
     "thumbnail": "puzzles/images/きっちん.webp",
     "targetCount": 12
+  },
+  {
+    "id": "うみのなか",
+    "name": "うみのなか",
+    "thumbnail": "puzzles/images/うみのなか.webp",
+    "targetCount": 16
   }
 ]
