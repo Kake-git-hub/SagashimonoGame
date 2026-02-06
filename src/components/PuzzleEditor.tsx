@@ -209,15 +209,17 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
     setTargets(prev => prev.map(t => {
       if (t.id !== targetId) return t;
       // 最後の座標から少しずらした位置に追加
-      const lastPos = t.positions[t.positions.length - 1];
       let baseX = 500, baseY = 500;
-      if (lastPos.type === 'circle') {
-        baseX = lastPos.x;
-        baseY = lastPos.y;
-      } else if (lastPos.type === 'polygon' && lastPos.points.length > 0) {
-        // ポリゴンの最後の点を基準
-        baseX = lastPos.points[0].x;
-        baseY = lastPos.points[0].y;
+      const lastPos = t.positions[t.positions.length - 1];
+      if (lastPos) {
+        if (lastPos.type === 'circle') {
+          baseX = lastPos.x;
+          baseY = lastPos.y;
+        } else if (lastPos.type === 'polygon' && lastPos.points.length > 0) {
+          // ポリゴンの最後の点を基準
+          baseX = lastPos.points[0].x;
+          baseY = lastPos.points[0].y;
+        }
       }
       const newPos: CircleEditorPosition = {
         type: 'circle',
