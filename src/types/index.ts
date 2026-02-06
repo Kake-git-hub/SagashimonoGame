@@ -1,12 +1,25 @@
 // マーカーサイズ
 export type MarkerSize = 'small' | 'medium' | 'large';
 
-// 位置情報（座標+サイズ）
-export interface Position {
+// 位置のタイプ
+export type PositionType = 'circle' | 'polygon';
+
+// 円形の位置情報
+export interface CirclePosition {
+  type?: 'circle'; // 省略時はcircle
   x: number;
   y: number;
   size: MarkerSize;
 }
+
+// ポリゴン（フリーハンド）の位置情報
+export interface PolygonPosition {
+  type: 'polygon';
+  points: { x: number; y: number }[]; // 頂点の配列
+}
+
+// 位置情報（座標+サイズ または ポリゴン）
+export type Position = CirclePosition | PolygonPosition;
 
 // ターゲット（探すアイテム）
 export interface Target {
@@ -19,11 +32,21 @@ export type LegacyPosition = [number, number];
 
 // 旧形式かどうかをチェック
 export function isLegacyPosition(pos: Position | LegacyPosition): pos is LegacyPosition {
-  return Array.isArray(pos);
+  return Array.isArray(pos) && typeof pos[0] === 'number' && typeof pos[1] === 'number';
+}
+
+// ポリゴンかどうかをチェック
+export function isPolygonPosition(pos: Position | LegacyPosition): pos is PolygonPosition {
+  return !Array.isArray(pos) && (pos as PolygonPosition).type === 'polygon';
+}
+
+// 円形かどうかをチェック
+export function isCirclePosition(pos: Position | LegacyPosition): pos is CirclePosition {
+  return !Array.isArray(pos) && (pos as PolygonPosition).type !== 'polygon';
 }
 
 // 旧形式から新形式に変換
-export function convertLegacyPosition(pos: LegacyPosition): Position {
+export function convertLegacyPosition(pos: LegacyPosition): CirclePosition {
   return { x: pos[0], y: pos[1], size: 'medium' };
 }
 
@@ -33,6 +56,28 @@ export function normalizePosition(pos: Position | LegacyPosition): Position {
     return convertLegacyPosition(pos);
   }
   return pos;
+}
+
+// ポリゴンの中心点を取得
+export function getPolygonCenter(pos: PolygonPosition): { x: number; y: number } {
+  const points = pos.points;
+  const sumX = points.reduce((sum, p) => sum + p.x, 0);
+  const sumY = points.reduce((sum, p) => sum + p.y, 0);
+  return { x: sumX / points.length, y: sumY / points.length };
+}
+
+// 点がポリゴン内にあるかチェック（レイキャスティング法）
+export function isPointInPolygon(x: number, y: number, polygon: PolygonPosition): boolean {
+  const points = polygon.points;
+  let inside = false;
+  for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+    const xi = points[i].x, yi = points[i].y;
+    const xj = points[j].x, yj = points[j].y;
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+      inside = !inside;
+    }
+  }
+  return inside;
 }
 
 // パズルデータ

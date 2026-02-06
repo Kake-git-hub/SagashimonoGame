@@ -1,7 +1,16 @@
-import { Target, CONSTANTS, normalizePosition, Position } from '../types';
+import { Target, CONSTANTS, normalizePosition, Position, isPolygonPosition, getPolygonCenter, CirclePosition } from '../types';
 
 // サムネイルキャッシュ
 const thumbnailCache = new Map<string, string>();
+
+// Position から中心座標を取得するヘルパー関数
+function getPositionCenter(pos: Position): { x: number; y: number } {
+  if (isPolygonPosition(pos)) {
+    return getPolygonCenter(pos);
+  }
+  const circlePos = pos as CirclePosition;
+  return { x: circlePos.x, y: circlePos.y };
+}
 
 // 画像から特定座標周辺を切り抜いてサムネイルを生成
 export async function generateThumbnail(
@@ -34,8 +43,9 @@ export async function generateThumbnail(
 
         // 座標を実際のピクセル位置に変換（最初の座標を使用）
         const pos = normalizePosition(target.positions[0] as Position | [number, number]);
-        const imgX = (pos.x / CONSTANTS.SCALE) * img.width;
-        const imgY = (pos.y / CONSTANTS.SCALE) * img.height;
+        const center = getPositionCenter(pos);
+        const imgX = (center.x / CONSTANTS.SCALE) * img.width;
+        const imgY = (center.y / CONSTANTS.SCALE) * img.height;
 
         // 切り抜き範囲を計算（中心からの範囲）
         const cropRadius = (CONSTANTS.THUMBNAIL_RADIUS / CONSTANTS.SCALE) * Math.min(img.width, img.height);
@@ -95,8 +105,9 @@ export async function generateAllThumbnails(
     canvas.height = size;
 
     const pos = normalizePosition(target.positions[0] as Position | [number, number]);
-    const imgX = (pos.x / CONSTANTS.SCALE) * img.width;
-    const imgY = (pos.y / CONSTANTS.SCALE) * img.height;
+    const center = getPositionCenter(pos);
+    const imgX = (center.x / CONSTANTS.SCALE) * img.width;
+    const imgY = (center.y / CONSTANTS.SCALE) * img.height;
 
     const cropRadius = (CONSTANTS.THUMBNAIL_RADIUS / CONSTANTS.SCALE) * Math.min(img.width, img.height);
     const cropSize = cropRadius * 2;

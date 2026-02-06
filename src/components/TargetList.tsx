@@ -61,7 +61,7 @@ export function TargetList({ targets, foundPositions, displayMode, thumbnails, l
                     alt={target.title}
                     style={{
                       ...styles.thumbnailImage,
-                      filter: isComplete ? 'none' : 'blur(5px) brightness(0.7)',
+                      opacity: isComplete ? 1 : 0.6,
                     }}
                   />
                 ) : (

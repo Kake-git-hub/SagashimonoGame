@@ -1,4 +1,4 @@
-import { Target, HintState, getHintRadius, normalizePosition, Position } from '../types';
+import { Target, HintState, getHintRadius, normalizePosition, Position, isPolygonPosition, getPolygonCenter, CirclePosition } from '../types';
 
 interface Props {
   target: Target;
@@ -13,11 +13,23 @@ export function HintOverlay({ target, hintState, getPosition, scaleFactor }: Pro
   if (!rawPosition) return null;
   
   const targetPosition = normalizePosition(rawPosition as Position | [number, number]);
+  
+  // ポリゴンの場合は中心点を使用
+  let hintX: number, hintY: number;
+  if (isPolygonPosition(targetPosition)) {
+    const center = getPolygonCenter(targetPosition);
+    hintX = center.x;
+    hintY = center.y;
+  } else {
+    const circlePos = targetPosition as CirclePosition;
+    hintX = circlePos.x;
+    hintY = circlePos.y;
+  }
 
   // オフセット付きで位置を計算
   const pos = getPosition(
-    targetPosition.x,
-    targetPosition.y,
+    hintX,
+    hintY,
     hintState.centerOffset
   );
   if (!pos) return null;

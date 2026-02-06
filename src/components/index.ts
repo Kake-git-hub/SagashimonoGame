@@ -2,6 +2,7 @@ export { PuzzleList } from './PuzzleList';
 export { GameScreen } from './GameScreen';
 export { TargetList } from './TargetList';
 export { TargetMarker } from './TargetMarker';
+export { PolygonMarker } from './PolygonMarker';
 export { HintOverlay } from './HintOverlay';
 export { ClearOverlay } from './ClearOverlay';
 export { CollapsiblePanel } from './CollapsiblePanel';

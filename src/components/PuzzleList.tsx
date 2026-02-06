@@ -465,7 +465,7 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    height: '100vh',
+    height: '100dvh',
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: '#f5f5f5',

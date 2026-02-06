@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Puzzle, GameState, CONSTANTS, Progress, HintState, makePositionKey, getTotalPositionCount, getHintRadius, normalizePosition, getHitRadius, Position } from '../types';
+import { Puzzle, GameState, CONSTANTS, Progress, HintState, makePositionKey, getTotalPositionCount, getHintRadius, normalizePosition, getHitRadius, Position, isPolygonPosition, isPointInPolygon, CirclePosition, getPolygonCenter } from '../types';
 import { saveProgress, getProgress } from '../services/storageService';
 
 export function useGame(puzzle: Puzzle | null) {
@@ -56,10 +56,20 @@ export function useGame(puzzle: Puzzle | null) {
         if (state.foundPositions.has(posKey)) continue;
 
         const pos = normalizePosition(target.positions[i] as Position | [number, number]);
-        const hitRadius = getHitRadius(pos.size);
-        const distance = Math.hypot(clickX - pos.x, clickY - pos.y);
-        if (distance < hitRadius) {
-          return posKey;
+        
+        // ポリゴンの場合はポリゴン内判定
+        if (isPolygonPosition(pos)) {
+          if (isPointInPolygon(clickX, clickY, pos)) {
+            return posKey;
+          }
+        } else {
+          // 円形の場合は距離判定
+          const circlePos = pos as CirclePosition;
+          const hitRadius = getHitRadius(circlePos.size);
+          const distance = Math.hypot(clickX - circlePos.x, clickY - circlePos.y);
+          if (distance < hitRadius) {
+            return posKey;
+          }
         }
       }
     }
@@ -196,7 +206,20 @@ export function useGame(puzzle: Puzzle | null) {
 
   // ランダムオフセットを計算
   function calculateRandomOffset(answerPos: Position, hintRadius: number): [number, number] {
-    const hitRadius = getHitRadius(answerPos.size);
+    // ポリゴンの場合は中心点を使用
+    let centerX: number, centerY: number, hitRadius: number;
+    if (isPolygonPosition(answerPos)) {
+      const center = getPolygonCenter(answerPos);
+      centerX = center.x;
+      centerY = center.y;
+      hitRadius = 32; // ポリゴンのデフォルト判定半径
+    } else {
+      const circlePos = answerPos as CirclePosition;
+      centerX = circlePos.x;
+      centerY = circlePos.y;
+      hitRadius = getHitRadius(circlePos.size);
+    }
+    
     const maxOffset = Math.max(0, hintRadius - hitRadius);
     
     const angle = Math.random() * Math.PI * 2;
@@ -206,10 +229,10 @@ export function useGame(puzzle: Puzzle | null) {
     const offsetY = Math.sin(angle) * distance;
     
     const margin = hintRadius;
-    const newX = Math.max(margin, Math.min(CONSTANTS.SCALE - margin, answerPos.x + offsetX));
-    const newY = Math.max(margin, Math.min(CONSTANTS.SCALE - margin, answerPos.y + offsetY));
+    const newX = Math.max(margin, Math.min(CONSTANTS.SCALE - margin, centerX + offsetX));
+    const newY = Math.max(margin, Math.min(CONSTANTS.SCALE - margin, centerY + offsetY));
     
-    return [newX - answerPos.x, newY - answerPos.y];
+    return [newX - centerX, newY - centerY];
   }
 
   // ゲームをリセット

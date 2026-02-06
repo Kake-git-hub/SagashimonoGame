@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Puzzle, CONSTANTS, makePositionKey, getTotalPositionCount, normalizePosition, Position, MarkerSize } from '../types';
+import { Puzzle, CONSTANTS, makePositionKey, getTotalPositionCount, normalizePosition, Position, MarkerSize, isPolygonPosition, CirclePosition } from '../types';
 import { useGame } from '../hooks/useGame';
 import { useIsTablet } from '../hooks/useMediaQuery';
 import { useSettings } from '../hooks/useSettings';
@@ -7,6 +7,7 @@ import { getImageUrl } from '../services/puzzleService';
 import { generateAllThumbnails } from '../services/thumbnailService';
 import { TargetList } from './TargetList';
 import { TargetMarker } from './TargetMarker';
+import { PolygonMarker } from './PolygonMarker';
 import { HintOverlay } from './HintOverlay';
 import { ClearOverlay } from './ClearOverlay';
 
@@ -300,18 +301,31 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
   const foundCount = game.foundPositions.size;
 
   // 発見済み位置のマーカーを生成
-  const foundMarkers: { key: string; x: number; y: number; size: MarkerSize }[] = [];
+  type CircleMarker = { key: string; type: 'circle'; x: number; y: number; size: MarkerSize };
+  type PolygonMarkerData = { key: string; type: 'polygon'; points: { x: number; y: number }[] };
+  const foundMarkers: (CircleMarker | PolygonMarkerData)[] = [];
+  
   for (const target of puzzle.targets) {
     for (let i = 0; i < target.positions.length; i++) {
       const posKey = makePositionKey(target.title, i);
       if (game.foundPositions.has(posKey)) {
         const pos = normalizePosition(target.positions[i] as Position | [number, number]);
-        foundMarkers.push({
-          key: posKey,
-          x: pos.x,
-          y: pos.y,
-          size: pos.size,
-        });
+        if (isPolygonPosition(pos)) {
+          foundMarkers.push({
+            key: posKey,
+            type: 'polygon',
+            points: pos.points,
+          });
+        } else {
+          const circlePos = pos as CirclePosition;
+          foundMarkers.push({
+            key: posKey,
+            type: 'circle',
+            x: circlePos.x,
+            y: circlePos.y,
+            size: circlePos.size,
+          });
+        }
       }
     }
   }
@@ -421,17 +435,33 @@ export function GameScreen({ puzzle, onBack, onNextPuzzle, hasNextPuzzle }: Prop
 
           {/* 発見済みマーカー - 各位置ごとに表示 */}
           {foundMarkers.map(marker => {
-            const pos = getPixelPosition(marker.x, marker.y);
-            if (!pos) return null;
-            return (
-              <TargetMarker
-                key={marker.key}
-                x={pos.x}
-                y={pos.y}
-                isNew={foundAnimation === marker.key}
-                size={marker.size}
-              />
-            );
+            if (marker.type === 'polygon') {
+              // ポリゴンマーカー
+              const polygonPoints = marker.points.map(p => {
+                const pixelPos = getPixelPosition(p.x, p.y);
+                return pixelPos || { x: 0, y: 0 };
+              });
+              return (
+                <PolygonMarker
+                  key={marker.key}
+                  points={polygonPoints}
+                  isNew={foundAnimation === marker.key}
+                />
+              );
+            } else {
+              // 円形マーカー
+              const pos = getPixelPosition(marker.x, marker.y);
+              if (!pos) return null;
+              return (
+                <TargetMarker
+                  key={marker.key}
+                  x={pos.x}
+                  y={pos.y}
+                  isNew={foundAnimation === marker.key}
+                  size={marker.size}
+                />
+              );
+            }
           })}
 
           {/* ヒント表示 */}
@@ -471,9 +501,12 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     display: 'flex',
     flexDirection: 'column',
-    height: '100vh',
+    height: '100dvh',
     backgroundColor: '#1a1a2e',
     overflow: 'hidden',
+    WebkitUserSelect: 'none',
+    userSelect: 'none',
+    WebkitTouchCallout: 'none',
   },
   header: {
     display: 'flex',

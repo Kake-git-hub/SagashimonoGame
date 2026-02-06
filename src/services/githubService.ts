@@ -141,7 +141,7 @@ export async function uploadPuzzleToServer(
   puzzleData: {
     id: string;
     name: string;
-    targets: { title: string; positions: { x: number; y: number; size: string }[] }[];
+    targets: { title: string; positions: ({ x: number; y: number; size: string } | { type: 'polygon'; points: { x: number; y: number }[] })[] }[];
     imageData: string; // Base64 data URL
   }
 ): Promise<GitHubUploadResult> {

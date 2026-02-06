@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Target, CONSTANTS, CustomPuzzle, MarkerSize, Position, getMarkerPixelSize, isLegacyPosition } from '../types';
+import { Target, CONSTANTS, CustomPuzzle, MarkerSize, Position, getMarkerPixelSize, isLegacyPosition, isPolygonPosition, CirclePosition } from '../types';
 import { saveCustomPuzzle } from '../services/storageService';
 import { compressImage, formatSize, estimateBase64Size } from '../services/imageService';
 import { uploadPuzzleToServer, validateGitHubToken } from '../services/githubService';
@@ -64,7 +64,12 @@ export function PuzzleEditor({ onBack, onPuzzleCreated, editPuzzle, isServerPuzz
             return { x, y, size: 'medium' as MarkerSize };
           }
           const pos = p as unknown as Position;
-          return { x: pos.x, y: pos.y, size: pos.size };
+          // ポリゴンの場合はスキップ（エディタでは円形のみサポート）
+          if (isPolygonPosition(pos)) {
+            return { x: 0, y: 0, size: 'medium' as MarkerSize };
+          }
+          const circlePos = pos as CirclePosition;
+          return { x: circlePos.x, y: circlePos.y, size: circlePos.size };
         }),
       })));
     }
