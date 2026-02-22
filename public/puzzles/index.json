@@ -12,12 +12,6 @@
     "targetCount": 11
   },
   {
-    "id": "ハロウィン",
-    "name": "ハロウィン",
-    "thumbnail": "puzzles/images/ハロウィン.webp",
-    "targetCount": 14
-  },
-  {
     "id": "おたからどうくつ",
     "name": "おたからどうくつ",
     "thumbnail": "puzzles/images/おたからどうくつ.webp",
@@ -70,5 +64,11 @@
     "name": "クリスマス",
     "thumbnail": "puzzles/images/クリスマス.webp",
     "targetCount": 14
+  },
+  {
+    "id": "ハロウィン",
+    "name": "ハロウィン",
+    "thumbnail": "puzzles/images/ハロウィン.webp",
+    "targetCount": 15
   }
 ]
