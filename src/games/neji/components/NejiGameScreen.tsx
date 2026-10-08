@@ -2,8 +2,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Stage } from '../types';
 import { ANIM } from '../constants';
 import { useNejiGame } from '../hooks/useNejiGame';
+import { useHudChoreography } from '../hooks/useHudChoreography';
 import { Scene } from './Scene';
+import { ScreenPoint } from './ScrewMesh';
+import { BoxHud } from './BoxHud';
+import { BufferHud } from './BufferHud';
+import { FlyingScrewLayer } from './FlyingScrewLayer';
 import { ResultOverlay } from './ResultOverlay';
+import '../neji.css';
 
 interface Props {
   stage: Stage;
@@ -21,6 +27,9 @@ export function NejiGameScreen({ stage, hasNextStage, onBack, onNextStage, onCle
   const [showResult, setShowResult] = useState(false);
   const [viewResetKey, setViewResetKey] = useState(0);
   const lastMissRef = useRef(0);
+  const hudRef = useRef<HTMLDivElement>(null);
+  const canvasAreaRef = useRef<HTMLDivElement>(null);
+  const hud = useHudChoreography(state, hudRef);
 
   // 外せないネジをタップ → 邪魔している物をしばらく赤く光らせる
   useEffect(() => {
@@ -30,16 +39,26 @@ export function NejiGameScreen({ stage, hasNextStage, onBack, onNextStage, onCle
     return () => window.clearTimeout(timer);
   }, [state.feedback]);
 
-  // クリア → 少し待ってから結果画面
+  // クリア / 失敗 → 演出が終わるのを待ってから結果画面
   useEffect(() => {
-    if (state.status !== 'cleared') {
+    if (state.status === 'playing') {
       setShowResult(false);
       return;
     }
-    onCleared(stage.id, state.moves);
-    const timer = window.setTimeout(() => setShowResult(true), ANIM.RESULT_DELAY_MS);
+    if (state.status === 'cleared') {
+      onCleared(stage.id, state.moves);
+    }
+    const delay = ANIM.REMOVE_MS + ANIM.FLY_MS + ANIM.RESULT_DELAY_MS;
+    const timer = window.setTimeout(() => setShowResult(true), delay);
     return () => window.clearTimeout(timer);
   }, [state.status, state.moves, stage.id, onCleared]);
+
+  // 3D 上でネジが抜けきった: キャンバス内座標 → 画面座標にして飛ぶ演出へ
+  const handleScrewRemoveDone = useCallback((id: string, at: ScreenPoint) => {
+    const rect = canvasAreaRef.current?.getBoundingClientRect();
+    hud.onScrewRemoved(id, { x: (rect?.left ?? 0) + at.x, y: (rect?.top ?? 0) + at.y });
+    screwRemoveDone(id);
+  }, [hud, screwRemoveDone]);
 
   const resetView = useCallback(() => setViewResetKey(k => k + 1), []);
 
@@ -60,6 +79,7 @@ export function NejiGameScreen({ stage, hasNextStage, onBack, onNextStage, onCle
   }, [reset]);
 
   const remaining = state.remainingScrews.size;
+  const nextColor = stage.boxes[state.sort.nextBoxIndex] ?? null;
 
   return (
     <div style={styles.container}>
@@ -77,7 +97,18 @@ export function NejiGameScreen({ stage, hasNextStage, onBack, onNextStage, onCle
         </div>
       </header>
 
-      <div style={styles.canvasArea}>
+      <div className="neji-hud" ref={hudRef}>
+        <BoxHud
+          boxes={state.sort.boxes}
+          capacity={stage.boxCapacity}
+          nextColor={nextColor}
+          hidden={hud.hidden}
+          departing={hud.departing}
+        />
+        <BufferHud slots={state.sort.buffer} hidden={hud.hidden} />
+      </div>
+
+      <div style={styles.canvasArea} ref={canvasAreaRef}>
         <Scene
           stage={stage}
           remainingParts={state.remainingParts}
@@ -88,7 +119,7 @@ export function NejiGameScreen({ stage, hasNextStage, onBack, onNextStage, onCle
           highlightActive={highlightActive}
           viewResetKey={viewResetKey}
           onTapScrew={tapScrew}
-          onScrewRemoveDone={screwRemoveDone}
+          onScrewRemoveDone={handleScrewRemoveDone}
           onPartFallDone={partFallDone}
           onPointerMissed={handlePointerMissed}
         />
@@ -98,9 +129,11 @@ export function NejiGameScreen({ stage, hasNextStage, onBack, onNextStage, onCle
         </button>
       </div>
 
-      {showResult && (
+      <FlyingScrewLayer flights={hud.flights} onDone={hud.onFlightDone} />
+
+      {showResult && state.status !== 'playing' && (
         <ResultOverlay
-          kind="cleared"
+          kind={state.status}
           stageName={stage.name}
           moves={state.moves}
           hasNext={hasNextStage}

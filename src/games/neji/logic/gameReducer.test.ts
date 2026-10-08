@@ -44,6 +44,22 @@ describe('nejiReducer', () => {
     expect(s4.moves).toBe(2);
   });
 
+  it('外したネジはボックスへ入り、イベントが出る', () => {
+    const s0 = createInitialState(normalizeStage(def));
+    const s1 = nejiReducer(s0, { type: 'tapScrew', id: 'lidA' });
+    expect(s1.sort.boxes[0]).toMatchObject({ color: 'green', filled: 1 });
+    expect(s1.events.map(e => e.type)).toEqual(['screwPlaced']);
+    expect(s1.events[0].seq).toBe(1);
+  });
+
+  it('一時置き場があふれると失敗', () => {
+    const tiny = normalizeStage({ ...def, boxes: ['red'], bufferSlots: 0 });
+    const s0 = createInitialState(tiny);
+    const s1 = nejiReducer(s0, { type: 'tapScrew', id: 'lidA' }); // green の箱が無く、置き場も無い
+    expect(s1.status).toBe('failed');
+    expect(s1.events.map(e => e.type)).toEqual(['overflow']);
+  });
+
   it('クリア後はタップしても変わらない', () => {
     let s = createInitialState(normalizeStage(def));
     s = nejiReducer(s, { type: 'tapScrew', id: 'lidA' });
