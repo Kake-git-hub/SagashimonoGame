@@ -3,7 +3,7 @@
  * three.js の数学クラスだけを使い、WebGL のシーンに依存しない（Node のテストでも動く）
  */
 import { Box3, Euler, Matrix4, Quaternion, Vector3 } from 'three';
-import { PartDef, ScrewDef, Stage, Vec3 } from '../types';
+import { HingeDef, PartDef, ScrewDef, Stage, Vec3 } from '../types';
 import { SCREW } from '../constants';
 
 const EPS = 1e-9;
@@ -22,6 +22,35 @@ function deg(d: number): number {
 export function partQuaternion(part: PartDef): Quaternion {
   const rot = part.rotation ?? [0, 0, 0];
   return new Quaternion().setFromEuler(new Euler(deg(rot[0]), deg(rot[1]), deg(rot[2]), 'XYZ'));
+}
+
+export interface Pose {
+  position: Vector3;
+  quaternion: Quaternion;
+}
+
+/**
+ * 展開図: ちょうつがいを順に回したときの姿勢。progress は全体の進み具合（0〜1）で、
+ * ちょうつがいが複数あるときは順番に 1 つずつ回る
+ */
+export function unfoldPose(part: PartDef, hinges: HingeDef[], progress: number): Pose {
+  const position = toVector3(part.position);
+  const quaternion = partQuaternion(part);
+  if (hinges.length === 0) return { position, quaternion };
+  const per = 1 / hinges.length;
+  for (let i = 0; i < hinges.length; i++) {
+    const local = Math.max(0, Math.min(1, (progress - i * per) / per));
+    if (local <= 0) break;
+    const hinge = hinges[i];
+    const axis = toVector3(hinge.axis);
+    if (axis.lengthSq() < EPS) continue;
+    axis.normalize();
+    const rot = new Quaternion().setFromAxisAngle(axis, deg(hinge.angle) * local);
+    const pivot = toVector3(hinge.point);
+    position.sub(pivot).applyQuaternion(rot).add(pivot);
+    quaternion.premultiply(rot);
+  }
+  return { position, quaternion };
 }
 
 export function partMatrix(part: PartDef): Matrix4 {
@@ -220,16 +249,18 @@ export interface ModelBounds {
   corners: Vector3[]; // パーツの頂点とネジの端点（カメラ合わせで輪郭を投影するための点）
 }
 
-export function computeModelBounds(stage: Stage): ModelBounds {
+export function computeModelBounds(stage: Stage, partIds?: ReadonlySet<string>): ModelBounds {
   const box = new Box3();
   const corners: Vector3[] = [];
   for (const part of stage.parts) {
+    if (partIds && !partIds.has(part.id)) continue;
     for (const p of partCornerPoints(part)) {
       box.expandByPoint(p);
       corners.push(p);
     }
   }
   for (const screw of stage.screws) {
+    if (partIds) break;
     const head = screwHeadTop(screw);
     const tip = screwTip(screw);
     box.expandByPoint(head);

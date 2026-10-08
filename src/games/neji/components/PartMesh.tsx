@@ -3,11 +3,12 @@ import { ExtrudeGeometry, Group, MeshStandardMaterial, Quaternion, Shape, Vector
 import { useFrame } from '@react-three/fiber';
 import { FancyPartDef, PartDef } from '../types';
 import { ANIM, PART_DEFAULT_COLOR } from '../constants';
-import { partQuaternion, perpendicularBasis, toVector3 } from '../logic/geometry';
+import { partQuaternion, perpendicularBasis, toVector3, unfoldPose } from '../logic/geometry';
 
 interface Props {
   part: PartDef;
-  falling: boolean;
+  falling: boolean;     // 外れて落ちる / 開く アニメーション中
+  unfolded: boolean;    // 展開図のパーツが開き終わって、そのまま残っている
   fallDir: Vector3;
   highlighted: boolean; // 邪魔している物として赤く光らせる
   treasure?: boolean;   // たからもの（核ブロック）: 光沢を強くする
@@ -112,7 +113,7 @@ function PartGeometry({ part, material }: { part: PartDef; material: MeshStandar
     case 'cylinder':
       return (
         <mesh material={material}>
-          <cylinderGeometry args={[part.radius, part.radius, part.height, 32]} />
+          <cylinderGeometry args={[part.radius, part.radius, part.height, part.segments ?? 32]} />
         </mesh>
       );
     case 'sphere':
@@ -126,12 +127,18 @@ function PartGeometry({ part, material }: { part: PartDef; material: MeshStandar
   }
 }
 
-export function PartMesh({ part, falling, fallDir, highlighted, treasure = false, onFallDone }: Props) {
+// なめらかに開く（ゆっくり始まってゆっくり止まる）
+function easeInOut(p: number): number {
+  return p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+}
+
+export function PartMesh({ part, falling, unfolded, fallDir, highlighted, treasure = false, onFallDone }: Props) {
   const groupRef = useRef<Group>(null);
   const basePosition = useMemo(() => toVector3(part.position), [part]);
   const baseQuaternion = useMemo(() => partQuaternion(part), [part]);
   const tumbleAxis = useMemo(() => perpendicularBasis(fallDir)[0], [fallDir]);
-  const fallStartRef = useRef<number | null>(null);
+  const hinges = part.unfold;
+  const startRef = useRef<number | null>(null);
   const doneRef = useRef(false);
 
   // 複数メッシュ（骨など）で共有するマテリアル
@@ -151,18 +158,25 @@ export function PartMesh({ part, falling, fallDir, highlighted, treasure = false
     material.emissiveIntensity = highlighted ? 1.0 : treasure ? 0.18 : 0;
   }, [material, highlighted, treasure, part.color]);
 
+  // アニメーション中でなければ、元の姿勢（または開き終わった姿勢）に置く
   useEffect(() => {
     if (falling) return;
-    fallStartRef.current = null;
+    startRef.current = null;
     doneRef.current = false;
     const group = groupRef.current;
     if (group) {
-      group.position.copy(basePosition);
-      group.quaternion.copy(baseQuaternion);
+      if (unfolded && hinges) {
+        const pose = unfoldPose(part, hinges, 1);
+        group.position.copy(pose.position);
+        group.quaternion.copy(pose.quaternion);
+      } else {
+        group.position.copy(basePosition);
+        group.quaternion.copy(baseQuaternion);
+      }
     }
     material.transparent = false;
     material.opacity = 1;
-  }, [falling, basePosition, baseQuaternion, material]);
+  }, [falling, unfolded, hinges, part, basePosition, baseQuaternion, material]);
 
   useFrame(() => {
     if (!falling) return;
@@ -170,11 +184,25 @@ export function PartMesh({ part, falling, fallDir, highlighted, treasure = false
     if (!group) return;
 
     const now = performance.now();
-    if (fallStartRef.current === null) {
-      fallStartRef.current = now;
-      material.transparent = true;
+    if (startRef.current === null) {
+      startRef.current = now;
+      material.transparent = !hinges;
     }
-    const p = Math.min(1, (now - fallStartRef.current) / ANIM.FALL_MS);
+
+    if (hinges) {
+      // 展開図: ちょうつがいで順に開く。開いたあとは消えずに残る
+      const p = Math.min(1, (now - startRef.current) / ANIM.UNFOLD_MS);
+      const pose = unfoldPose(part, hinges, easeInOut(p));
+      group.position.copy(pose.position);
+      group.quaternion.copy(pose.quaternion);
+      if (p >= 1 && !doneRef.current) {
+        doneRef.current = true;
+        onFallDone(part.id);
+      }
+      return;
+    }
+
+    const p = Math.min(1, (now - startRef.current) / ANIM.FALL_MS);
 
     // 外向きに押し出されつつ、重力で加速しながら落ちる
     group.position

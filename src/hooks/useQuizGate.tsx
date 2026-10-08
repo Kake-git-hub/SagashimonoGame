@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { getAppSettings, QuizTrigger, shouldQuiz } from '../services/appSettingsService';
 import { getCurrentProfile, quizLevelForAge } from '../services/profileService';
-import { QuizOverlay } from '../components/quiz/QuizOverlay';
+import { QuizScreen } from '../components/quiz/QuizScreen';
 
 const TRIGGER_TITLES: Record<QuizTrigger, string> = {
   addBox: 'はこを ふやす',
@@ -18,7 +18,7 @@ interface Pending {
 /**
  * 「クイズに正解したら進める」関門
  * ask(trigger) は、親の設定でその場面にクイズが不要なら即 true、
- * 必要なら QuizOverlay を出して正解で true / やめるで false になる Promise を返す
+ * 必要なら QuizScreen（全画面）に切り替えて正解で true / やめるで false になる Promise を返す
  */
 export function useQuizGate() {
   const [pending, setPending] = useState<Pending | null>(null);
@@ -49,7 +49,7 @@ export function useQuizGate() {
     const profile = getCurrentProfile();
     const level = settings.quizLevelOverride ?? quizLevelForAge(profile?.age ?? 6);
     return (
-      <QuizOverlay
+      <QuizScreen
         level={level}
         subjects={settings.quizSubjects}
         required={Math.max(1, settings.quizQuestions)}

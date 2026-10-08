@@ -9,7 +9,8 @@
     "green",
     "blue",
     "purple",
-    "orange"
+    "orange",
+    "red"
   ],
   "parts": [
     {
@@ -117,6 +118,36 @@
         0,
         2.3,
         1.15
+      ],
+      "color": "#e63946"
+    },
+    {
+      "id": "backpack",
+      "shape": "box",
+      "size": [
+        1.6,
+        1.6,
+        0.5
+      ],
+      "position": [
+        0,
+        2.3,
+        -1.2
+      ],
+      "color": "#6c757d"
+    },
+    {
+      "id": "helmet",
+      "shape": "box",
+      "size": [
+        1.8,
+        0.3,
+        1.6
+      ],
+      "position": [
+        0,
+        5.1,
+        0
       ],
       "color": "#e63946"
     }
@@ -452,6 +483,63 @@
       "length": 0.4,
       "partIds": [
         "plate"
+      ]
+    },
+    {
+      "id": "bp1",
+      "color": "red",
+      "position": [
+        0.5,
+        2.3,
+        -1.45
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1.0,
+      "partIds": [
+        "backpack",
+        "body"
+      ]
+    },
+    {
+      "id": "bp2",
+      "color": "red",
+      "position": [
+        -0.5,
+        2.3,
+        -1.45
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1.0,
+      "partIds": [
+        "backpack",
+        "body"
+      ]
+    },
+    {
+      "id": "hm1",
+      "color": "red",
+      "position": [
+        0,
+        5.25,
+        0.3
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.05,
+      "partIds": [
+        "helmet",
+        "head"
       ]
     }
   ]

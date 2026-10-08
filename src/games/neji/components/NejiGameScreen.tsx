@@ -5,7 +5,7 @@ import { useNejiGame } from '../hooks/useNejiGame';
 import { useHudChoreography } from '../hooks/useHudChoreography';
 import { hasQueuedBox } from '../logic/rules';
 import { REWIND_MOVES } from '../logic/gameReducer';
-import { Scene, ViewInsets } from './Scene';
+import { Scene, SceneFocus, ViewInsets } from './Scene';
 import { ScreenPoint } from './ScrewMesh';
 import { BoxHud } from './BoxHud';
 import { BufferHud } from './BufferHud';
@@ -14,6 +14,7 @@ import { ResultOverlay, TreasureResult } from './ResultOverlay';
 import { useIsLandscape } from '../../../hooks/useMediaQuery';
 import { QuizGate } from '../../../hooks/useQuizGate';
 import { getAppSettings } from '../../../services/appSettingsService';
+import { useTapGuard } from '../../../hooks/useTapGuard';
 import '../neji.css';
 
 interface Props {
@@ -34,6 +35,9 @@ export function NejiGameScreen({ stage, hasNextStage, quiz, onBack, onNextStage,
   const [highlightActive, setHighlightActive] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [treasure, setTreasure] = useState<TreasureResult | null>(null);
+  // 発掘ステージをクリアしたあと、たからものをじっくり見ている
+  const [revealing, setRevealing] = useState(false);
+  const revealReady = useTapGuard(1500, revealing);
   const [viewResetKey, setViewResetKey] = useState(0);
   const [insets, setInsets] = useState<ViewInsets>(ZERO_INSETS);
   const lastMissRef = useRef(0);
@@ -94,18 +98,32 @@ export function NejiGameScreen({ stage, hasNextStage, quiz, onBack, onNextStage,
   }, [state.feedback]);
 
   // クリア / 失敗 → 演出が終わるのを待ってから結果画面
+  // 発掘ステージのクリアは、先にたからものをじっくり見るモードにして、ボタンで結果画面へ進む
   useEffect(() => {
     if (state.status === 'playing') {
       setShowResult(false);
+      setRevealing(false);
       return;
     }
+    let found: TreasureResult | null = null;
     if (state.status === 'cleared') {
-      setTreasure(onCleared(stage.id, state.moves));
+      found = onCleared(stage.id, state.moves);
+      setTreasure(found);
     }
     const delay = ANIM.REMOVE_MS + ANIM.FLY_MS + ANIM.RESULT_DELAY_MS;
-    const timer = window.setTimeout(() => setShowResult(true), delay);
+    const timer = window.setTimeout(() => {
+      if (found) setRevealing(true);
+      else setShowResult(true);
+    }, delay);
     return () => window.clearTimeout(timer);
   }, [state.status, state.moves, stage.id, onCleared]);
+
+  const finishReveal = useCallback(() => {
+    setRevealing(false);
+    setShowResult(true);
+  }, []);
+
+  const focus: SceneFocus | null = revealing && stage.treasure ? { partIds: stage.treasure.partIds } : null;
 
   // 3D 上でネジが抜けきった: キャンバス内座標 → 画面座標にして飛ぶ演出へ
   const handleScrewRemoveDone = useCallback((id: string, at: ScreenPoint) => {
@@ -169,6 +187,7 @@ export function NejiGameScreen({ stage, hasNextStage, quiz, onBack, onNextStage,
           highlightActive={highlightActive}
           viewResetKey={viewResetKey}
           insets={insets}
+          focus={focus}
           onTapScrew={tapScrew}
           onScrewRemoveDone={handleScrewRemoveDone}
           onPartFallDone={partFallDone}
@@ -193,7 +212,7 @@ export function NejiGameScreen({ stage, hasNextStage, quiz, onBack, onNextStage,
         </div>
       </header>
 
-      <div className="neji-hud-boxes" ref={boxesRef}>
+      <div className="neji-hud-boxes" ref={boxesRef} style={{ visibility: revealing ? 'hidden' : 'visible' }}>
         <BoxHud
           boxes={state.sort.boxes}
           capacity={stage.boxCapacity}
@@ -204,7 +223,7 @@ export function NejiGameScreen({ stage, hasNextStage, quiz, onBack, onNextStage,
         />
       </div>
 
-      <div className="neji-hud-buffer" ref={bufferRef}>
+      <div className="neji-hud-buffer" ref={bufferRef} style={{ visibility: revealing ? 'hidden' : 'visible' }}>
         <BufferHud
           slots={state.sort.buffer}
           hidden={hud.hidden}
@@ -217,6 +236,21 @@ export function NejiGameScreen({ stage, hasNextStage, quiz, onBack, onNextStage,
 
       <FlyingScrewLayer flights={hud.flights} onDone={hud.onFlightDone} />
 
+      {revealing && treasure && (
+        <div className="neji-reveal">
+          <div className="neji-reveal-title">✨ {treasure.emoji} 「{treasure.name}」を はっけん！</div>
+          <div className="neji-reveal-hint">ゆびで まわして じっくり みてね</div>
+          <button
+            className="neji-reveal-button"
+            onClick={finishReveal}
+            disabled={!revealReady}
+            style={{ opacity: revealReady ? 1 : 0.5 }}
+          >
+            たからばこに いれる →
+          </button>
+        </div>
+      )}
+
       {showResult && state.status !== 'playing' && (
         <ResultOverlay
           kind={state.status}
@@ -225,8 +259,9 @@ export function NejiGameScreen({ stage, hasNextStage, quiz, onBack, onNextStage,
           hasNext={hasNextStage}
           treasure={treasure}
           canContinue={canContinue}
-          continueLabel={`${quizMark('continue')} つづきから（${REWIND_MOVES} てまえ）`}
-          nextLabel={`${quizMark('nextStage')} つぎのステージへ →`}
+          continueQuiz={quiz.isQuizRequired('continue')}
+          nextQuiz={quiz.isQuizRequired('nextStage')}
+          rewindMoves={REWIND_MOVES}
           onNext={onNextStage}
           onContinue={handleContinue}
           onRetry={handleRetry}

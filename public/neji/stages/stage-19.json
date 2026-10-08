@@ -1,0 +1,407 @@
+{
+  "id": "stage-19",
+  "name": "かんじ「田」",
+  "emoji": "🌾",
+  "difficulty": 5,
+  "boxes": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple"
+  ],
+  "parts": [
+    {
+      "id": "board",
+      "shape": "box",
+      "size": [
+        5,
+        5,
+        0.4
+      ],
+      "position": [
+        0,
+        0,
+        -0.6
+      ],
+      "color": "#fdf6e3",
+      "fixed": true
+    },
+    {
+      "id": "top",
+      "shape": "box",
+      "size": [
+        3.6,
+        0.45,
+        0.4
+      ],
+      "position": [
+        0,
+        1.575,
+        0.65
+      ],
+      "color": "#1d3557"
+    },
+    {
+      "id": "bot",
+      "shape": "box",
+      "size": [
+        3.6,
+        0.45,
+        0.4
+      ],
+      "position": [
+        0,
+        -1.575,
+        0.65
+      ],
+      "color": "#1d3557"
+    },
+    {
+      "id": "left",
+      "shape": "box",
+      "size": [
+        0.45,
+        2.7,
+        0.4
+      ],
+      "position": [
+        -1.575,
+        0,
+        0.65
+      ],
+      "color": "#1d3557"
+    },
+    {
+      "id": "right",
+      "shape": "box",
+      "size": [
+        0.45,
+        2.7,
+        0.4
+      ],
+      "position": [
+        1.575,
+        0,
+        0.65
+      ],
+      "color": "#1d3557"
+    },
+    {
+      "id": "tate",
+      "shape": "box",
+      "size": [
+        0.45,
+        3.2,
+        0.4
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "color": "#1d3557"
+    },
+    {
+      "id": "yoko",
+      "shape": "box",
+      "size": [
+        3.2,
+        0.45,
+        0.36
+      ],
+      "position": [
+        0,
+        0,
+        -0.02
+      ],
+      "color": "#1d3557"
+    }
+  ],
+  "screws": [
+    {
+      "id": "tp1",
+      "color": "red",
+      "position": [
+        -1.0,
+        1.575,
+        0.85
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.55,
+      "partIds": [
+        "top",
+        "board"
+      ]
+    },
+    {
+      "id": "tp2",
+      "color": "red",
+      "position": [
+        1.0,
+        1.575,
+        0.85
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.55,
+      "partIds": [
+        "top",
+        "board"
+      ]
+    },
+    {
+      "id": "bt1",
+      "color": "red",
+      "position": [
+        -1.0,
+        -1.575,
+        0.85
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.55,
+      "partIds": [
+        "bot",
+        "board"
+      ]
+    },
+    {
+      "id": "bt2",
+      "color": "blue",
+      "position": [
+        1.0,
+        -1.575,
+        0.85
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.55,
+      "partIds": [
+        "bot",
+        "board"
+      ]
+    },
+    {
+      "id": "lf1",
+      "color": "blue",
+      "position": [
+        -1.575,
+        0.7,
+        0.85
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.55,
+      "partIds": [
+        "left",
+        "board"
+      ]
+    },
+    {
+      "id": "lf2",
+      "color": "blue",
+      "position": [
+        -1.575,
+        -0.7,
+        0.85
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.55,
+      "partIds": [
+        "left",
+        "board"
+      ]
+    },
+    {
+      "id": "rt1",
+      "color": "green",
+      "position": [
+        1.575,
+        0.7,
+        0.85
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.55,
+      "partIds": [
+        "right",
+        "board"
+      ]
+    },
+    {
+      "id": "rt2",
+      "color": "green",
+      "position": [
+        1.575,
+        -0.7,
+        0.85
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.55,
+      "partIds": [
+        "right",
+        "board"
+      ]
+    },
+    {
+      "id": "v1",
+      "color": "green",
+      "position": [
+        0,
+        1.4,
+        0.2
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.9,
+      "partIds": [
+        "tate",
+        "board"
+      ]
+    },
+    {
+      "id": "v2",
+      "color": "yellow",
+      "position": [
+        0,
+        -1.4,
+        0.2
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.9,
+      "partIds": [
+        "tate",
+        "board"
+      ]
+    },
+    {
+      "id": "v3",
+      "color": "yellow",
+      "position": [
+        0,
+        0,
+        0.2
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.9,
+      "partIds": [
+        "tate",
+        "yoko",
+        "board"
+      ]
+    },
+    {
+      "id": "w1",
+      "color": "yellow",
+      "position": [
+        -1.4,
+        0,
+        0.16
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.86,
+      "partIds": [
+        "yoko",
+        "board"
+      ]
+    },
+    {
+      "id": "w2",
+      "color": "purple",
+      "position": [
+        1.4,
+        0,
+        0.16
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.86,
+      "partIds": [
+        "yoko",
+        "board"
+      ]
+    },
+    {
+      "id": "d1",
+      "color": "purple",
+      "position": [
+        -1.5,
+        -2.5,
+        -0.6
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "board"
+      ]
+    },
+    {
+      "id": "d2",
+      "color": "purple",
+      "position": [
+        1.5,
+        -2.5,
+        -0.6
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "board"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,371 @@
+{
+  "id": "stage-17",
+  "name": "ピラミッド",
+  "emoji": "🔺",
+  "difficulty": 4,
+  "boxes": [
+    "red",
+    "purple",
+    "yellow",
+    "green",
+    "blue"
+  ],
+  "parts": [
+    {
+      "id": "L0",
+      "shape": "box",
+      "size": [
+        6,
+        1,
+        6
+      ],
+      "position": [
+        0,
+        0.5,
+        0
+      ],
+      "color": "#e9c46a",
+      "fixed": true
+    },
+    {
+      "id": "L1",
+      "shape": "box",
+      "size": [
+        4.4,
+        0.8,
+        4.4
+      ],
+      "position": [
+        0,
+        1.65,
+        0
+      ],
+      "color": "#f4a261"
+    },
+    {
+      "id": "L2",
+      "shape": "box",
+      "size": [
+        3.0,
+        0.8,
+        3.0
+      ],
+      "position": [
+        0,
+        2.7,
+        0
+      ],
+      "color": "#e76f51"
+    },
+    {
+      "id": "L3",
+      "shape": "box",
+      "size": [
+        1.6,
+        0.8,
+        1.6
+      ],
+      "position": [
+        0,
+        3.75,
+        0
+      ],
+      "color": "#d62828"
+    },
+    {
+      "id": "ball",
+      "shape": "sphere",
+      "radius": 0.4,
+      "position": [
+        0,
+        4.8,
+        0
+      ],
+      "color": "#ffd60a"
+    }
+  ],
+  "screws": [
+    {
+      "id": "g1",
+      "color": "red",
+      "position": [
+        -1.5,
+        0,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.8,
+      "partIds": [
+        "L0"
+      ]
+    },
+    {
+      "id": "g2",
+      "color": "red",
+      "position": [
+        1.5,
+        0,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.8,
+      "partIds": [
+        "L0"
+      ]
+    },
+    {
+      "id": "g3",
+      "color": "red",
+      "position": [
+        0,
+        0,
+        -1.5
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.8,
+      "partIds": [
+        "L0"
+      ]
+    },
+    {
+      "id": "a0",
+      "color": "blue",
+      "position": [
+        1,
+        2.05,
+        1
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "L1",
+        "L0"
+      ]
+    },
+    {
+      "id": "a1",
+      "color": "blue",
+      "position": [
+        -1,
+        2.05,
+        1
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "L1",
+        "L0"
+      ]
+    },
+    {
+      "id": "a2",
+      "color": "blue",
+      "position": [
+        1,
+        2.05,
+        -1
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "L1",
+        "L0"
+      ]
+    },
+    {
+      "id": "a3",
+      "color": "green",
+      "position": [
+        -1,
+        2.05,
+        -1
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "L1",
+        "L0"
+      ]
+    },
+    {
+      "id": "a4",
+      "color": "green",
+      "position": [
+        0,
+        2.05,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "L1",
+        "L0"
+      ]
+    },
+    {
+      "id": "b0",
+      "color": "green",
+      "position": [
+        0.45,
+        3.1,
+        0.45
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "L2",
+        "L1"
+      ]
+    },
+    {
+      "id": "b1",
+      "color": "yellow",
+      "position": [
+        -0.45,
+        3.1,
+        0.45
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "L2",
+        "L1"
+      ]
+    },
+    {
+      "id": "b2",
+      "color": "yellow",
+      "position": [
+        0.45,
+        3.1,
+        -0.45
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "L2",
+        "L1"
+      ]
+    },
+    {
+      "id": "b3",
+      "color": "yellow",
+      "position": [
+        -0.45,
+        3.1,
+        -0.45
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "L2",
+        "L1"
+      ]
+    },
+    {
+      "id": "c0",
+      "color": "purple",
+      "position": [
+        0,
+        4.15,
+        0.45
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "L3",
+        "L2"
+      ]
+    },
+    {
+      "id": "c1",
+      "color": "purple",
+      "position": [
+        0,
+        4.15,
+        -0.45
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "L3",
+        "L2"
+      ]
+    },
+    {
+      "id": "top",
+      "color": "purple",
+      "position": [
+        0,
+        5.2,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.15,
+      "partIds": [
+        "ball",
+        "L3"
+      ]
+    }
+  ]
+}

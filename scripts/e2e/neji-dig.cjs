@@ -3,6 +3,8 @@ const { launch, gotoHome, openStage, tapScrew, hudText, report, OUT, DEBUG_URL }
 
 async function answerQuiz(page) {
   await page.waitForSelector('[aria-label="べんきょうクイズ"]', { timeout: 5000 });
+  await page.waitForTimeout(1100); // 出た直後は連打対策でボタンが押せない
+  await page.screenshot({ path: `${OUT}/neji-quiz.png` });
   // 正解の選択肢はテストから分からないので、全部の選択肢を順に試す（不正解なら次の問題が出る）
   for (let i = 0; i < 12; i++) {
     const buttons = await page.$$('[aria-label="べんきょうクイズ"] button:not(:disabled)');
@@ -42,15 +44,21 @@ async function answerQuiz(page) {
     await page.waitForTimeout(350);
     if (n === 8) { await page.waitForTimeout(1200); await page.screenshot({ path: `${OUT}/neji-dig-revealed.png` }); }
   }
+  // クリア → まず、たからものをじっくり見るモード（HUD が消えて、カメラが寄って回る）
+  await page.waitForSelector('text=ゆびで まわして', { timeout: 10000 });
+  await page.waitForTimeout(1800);
+  await page.screenshot({ path: `${OUT}/neji-dig-reveal.png` });
+  check('reveal mode shows treasure name', await page.$('text=「ピンクのハート」を はっけん！') !== null);
+  await page.click('button:has-text("たからばこに いれる")');
   await page.waitForSelector('text=はっけん！', { timeout: 10000 });
   await page.waitForTimeout(600);
   await page.screenshot({ path: `${OUT}/neji-dig-clear.png` });
-  check('treasure found', await page.$('text=たからばこに はいったよ') !== null);
+  check('treasure found', await page.$('text=たからばこに いれたよ') !== null);
 
   // つぎのステージへ → クイズ → 次のステージが開く
   await page.click('text=つぎのステージへ');
   await answerQuiz(page);
-  await page.waitForSelector('text=ピンのとう', { timeout: 10000 });
+  await page.waitForSelector('text=さいころの てんかいず', { timeout: 10000 });
   check('next stage after quiz', true);
 
   // たからばこに入っている
@@ -68,14 +76,17 @@ async function answerQuiz(page) {
   await page.screenshot({ path: `${OUT}/neji-portrait.png` });
   // 箱の無い色（黄・緑・紫）を 7 本外すと、おきば 6 こではあふれて失敗
   for (const id of ['c1', 'c2', 'r2', 'wBL', 'wBR', 'r1', 'd1']) { await tapScrew(page, id); await page.waitForTimeout(300); }
-  await page.waitForSelector('text=ざんねん…', { timeout: 10000 });
+  await page.waitForSelector('text=おきばが いっぱい！', { timeout: 10000 });
+  // 出た直後の連打は無視される（ボタンは押せない）
+  const disabledAtFirst = await page.$eval('button:has-text("つづきから")', b => b.disabled);
+  check('result buttons ignore taps right after appearing', disabledAtFirst);
   await page.screenshot({ path: `${OUT}/neji-failed.png` });
   await page.click('button:has-text("つづきから")');
   await answerQuiz(page);
   await page.waitForTimeout(500);
   const after = await hudText(page);
   check('rewound 3 moves after quiz', after.includes('のこり 11') && after.includes('おきば 4/6'), after);
-  check('result overlay closed', (await page.$('text=ざんねん…')) === null);
+  check('result overlay closed', (await page.$('text=おきばが いっぱい！')) === null);
   await page.screenshot({ path: `${OUT}/neji-continued.png` });
 
   await browser.close();

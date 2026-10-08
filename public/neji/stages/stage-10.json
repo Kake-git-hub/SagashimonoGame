@@ -11,7 +11,8 @@
     "yellow",
     "orange",
     "purple",
-    "blue"
+    "blue",
+    "green"
   ],
   "parts": [
     {
@@ -211,6 +212,51 @@
         0
       ],
       "color": "#ffb703"
+    },
+    {
+      "id": "gate",
+      "shape": "box",
+      "size": [
+        2.4,
+        1.0,
+        0.3
+      ],
+      "position": [
+        0,
+        1.0,
+        2.9
+      ],
+      "color": "#6a4c93"
+    },
+    {
+      "id": "capNE",
+      "shape": "box",
+      "size": [
+        1.2,
+        0.3,
+        1.2
+      ],
+      "position": [
+        2.2,
+        4.05,
+        2.2
+      ],
+      "color": "#ffd60a"
+    },
+    {
+      "id": "capSW",
+      "shape": "box",
+      "size": [
+        1.2,
+        0.3,
+        1.2
+      ],
+      "position": [
+        -2.2,
+        4.05,
+        -2.2
+      ],
+      "color": "#ffd60a"
     }
   ],
   "screws": [
@@ -653,6 +699,63 @@
       "length": 0.5,
       "partIds": [
         "base"
+      ]
+    },
+    {
+      "id": "gt1",
+      "color": "green",
+      "position": [
+        0,
+        1.0,
+        3.05
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.95,
+      "partIds": [
+        "gate",
+        "wallN"
+      ]
+    },
+    {
+      "id": "cne",
+      "color": "green",
+      "position": [
+        2.65,
+        4.2,
+        2.2
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.0,
+      "partIds": [
+        "capNE",
+        "roofNE"
+      ]
+    },
+    {
+      "id": "csw",
+      "color": "green",
+      "position": [
+        -2.65,
+        4.2,
+        -2.2
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.0,
+      "partIds": [
+        "capSW",
+        "roofSW"
       ]
     }
   ]

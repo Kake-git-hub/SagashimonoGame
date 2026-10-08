@@ -1,0 +1,330 @@
+{
+  "id": "stage-18",
+  "name": "かんじ「木」",
+  "emoji": "🌳",
+  "difficulty": 3,
+  "boxes": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "parts": [
+    {
+      "id": "board",
+      "shape": "box",
+      "size": [
+        5,
+        5,
+        0.4
+      ],
+      "position": [
+        0,
+        0,
+        -0.6
+      ],
+      "color": "#fdf6e3",
+      "fixed": true
+    },
+    {
+      "id": "yoko",
+      "shape": "box",
+      "size": [
+        3.4,
+        0.45,
+        0.4
+      ],
+      "position": [
+        0,
+        0.85,
+        0.65
+      ],
+      "color": "#1d3557"
+    },
+    {
+      "id": "tate",
+      "shape": "box",
+      "size": [
+        0.45,
+        4.2,
+        0.4
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "color": "#1d3557"
+    },
+    {
+      "id": "hidari",
+      "shape": "box",
+      "size": [
+        0.45,
+        2.6,
+        0.4
+      ],
+      "position": [
+        -0.95,
+        -0.1,
+        0
+      ],
+      "color": "#1d3557",
+      "rotation": [
+        0,
+        0,
+        35
+      ]
+    },
+    {
+      "id": "migi",
+      "shape": "box",
+      "size": [
+        0.45,
+        2.6,
+        0.4
+      ],
+      "position": [
+        0.95,
+        -0.1,
+        0
+      ],
+      "color": "#1d3557",
+      "rotation": [
+        0,
+        0,
+        -35
+      ]
+    }
+  ],
+  "screws": [
+    {
+      "id": "y1",
+      "color": "red",
+      "position": [
+        -1.45,
+        0.85,
+        0.85
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.55,
+      "partIds": [
+        "yoko",
+        "hidari",
+        "board"
+      ]
+    },
+    {
+      "id": "y2",
+      "color": "red",
+      "position": [
+        1.45,
+        0.85,
+        0.85
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.55,
+      "partIds": [
+        "yoko",
+        "migi",
+        "board"
+      ]
+    },
+    {
+      "id": "y3",
+      "color": "red",
+      "position": [
+        0.6,
+        0.85,
+        0.85
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.55,
+      "partIds": [
+        "yoko",
+        "board"
+      ]
+    },
+    {
+      "id": "t1",
+      "color": "blue",
+      "position": [
+        0,
+        1.8,
+        0.2
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.9,
+      "partIds": [
+        "tate",
+        "board"
+      ]
+    },
+    {
+      "id": "t2",
+      "color": "blue",
+      "position": [
+        0,
+        -1.7,
+        0.2
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.9,
+      "partIds": [
+        "tate",
+        "board"
+      ]
+    },
+    {
+      "id": "t3",
+      "color": "green",
+      "position": [
+        0,
+        0.85,
+        0.2
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.9,
+      "partIds": [
+        "tate",
+        "board"
+      ]
+    },
+    {
+      "id": "h1",
+      "color": "green",
+      "position": [
+        -1.3228,
+        0.4324,
+        0.2
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.9,
+      "partIds": [
+        "hidari",
+        "board"
+      ]
+    },
+    {
+      "id": "h2",
+      "color": "blue",
+      "position": [
+        -0.4338,
+        -0.8372,
+        0.2
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.9,
+      "partIds": [
+        "hidari",
+        "board"
+      ]
+    },
+    {
+      "id": "m1",
+      "color": "green",
+      "position": [
+        1.3228,
+        0.4324,
+        0.2
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.9,
+      "partIds": [
+        "migi",
+        "board"
+      ]
+    },
+    {
+      "id": "m2",
+      "color": "yellow",
+      "position": [
+        0.4338,
+        -0.8372,
+        0.2
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.9,
+      "partIds": [
+        "migi",
+        "board"
+      ]
+    },
+    {
+      "id": "d1",
+      "color": "yellow",
+      "position": [
+        -1.5,
+        -2.5,
+        -0.6
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "board"
+      ]
+    },
+    {
+      "id": "d2",
+      "color": "yellow",
+      "position": [
+        1.5,
+        -2.5,
+        -0.6
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "board"
+      ]
+    }
+  ]
+}

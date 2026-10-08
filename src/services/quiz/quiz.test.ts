@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defaultSubjectsForLevel, generateParentGate, generateQuestion } from './quizService';
-import { QUIZ_SUBJECTS } from './appSettingsService';
+import { defaultSubjectsForLevel, generateParentGate, generateQuestion, QUIZ_SUBJECTS } from './index';
 
 // 再現できる疑似乱数
 function seeded(seed: number) {

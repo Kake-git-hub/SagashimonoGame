@@ -33,6 +33,13 @@
     }
   },
   {
+    "id": "stage-15",
+    "name": "さいころの てんかいず",
+    "emoji": "🎲",
+    "difficulty": 2,
+    "screwCount": 12
+  },
+  {
     "id": "stage-03",
     "name": "ピンのとう",
     "emoji": "🗼",
@@ -51,7 +58,7 @@
     "name": "ロボット",
     "emoji": "🤖",
     "difficulty": 3,
-    "screwCount": 18
+    "screwCount": 21
   },
   {
     "id": "stage-12",
@@ -66,11 +73,25 @@
     }
   },
   {
+    "id": "stage-18",
+    "name": "かんじ「木」",
+    "emoji": "🌳",
+    "difficulty": 3,
+    "screwCount": 12
+  },
+  {
+    "id": "stage-16",
+    "name": "ろっかくの はこ",
+    "emoji": "⬡",
+    "difficulty": 3,
+    "screwCount": 12
+  },
+  {
     "id": "stage-07",
     "name": "タワー",
     "emoji": "🏯",
     "difficulty": 4,
-    "screwCount": 18
+    "screwCount": 21
   },
   {
     "id": "stage-08",
@@ -84,7 +105,7 @@
     "name": "ロケット",
     "emoji": "🚀",
     "difficulty": 4,
-    "screwCount": 21
+    "screwCount": 24
   },
   {
     "id": "stage-13",
@@ -99,11 +120,18 @@
     }
   },
   {
+    "id": "stage-17",
+    "name": "ピラミッド",
+    "emoji": "🔺",
+    "difficulty": 4,
+    "screwCount": 15
+  },
+  {
     "id": "stage-10",
     "name": "おしろ",
     "emoji": "🏰",
     "difficulty": 5,
-    "screwCount": 24
+    "screwCount": 27
   },
   {
     "id": "stage-14",
@@ -116,5 +144,12 @@
       "name": "きょうりゅうのほね",
       "emoji": "🦴"
     }
+  },
+  {
+    "id": "stage-19",
+    "name": "かんじ「田」",
+    "emoji": "🌾",
+    "difficulty": 5,
+    "screwCount": 15
   }
 ]

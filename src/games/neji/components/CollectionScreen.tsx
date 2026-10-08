@@ -1,4 +1,5 @@
 import { NejiCollectionMap, StageSummary } from '../types';
+import { TreasureChestIcon } from '../../../components/TreasureChestIcon';
 import '../neji.css';
 
 interface Props {
@@ -27,7 +28,8 @@ export function CollectionScreen({ stages, collection, onBack }: Props) {
       <header style={styles.header}>
         <div style={styles.titleRow}>
           <button style={styles.backButton} onClick={onBack} aria-label="ステージいちらんへもどる">←</button>
-          <h1 style={styles.title}>🏆 たからばこ</h1>
+          <TreasureChestIcon size={56} open={found > 0} />
+          <h1 style={styles.title}>たからばこ</h1>
         </div>
         <p style={styles.subtitle}>
           {found === 0 ? 'ステージを ほりすすめて たからものを みつけよう' : `みつけた たからもの ${found} / ${list.length}`}

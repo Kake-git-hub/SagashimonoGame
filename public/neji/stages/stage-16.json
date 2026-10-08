@@ -1,0 +1,555 @@
+{
+  "id": "stage-16",
+  "name": "ろっかくの はこ",
+  "emoji": "⬡",
+  "difficulty": 3,
+  "boxes": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "parts": [
+    {
+      "id": "core",
+      "shape": "cylinder",
+      "radius": 1.2,
+      "height": 1.6,
+      "position": [
+        0,
+        1.0,
+        0
+      ],
+      "color": "#2b2d42",
+      "rotation": [
+        0,
+        30,
+        0
+      ],
+      "segments": 6,
+      "fixed": true
+    },
+    {
+      "id": "bottom",
+      "shape": "cylinder",
+      "radius": 1.5,
+      "height": 0.2,
+      "position": [
+        0,
+        0.1,
+        0
+      ],
+      "color": "#f1faee",
+      "rotation": [
+        0,
+        30,
+        0
+      ],
+      "segments": 6,
+      "fixed": true
+    },
+    {
+      "id": "side0",
+      "shape": "box",
+      "size": [
+        1.3856406460551018,
+        1.6,
+        0.2
+      ],
+      "position": [
+        0.0,
+        1.0,
+        1.3
+      ],
+      "color": "#ffb4a2",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "unfold": [
+        {
+          "point": [
+            0.0,
+            0,
+            1.4
+          ],
+          "axis": [
+            1.0,
+            0,
+            -0.0
+          ],
+          "angle": 90
+        }
+      ]
+    },
+    {
+      "id": "side1",
+      "shape": "box",
+      "size": [
+        1.3856406460551018,
+        1.6,
+        0.2
+      ],
+      "position": [
+        1.1258,
+        1.0,
+        0.65
+      ],
+      "color": "#a8dadc",
+      "rotation": [
+        0,
+        60,
+        0
+      ],
+      "unfold": [
+        {
+          "point": [
+            1.2124,
+            0,
+            0.7
+          ],
+          "axis": [
+            0.5,
+            0,
+            -0.866
+          ],
+          "angle": 90
+        }
+      ]
+    },
+    {
+      "id": "side2",
+      "shape": "box",
+      "size": [
+        1.3856406460551018,
+        1.6,
+        0.2
+      ],
+      "position": [
+        1.1258,
+        1.0,
+        -0.65
+      ],
+      "color": "#ffb4a2",
+      "rotation": [
+        0,
+        120,
+        0
+      ],
+      "unfold": [
+        {
+          "point": [
+            1.2124,
+            0,
+            -0.7
+          ],
+          "axis": [
+            -0.5,
+            0,
+            -0.866
+          ],
+          "angle": 90
+        }
+      ]
+    },
+    {
+      "id": "side3",
+      "shape": "box",
+      "size": [
+        1.3856406460551018,
+        1.6,
+        0.2
+      ],
+      "position": [
+        0.0,
+        1.0,
+        -1.3
+      ],
+      "color": "#a8dadc",
+      "rotation": [
+        0,
+        180,
+        0
+      ],
+      "unfold": [
+        {
+          "point": [
+            0.0,
+            0,
+            -1.4
+          ],
+          "axis": [
+            -1.0,
+            0,
+            -0.0
+          ],
+          "angle": 90
+        }
+      ]
+    },
+    {
+      "id": "side4",
+      "shape": "box",
+      "size": [
+        1.3856406460551018,
+        1.6,
+        0.2
+      ],
+      "position": [
+        -1.1258,
+        1.0,
+        -0.65
+      ],
+      "color": "#ffb4a2",
+      "rotation": [
+        0,
+        240,
+        0
+      ],
+      "unfold": [
+        {
+          "point": [
+            -1.2124,
+            0,
+            -0.7
+          ],
+          "axis": [
+            -0.5,
+            0,
+            0.866
+          ],
+          "angle": 90
+        }
+      ]
+    },
+    {
+      "id": "side5",
+      "shape": "box",
+      "size": [
+        1.3856406460551018,
+        1.6,
+        0.2
+      ],
+      "position": [
+        -1.1258,
+        1.0,
+        0.65
+      ],
+      "color": "#a8dadc",
+      "rotation": [
+        0,
+        300,
+        0
+      ],
+      "unfold": [
+        {
+          "point": [
+            -1.2124,
+            0,
+            0.7
+          ],
+          "axis": [
+            0.5,
+            0,
+            0.866
+          ],
+          "angle": 90
+        }
+      ]
+    },
+    {
+      "id": "cap",
+      "shape": "cylinder",
+      "radius": 1.5,
+      "height": 0.2,
+      "position": [
+        0,
+        1.9,
+        0
+      ],
+      "color": "#f1faee",
+      "rotation": [
+        0,
+        30,
+        0
+      ],
+      "segments": 6,
+      "unfold": [
+        {
+          "point": [
+            0.0,
+            0,
+            1.4
+          ],
+          "axis": [
+            1.0,
+            0,
+            -0.0
+          ],
+          "angle": 90
+        },
+        {
+          "point": [
+            0,
+            0,
+            3.0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "angle": 90
+        }
+      ]
+    },
+    {
+      "id": "handle",
+      "shape": "box",
+      "size": [
+        2.2,
+        0.3,
+        0.5
+      ],
+      "position": [
+        0,
+        2.4,
+        0
+      ],
+      "color": "#e63946"
+    }
+  ],
+  "screws": [
+    {
+      "id": "s0",
+      "color": "red",
+      "position": [
+        0.0,
+        1.0,
+        1.4
+      ],
+      "dir": [
+        0.0,
+        0,
+        1.0
+      ],
+      "length": 0.7,
+      "partIds": [
+        "side0",
+        "core"
+      ]
+    },
+    {
+      "id": "s1",
+      "color": "red",
+      "position": [
+        1.2124,
+        1.0,
+        0.7
+      ],
+      "dir": [
+        0.866,
+        0,
+        0.5
+      ],
+      "length": 0.7,
+      "partIds": [
+        "side1",
+        "core"
+      ]
+    },
+    {
+      "id": "s2",
+      "color": "red",
+      "position": [
+        1.2124,
+        1.0,
+        -0.7
+      ],
+      "dir": [
+        0.866,
+        0,
+        -0.5
+      ],
+      "length": 0.7,
+      "partIds": [
+        "side2",
+        "core"
+      ]
+    },
+    {
+      "id": "s3",
+      "color": "blue",
+      "position": [
+        0.0,
+        1.0,
+        -1.4
+      ],
+      "dir": [
+        0.0,
+        0,
+        -1.0
+      ],
+      "length": 0.7,
+      "partIds": [
+        "side3",
+        "core"
+      ]
+    },
+    {
+      "id": "s4",
+      "color": "blue",
+      "position": [
+        -1.2124,
+        1.0,
+        -0.7
+      ],
+      "dir": [
+        -0.866,
+        0,
+        -0.5
+      ],
+      "length": 0.7,
+      "partIds": [
+        "side4",
+        "core"
+      ]
+    },
+    {
+      "id": "s5",
+      "color": "blue",
+      "position": [
+        -1.2124,
+        1.0,
+        0.7
+      ],
+      "dir": [
+        -0.866,
+        0,
+        0.5
+      ],
+      "length": 0.7,
+      "partIds": [
+        "side5",
+        "core"
+      ]
+    },
+    {
+      "id": "c1",
+      "color": "green",
+      "position": [
+        0.8,
+        2.0,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.7,
+      "partIds": [
+        "cap",
+        "core"
+      ]
+    },
+    {
+      "id": "c2",
+      "color": "green",
+      "position": [
+        -0.8,
+        2.0,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.7,
+      "partIds": [
+        "cap",
+        "core"
+      ]
+    },
+    {
+      "id": "c3",
+      "color": "green",
+      "position": [
+        0,
+        2.0,
+        -0.8
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.7,
+      "partIds": [
+        "cap",
+        "core"
+      ]
+    },
+    {
+      "id": "h1",
+      "color": "yellow",
+      "position": [
+        0.3,
+        2.55,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.05,
+      "partIds": [
+        "handle",
+        "cap",
+        "core"
+      ]
+    },
+    {
+      "id": "h2",
+      "color": "yellow",
+      "position": [
+        -0.3,
+        2.55,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.05,
+      "partIds": [
+        "handle",
+        "cap",
+        "core"
+      ]
+    },
+    {
+      "id": "b1",
+      "color": "yellow",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.8,
+      "partIds": [
+        "bottom",
+        "core"
+      ]
+    }
+  ]
+}

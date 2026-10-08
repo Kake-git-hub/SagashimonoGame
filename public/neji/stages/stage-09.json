@@ -10,7 +10,8 @@
     "purple",
     "orange",
     "red",
-    "red"
+    "red",
+    "green"
   ],
   "parts": [
     {
@@ -135,6 +136,36 @@
         1.4
       ],
       "color": "#ffd166"
+    },
+    {
+      "id": "nosering",
+      "shape": "box",
+      "size": [
+        1.4,
+        0.3,
+        1.4
+      ],
+      "position": [
+        0,
+        6.1,
+        0
+      ],
+      "color": "#ffd60a"
+    },
+    {
+      "id": "finguard",
+      "shape": "box",
+      "size": [
+        0.3,
+        0.5,
+        1.4
+      ],
+      "position": [
+        2.2,
+        1.2,
+        0
+      ],
+      "color": "#ffd60a"
     }
   ],
   "screws": [
@@ -527,6 +558,63 @@
       "length": 0.4,
       "partIds": [
         "body"
+      ]
+    },
+    {
+      "id": "nr1",
+      "color": "green",
+      "position": [
+        0.5,
+        6.25,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.05,
+      "partIds": [
+        "nosering",
+        "nose"
+      ]
+    },
+    {
+      "id": "nr2",
+      "color": "green",
+      "position": [
+        -0.5,
+        6.25,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.05,
+      "partIds": [
+        "nosering",
+        "nose"
+      ]
+    },
+    {
+      "id": "fg1",
+      "color": "green",
+      "position": [
+        2.35,
+        1.2,
+        0.5
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "length": 1.0,
+      "partIds": [
+        "finguard",
+        "finPX"
       ]
     }
   ]

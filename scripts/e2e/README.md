@@ -7,6 +7,7 @@ Claude Code のクラウド環境では Playwright と Chromium が最初から�
 ```bash
 bash scripts/e2e/run.sh neji-smoke      # ネジはずし: ステージ1クリア、ブロック表示、色仕分けの流れ
 bash scripts/e2e/run.sh neji-dig        # 発掘ステージ（横向き）: ＋おきばのクイズ、ふたの下のブロック、たからばこ、つぎのステージのクイズ、しっぱい → つづきから（縦向き）
+bash scripts/e2e/run.sh geo-shots       # 展開図（さいころ）を解いて開くのを確認、ピラミッド・漢字のブロック、各ステージのスクリーンショット
 bash scripts/e2e/run.sh stage-shots     # 全ステージの初期表示をスクリーンショット
 bash scripts/e2e/run.sh treasure-shots  # 発掘ステージの土を外して、たからもの（ほし・ダイヤ・骨）が見える状態を撮る
 bash scripts/e2e/run.sh pwa-update      # 旧ビルド起動 → 新ビルド公開 → 自動更新 → オフライン起動

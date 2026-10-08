@@ -18,7 +18,7 @@
 | 機能 | 場所 | 概要 |
 |---|---|---|
 | プロフィール（なんさい？） | `src/services/profileService.ts`, `src/screens/ProfileScreen.tsx` | 起動時に名前と年齢を登録。兄弟分を持てて、進捗はプロフィールごとに分かれる。年齢 → 難易度・クイズレベル（`difficultyForAge`） |
-| べんきょうクイズ | `src/services/quizService.ts`, `src/components/quiz/QuizOverlay.tsx`, `src/hooks/useQuizGate.tsx` | 年齢に合わせた問題を生成。`useQuizGate().ask(trigger)` が「クイズに正解したら true」の Promise を返す |
+| べんきょうクイズ | `src/services/quiz/`（`index.ts` が科目の登録簿、`generators/` が科目ごとの問題生成）, `src/components/quiz/QuizScreen.tsx`（全画面）, `src/hooks/useQuizGate.tsx` | 年齢に合わせた問題を生成。`useQuizGate().ask(trigger)` が「クイズに正解したら true」の Promise を返す。科目を増やすときは `generators/` にファイルを足して `GENERATORS` に登録する |
 | おうちのひと設定 | `src/services/appSettingsService.ts`, `src/screens/ParentSettingsScreen.tsx` | かけ算の関門の先。クイズを出す場面・レベル・科目、おたすけの回数、プロフィールの編集 |
 
 ## よく使うコマンド
@@ -32,6 +32,7 @@ npm run validate:neji  # ステージ JSON の検証だけ
 npm run preview        # dist を配信（PWA の動作確認はこちら）
 bash scripts/e2e/run.sh neji-smoke   # ヘッドレス Chromium で実際に遊んで確認（scripts/e2e/README.md）
 bash scripts/e2e/run.sh neji-dig     # 発掘ステージ・クイズ・おたすけ・つづきから の流れ
+bash scripts/e2e/run.sh geo-shots    # 展開図・ピラミッド・漢字ステージ（ブロックの確認とスクリーンショット）
 ```
 
 push 前に `npm run build` / `npm run lint` / `npm test` を通す。CI（`.github/workflows/deploy.yml`）も同じ順で実行し、`main` に push されると GitHub Pages へデプロイされる。
@@ -51,7 +52,8 @@ push 前に `npm run build` / `npm run lint` / `npm test` を通す。CI（`.git
 - リポジトリ名と `base: '/SagashimonoGame/'` は変えない（PWA の登録パスが壊れる）
 - `public/sw.js` / `public/manifest.json` は作らない（ビルドで生成される。manifest は `vite.config.ts` で編集）
 - ホーム画面など軽い画面から three.js に依存するモジュールを import しない（`src/games/neji/logic/geometry.ts` 等）。ネジはずしは `React.lazy` で別チャンクにしてある
-- ネジはずしのステージ JSON を追加・変更したら `npm run validate:neji` を通す。検証を弱めてごまかさない（解けないステージを配布しないための仕組み）。底面（`dir: [0,-1,0]`）にもネジを置く
+- ネジはずしのステージ JSON を追加・変更したら `npm run validate:neji` を通す。検証を弱めてごまかさない（解けないステージを配布しないための仕組み）。底面（`dir: [0,-1,0]`）にもネジを置き、外側のパーツを外さないと取れないネジ（ふた・上の段・前の画）を多めに入れる
+- 画面が切り替わった直後の連打対策: 結果画面・クイズ・たからものを見る画面のボタンは `useTapGuard` で出てから約 1 秒は押せない。新しい画面を足すときも同じにする
 - ネジはずしの画面は 3D を全面に敷き、HUD（ボックス・おきば・ヘッダー）を透過で重ねる。HUD の位置は `neji.css` の `@media (orientation: landscape)` で切り替え、`NejiGameScreen` が HUD の大きさを測って `Scene` に `insets` として渡し、図形がその内側に収まるようにしている
 - ステータスバー（アンテナ・バッテリー）と重ならないよう、各画面のヘッダーは `env(safe-area-inset-top)` 分の余白を取る
 - UI の文言は子ども向けのひらがな中心（「よみこみちゅう」「おめでとう！」など既存の調子に合わせる）

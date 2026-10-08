@@ -8,6 +8,13 @@ export type ScrewColor = (typeof SCREW_COLORS)[number];
 
 // === ステージ定義（public/neji/stages/*.json） ===
 
+// ちょうつがい: point を通る axis（ワールド座標）のまわりに angle 度まわす
+export interface HingeDef {
+  point: Vec3;
+  axis: Vec3;
+  angle: number;
+}
+
 interface PartBase {
   id: string;
   position: Vec3;      // ワールド座標（パーツ中心）
@@ -15,6 +22,7 @@ interface PartBase {
   color?: string;      // CSS カラー。省略時は既定色
   fixed?: boolean;     // true なら最後まで落ちない（土台）
   detachDir?: Vec3;    // 落下時に押し出す方向。省略時は図形中心から外向き
+  unfold?: HingeDef[]; // 指定すると、落ちる代わりにちょうつがいで順に回って開く（展開図）。開いたあとも残る
 }
 
 export interface BoxPartDef extends PartBase {
@@ -26,6 +34,7 @@ export interface CylinderPartDef extends PartBase {
   shape: 'cylinder';
   radius: number;
   height: number;      // ローカル Y 軸方向の長さ
+  segments?: number;   // 側面の分割数（6 なら六角柱）。見た目だけで、当たり判定は円柱のまま
 }
 
 export interface SpherePartDef extends PartBase {

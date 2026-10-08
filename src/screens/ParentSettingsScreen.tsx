@@ -20,7 +20,7 @@ import {
   quizLevelForAge,
   updateProfile,
 } from '../services/profileService';
-import { generateParentGate } from '../services/quizService';
+import { generateParentGate } from '../services/quiz';
 
 interface Props {
   onClose: () => void;

@@ -1,0 +1,439 @@
+{
+  "id": "stage-15",
+  "name": "さいころの てんかいず",
+  "emoji": "🎲",
+  "difficulty": 2,
+  "boxes": [
+    "red",
+    "blue",
+    "green",
+    "yellow"
+  ],
+  "parts": [
+    {
+      "id": "core",
+      "shape": "box",
+      "size": [
+        1.6,
+        1.6,
+        1.6
+      ],
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "color": "#2b2d42",
+      "fixed": true
+    },
+    {
+      "id": "bottom",
+      "shape": "box",
+      "size": [
+        2,
+        0.2,
+        2
+      ],
+      "position": [
+        0,
+        0.1,
+        0
+      ],
+      "color": "#f1faee",
+      "fixed": true
+    },
+    {
+      "id": "top",
+      "shape": "box",
+      "size": [
+        2,
+        0.2,
+        2
+      ],
+      "position": [
+        0,
+        1.9,
+        0
+      ],
+      "color": "#f1faee",
+      "unfold": [
+        {
+          "point": [
+            0,
+            0,
+            -1
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "angle": -90
+        },
+        {
+          "point": [
+            0,
+            0,
+            -3
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "angle": -90
+        }
+      ]
+    },
+    {
+      "id": "px",
+      "shape": "box",
+      "size": [
+        0.2,
+        1.6,
+        2.0
+      ],
+      "position": [
+        0.9,
+        1,
+        0
+      ],
+      "color": "#a8dadc",
+      "unfold": [
+        {
+          "point": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "angle": -90
+        }
+      ]
+    },
+    {
+      "id": "nx",
+      "shape": "box",
+      "size": [
+        0.2,
+        1.6,
+        2.0
+      ],
+      "position": [
+        -0.9,
+        1,
+        0
+      ],
+      "color": "#a8dadc",
+      "unfold": [
+        {
+          "point": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "angle": 90
+        }
+      ]
+    },
+    {
+      "id": "pz",
+      "shape": "box",
+      "size": [
+        1.6,
+        1.6,
+        0.2
+      ],
+      "position": [
+        0,
+        1,
+        0.9
+      ],
+      "color": "#ffb4a2",
+      "unfold": [
+        {
+          "point": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "angle": 90
+        }
+      ]
+    },
+    {
+      "id": "nz",
+      "shape": "box",
+      "size": [
+        1.6,
+        1.6,
+        0.2
+      ],
+      "position": [
+        0,
+        1,
+        -0.9
+      ],
+      "color": "#ffb4a2",
+      "unfold": [
+        {
+          "point": [
+            0,
+            0,
+            -1
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "angle": -90
+        }
+      ]
+    }
+  ],
+  "screws": [
+    {
+      "id": "px1",
+      "color": "red",
+      "position": [
+        1.0,
+        1.45,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "px",
+        "core"
+      ]
+    },
+    {
+      "id": "px2",
+      "color": "red",
+      "position": [
+        1.0,
+        0.55,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "px",
+        "core"
+      ]
+    },
+    {
+      "id": "nx1",
+      "color": "red",
+      "position": [
+        -1.0,
+        1.45,
+        0
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "nx",
+        "core"
+      ]
+    },
+    {
+      "id": "nx2",
+      "color": "blue",
+      "position": [
+        -1.0,
+        0.55,
+        0
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "nx",
+        "core"
+      ]
+    },
+    {
+      "id": "pz1",
+      "color": "blue",
+      "position": [
+        0,
+        1.45,
+        1.0
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.6,
+      "partIds": [
+        "pz",
+        "core"
+      ]
+    },
+    {
+      "id": "pz2",
+      "color": "blue",
+      "position": [
+        0,
+        0.55,
+        1.0
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.6,
+      "partIds": [
+        "pz",
+        "core"
+      ]
+    },
+    {
+      "id": "nz1",
+      "color": "green",
+      "position": [
+        0,
+        1.45,
+        -1.0
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.6,
+      "partIds": [
+        "nz",
+        "core"
+      ]
+    },
+    {
+      "id": "nz2",
+      "color": "green",
+      "position": [
+        0,
+        0.55,
+        -1.0
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.6,
+      "partIds": [
+        "nz",
+        "core"
+      ]
+    },
+    {
+      "id": "t1",
+      "color": "green",
+      "position": [
+        0.5,
+        2.0,
+        0.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "top",
+        "core"
+      ]
+    },
+    {
+      "id": "t2",
+      "color": "yellow",
+      "position": [
+        -0.5,
+        2.0,
+        0.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "top",
+        "core"
+      ]
+    },
+    {
+      "id": "t3",
+      "color": "yellow",
+      "position": [
+        0.5,
+        2.0,
+        -0.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "top",
+        "core"
+      ]
+    },
+    {
+      "id": "t4",
+      "color": "yellow",
+      "position": [
+        -0.5,
+        2.0,
+        -0.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "top",
+        "core"
+      ]
+    }
+  ]
+}

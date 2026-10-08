@@ -1,4 +1,5 @@
 import { NejiCollectionMap, NejiProgressMap, StageSummary } from '../types';
+import { TreasureChestIcon } from '../../../components/TreasureChestIcon';
 
 interface Props {
   stages: StageSummary[];
@@ -35,11 +36,15 @@ export function StageList({ stages, progress, collection, onSelect, onOpenCollec
             ←
           </button>
           <h1 style={styles.title}>🔩 ネジはずし</h1>
-          <button style={styles.collectionButton} onClick={onOpenCollection} aria-label="たからばこをみる">
-            🏆 {treasureFound}/{treasureTotal}
-          </button>
         </div>
         <p style={styles.subtitle}>ステージをえらんでね（クリア {clearedCount} / {stages.length}）</p>
+        <button style={styles.collectionButton} onClick={onOpenCollection} aria-label="たからばこをみる">
+          <TreasureChestIcon size={64} open={treasureFound > 0} />
+          <span style={styles.collectionText}>
+            <span style={styles.collectionTitle}>たからばこ</span>
+            <span style={styles.collectionCount}>たからもの {treasureFound} / {treasureTotal}</span>
+          </span>
+        </button>
       </header>
 
       <div style={styles.scrollContainer}>
@@ -93,16 +98,32 @@ const styles: Record<string, React.CSSProperties> = {
     flexShrink: 0,
   },
   collectionButton: {
-    padding: '6px 12px',
-    fontSize: '0.95rem',
-    fontWeight: 'bold',
-    borderRadius: '18px',
-    border: 'none',
-    backgroundColor: '#fff3e0',
-    color: '#e65100',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '12px',
+    margin: '12px auto 0',
+    padding: '8px 22px 8px 12px',
+    borderRadius: '40px',
+    border: '3px solid #ffd166',
+    background: 'linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%)',
+    color: '#7a3f0e',
     cursor: 'pointer',
-    flexShrink: 0,
     fontFamily: 'inherit',
+    boxShadow: '0 4px 12px rgba(201, 122, 43, 0.3)',
+  },
+  collectionText: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    lineHeight: 1.2,
+  },
+  collectionTitle: {
+    fontSize: '1.25rem',
+    fontWeight: 'bold',
+  },
+  collectionCount: {
+    fontSize: '0.9rem',
+    color: '#a05a1c',
   },
   treasureBadge: {
     position: 'absolute',

@@ -49,6 +49,7 @@ export const ANIM = {
   SHAKE_MS: 400,         // 外せないネジの震え
   BLOCKER_FLASH_MS: 600, // 邪魔している物の赤表示
   FALL_MS: 900,          // パーツ落下
+  UNFOLD_MS: 1100,       // 展開図のパーツが開く（ちょうつがい 1 つあたりではなく全体）
   FLY_MS: 450,           // ネジがボックスへ飛ぶ
   BOX_DEPART_MS: 650,    // 満杯ボックスの退場
   RESULT_DELAY_MS: 600,  // クリア/失敗オーバーレイを出すまでの待ち

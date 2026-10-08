@@ -13,18 +13,10 @@ export const QUIZ_TRIGGERS: { id: QuizTrigger; label: string; detail: string }[]
   { id: 'nextStage', label: 'つぎのステージへ すすむとき', detail: 'クリアしたあと' },
 ];
 
-export type QuizSubject = 'count' | 'compare' | 'hiragana' | 'add' | 'sub' | 'mul' | 'div' | 'mixed';
+import { isQuizSubject, QuizSubject } from './quiz';
 
-export const QUIZ_SUBJECTS: { id: QuizSubject; label: string; minLevel: number }[] = [
-  { id: 'count', label: 'かぞえる', minLevel: 1 },
-  { id: 'compare', label: 'おおい・すくない', minLevel: 1 },
-  { id: 'hiragana', label: 'ひらがな', minLevel: 2 },
-  { id: 'add', label: 'たしざん', minLevel: 2 },
-  { id: 'sub', label: 'ひきざん', minLevel: 2 },
-  { id: 'mul', label: 'かけざん', minLevel: 3 },
-  { id: 'div', label: 'わりざん', minLevel: 4 },
-  { id: 'mixed', label: 'まぜこぜ（かっこ・じゅんばん）', minLevel: 5 },
-];
+export type { QuizSubject } from './quiz';
+export { QUIZ_SUBJECTS } from './quiz';
 
 export interface AppSettings {
   quizEnabled: boolean;                       // false ならクイズなしでそのまま進める
@@ -57,7 +49,7 @@ export function getAppSettings(): AppSettings {
         ...DEFAULT_SETTINGS,
         ...parsed,
         quizTriggers: { ...DEFAULT_SETTINGS.quizTriggers, ...(parsed.quizTriggers ?? {}) },
-        quizSubjects: Array.isArray(parsed.quizSubjects) ? parsed.quizSubjects : [],
+        quizSubjects: Array.isArray(parsed.quizSubjects) ? parsed.quizSubjects.filter(isQuizSubject) : [],
       };
     }
   } catch {
