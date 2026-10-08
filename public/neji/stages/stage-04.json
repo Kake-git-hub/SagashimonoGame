@@ -7,7 +7,8 @@
     "red",
     "blue",
     "yellow",
-    "green"
+    "green",
+    "purple"
   ],
   "parts": [
     {
@@ -351,6 +352,60 @@
         "body"
       ],
       "length": 0.8
+    },
+    {
+      "id": "d1",
+      "color": "purple",
+      "position": [
+        0,
+        0.2,
+        0.6
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.35,
+      "partIds": [
+        "chassis"
+      ]
+    },
+    {
+      "id": "d2",
+      "color": "purple",
+      "position": [
+        0,
+        0.2,
+        -0.6
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.35,
+      "partIds": [
+        "chassis"
+      ]
+    },
+    {
+      "id": "d3",
+      "color": "purple",
+      "position": [
+        0.7,
+        0.2,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.35,
+      "partIds": [
+        "chassis"
+      ]
     }
   ]
 }

@@ -4,69 +4,117 @@
     "name": "はこ",
     "emoji": "📦",
     "difficulty": 1,
-    "screwCount": 6
+    "screwCount": 9
   },
   {
     "id": "stage-02",
     "name": "きのこ",
     "emoji": "🍄",
     "difficulty": 2,
-    "screwCount": 9
+    "screwCount": 12
   },
   {
     "id": "stage-04",
     "name": "くるま",
     "emoji": "🚗",
     "difficulty": 2,
-    "screwCount": 12
+    "screwCount": 15
+  },
+  {
+    "id": "stage-11",
+    "name": "ハートのはっくつ",
+    "emoji": "💖",
+    "difficulty": 2,
+    "screwCount": 15,
+    "treasure": {
+      "id": "heart",
+      "name": "ピンクのハート",
+      "emoji": "💖"
+    }
   },
   {
     "id": "stage-03",
     "name": "ピンのとう",
     "emoji": "🗼",
     "difficulty": 3,
-    "screwCount": 9
+    "screwCount": 12
   },
   {
     "id": "stage-05",
     "name": "ゆきだるま",
     "emoji": "⛄",
     "difficulty": 3,
-    "screwCount": 15
+    "screwCount": 18
   },
   {
     "id": "stage-06",
     "name": "ロボット",
     "emoji": "🤖",
     "difficulty": 3,
-    "screwCount": 15
+    "screwCount": 18
+  },
+  {
+    "id": "stage-12",
+    "name": "ほしのはっくつ",
+    "emoji": "⭐",
+    "difficulty": 3,
+    "screwCount": 18,
+    "treasure": {
+      "id": "star",
+      "name": "きんいろのほし",
+      "emoji": "⭐"
+    }
   },
   {
     "id": "stage-07",
     "name": "タワー",
     "emoji": "🏯",
     "difficulty": 4,
-    "screwCount": 15
+    "screwCount": 18
   },
   {
     "id": "stage-08",
     "name": "ほんだな",
     "emoji": "📚",
     "difficulty": 4,
-    "screwCount": 18
+    "screwCount": 21
   },
   {
     "id": "stage-09",
     "name": "ロケット",
     "emoji": "🚀",
     "difficulty": 4,
-    "screwCount": 18
+    "screwCount": 21
+  },
+  {
+    "id": "stage-13",
+    "name": "ダイヤのはっくつ",
+    "emoji": "💎",
+    "difficulty": 4,
+    "screwCount": 18,
+    "treasure": {
+      "id": "gem",
+      "name": "みずいろのダイヤ",
+      "emoji": "💎"
+    }
   },
   {
     "id": "stage-10",
     "name": "おしろ",
     "emoji": "🏰",
     "difficulty": 5,
-    "screwCount": 21
+    "screwCount": 24
+  },
+  {
+    "id": "stage-14",
+    "name": "きょうりゅうのかせき",
+    "emoji": "🦕",
+    "difficulty": 5,
+    "screwCount": 21,
+    "treasure": {
+      "id": "dino",
+      "name": "きょうりゅうのほね",
+      "emoji": "🦴"
+    }
   }
 ]

@@ -3,7 +3,7 @@
  */
 import { Blocker, Stage } from '../types';
 import { findBlockers } from './removable';
-import { createSortState, findFreeParts, placeScrew, SortEvent, SortState } from './rules';
+import { addBoxSlot, addBufferSlot, createSortState, findFreeParts, placeScrew, SortEvent, SortState } from './rules';
 
 export type GameStatus = 'playing' | 'cleared' | 'failed';
 
@@ -16,9 +16,17 @@ export interface BlockedFeedback {
 // HUD のアニメーション用。seq は単調増加
 export type GameEvent = SortEvent & { seq: number };
 
+// 「もどす」用に 1 手ごとに取っておく状態
+interface MoveSnapshot {
+  remainingScrews: ReadonlySet<string>;
+  remainingParts: ReadonlySet<string>;
+  sort: SortState;
+  moves: number;
+}
+
 export interface NejiGameState {
   stage: Stage;
-  generation: number;                   // reset のたびに増える（演出のリセット用）
+  generation: number;                   // reset / もどす のたびに増える（演出のリセット用）
   remainingScrews: ReadonlySet<string>; // 図形に残っているネジ（判定対象）
   remainingParts: ReadonlySet<string>;  // 残っているパーツ（判定対象）
   removingScrews: readonly string[];    // 取り外しアニメーション中（表示のみ）
@@ -29,13 +37,21 @@ export interface NejiGameState {
   status: GameStatus;
   moves: number;
   feedback: BlockedFeedback | null;     // 外せないネジをタップしたときの情報
+  history: readonly MoveSnapshot[];     // 直前までの手（もどす用）
+  extraBoxes: number;                   // このステージで「＋はこ」した回数
+  extraBuffer: number;                  // このステージで「＋おきば」した回数
 }
 
 export type NejiAction =
   | { type: 'reset'; stage: Stage }
   | { type: 'tapScrew'; id: string }
   | { type: 'screwRemoveDone'; id: string }
-  | { type: 'partFallDone'; id: string };
+  | { type: 'partFallDone'; id: string }
+  | { type: 'addBox' }
+  | { type: 'addBuffer' }
+  | { type: 'rewind'; moves: number }; // 指定した手数だけ戻して遊べる状態にする
+
+export const REWIND_MOVES = 3;
 
 export function createInitialState(stage: Stage, generation = 0): NejiGameState {
   return {
@@ -51,6 +67,9 @@ export function createInitialState(stage: Stage, generation = 0): NejiGameState 
     status: 'playing',
     moves: 0,
     feedback: null,
+    history: [],
+    extraBoxes: 0,
+    extraBuffer: 0,
   };
 }
 
@@ -90,6 +109,13 @@ export function nejiReducer(state: NejiGameState, action: NejiAction): NejiGameS
       if (placed.overflow) status = 'failed';
       else if (remainingScrews.size === 0) status = 'cleared';
 
+      const snapshot: MoveSnapshot = {
+        remainingScrews: state.remainingScrews,
+        remainingParts: state.remainingParts,
+        sort: state.sort,
+        moves: state.moves,
+      };
+
       return {
         ...state,
         remainingScrews,
@@ -101,6 +127,7 @@ export function nejiReducer(state: NejiGameState, action: NejiAction): NejiGameS
         eventSeq: seq,
         status,
         moves: state.moves + 1,
+        history: [...state.history, snapshot],
       };
     }
 
@@ -111,6 +138,40 @@ export function nejiReducer(state: NejiGameState, action: NejiAction): NejiGameS
     case 'partFallDone':
       if (!state.fallingParts.includes(action.id)) return state;
       return { ...state, fallingParts: state.fallingParts.filter(id => id !== action.id) };
+
+    case 'addBox': {
+      if (state.status !== 'playing') return state;
+      const added = addBoxSlot(state.stage, state.sort);
+      if (added.state === state.sort) return state;
+      let seq = state.eventSeq;
+      const events: GameEvent[] = added.events.map(e => ({ ...e, seq: ++seq }));
+      return { ...state, sort: added.state, events, eventSeq: seq, extraBoxes: state.extraBoxes + 1 };
+    }
+
+    case 'addBuffer': {
+      if (state.status !== 'playing') return state;
+      return { ...state, sort: addBufferSlot(state.sort), extraBuffer: state.extraBuffer + 1 };
+    }
+
+    case 'rewind': {
+      const count = Math.min(Math.max(1, action.moves), state.history.length);
+      if (count === 0) return state;
+      const target = state.history[state.history.length - count];
+      return {
+        ...state,
+        generation: state.generation + 1,
+        remainingScrews: target.remainingScrews,
+        remainingParts: target.remainingParts,
+        removingScrews: [],
+        fallingParts: [],
+        sort: target.sort,
+        events: [],
+        status: 'playing',
+        moves: target.moves,
+        feedback: null,
+        history: state.history.slice(0, state.history.length - count),
+      };
+    }
 
     default:
       return state;

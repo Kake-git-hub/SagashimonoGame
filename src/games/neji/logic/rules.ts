@@ -85,16 +85,12 @@ export function createSortState(stage: Stage): SortState {
   };
 }
 
-// 満杯になったボックスを退場させ、次のボックスを出し、一時置き場から同色を移す
-function completeBox(stage: Stage, state: SortState, position: number, events: SortEvent[]): void {
-  const full = state.boxes[position];
-  if (!full) return;
-  events.push({ type: 'boxFull', uid: full.uid, position, color: full.color });
-
-  const nextColor = state.boxes.length > 0 ? stage.boxes[state.nextBoxIndex] : undefined;
+// キューの次のボックスを position に出し、一時置き場の同色を移す。出すボックスが無ければ false
+function openNextBox(stage: Stage, state: SortState, position: number, events: SortEvent[]): boolean {
+  const nextColor = stage.boxes[state.nextBoxIndex];
   if (!nextColor) {
     state.boxes[position] = null;
-    return;
+    return false;
   }
   state.nextBoxIndex += 1;
   const box: BoxSlot = { uid: state.nextUid++, color: nextColor, filled: 0 };
@@ -119,6 +115,47 @@ function completeBox(stage: Stage, state: SortState, position: number, events: S
   if (box.filled >= stage.boxCapacity) {
     completeBox(stage, state, position, events);
   }
+  return true;
+}
+
+// 満杯になったボックスを退場させ、次のボックスを出す
+function completeBox(stage: Stage, state: SortState, position: number, events: SortEvent[]): void {
+  const full = state.boxes[position];
+  if (!full) return;
+  events.push({ type: 'boxFull', uid: full.uid, position, color: full.color });
+  openNextBox(stage, state, position, events);
+}
+
+function cloneSortState(prev: SortState): SortState {
+  return {
+    boxes: prev.boxes.map(b => (b ? { ...b } : null)),
+    nextBoxIndex: prev.nextBoxIndex,
+    buffer: [...prev.buffer],
+    nextUid: prev.nextUid,
+  };
+}
+
+// まだ出ていないボックスがあるか（「＋はこ」が意味を持つか）
+export function hasQueuedBox(stage: Stage, state: SortState): boolean {
+  return state.nextBoxIndex < stage.boxes.length;
+}
+
+// おたすけ: ボックスの枠を 1 つ増やして、キューの次のボックスを出す
+export function addBoxSlot(stage: Stage, prev: SortState): PlaceResult {
+  const state = cloneSortState(prev);
+  const events: SortEvent[] = [];
+  if (!hasQueuedBox(stage, state)) return { state: prev, events, overflow: false };
+  const position = state.boxes.length;
+  state.boxes.push(null);
+  openNextBox(stage, state, position, events);
+  return { state, events, overflow: false };
+}
+
+// おたすけ: 一時置き場の穴を 1 つ増やす
+export function addBufferSlot(prev: SortState): SortState {
+  const state = cloneSortState(prev);
+  state.buffer.push(null);
+  return state;
 }
 
 /**
@@ -126,12 +163,7 @@ function completeBox(stage: Stage, state: SortState, position: number, events: S
  * 同色で空きのあるボックス → 一時置き場 → どちらも無ければ overflow（失敗）
  */
 export function placeScrew(stage: Stage, prev: SortState, screwId: string, color: ScrewColor): PlaceResult {
-  const state: SortState = {
-    boxes: prev.boxes.map(b => (b ? { ...b } : null)),
-    nextBoxIndex: prev.nextBoxIndex,
-    buffer: [...prev.buffer],
-    nextUid: prev.nextUid,
-  };
+  const state = cloneSortState(prev);
   const events: SortEvent[] = [];
 
   const position = state.boxes.findIndex(b => b && b.color === color && b.filled < stage.boxCapacity);

@@ -42,12 +42,14 @@ function BoxView({ box, capacity, hidden, className = '' }: BoxViewProps) {
 interface Props {
   boxes: (BoxSlot | null)[];
   capacity: number;
-  nextColor: ScrewColor | null;
   hidden: ReadonlySet<string>;
   departing: DepartingBox[];
+  // おたすけ「＋はこ」。null なら表示しない
+  onAddBox: (() => void) | null;
+  addBoxLabel?: string;
 }
 
-export function BoxHud({ boxes, capacity, nextColor, hidden, departing }: Props) {
+export function BoxHud({ boxes, capacity, hidden, departing, onAddBox, addBoxLabel = '＋はこ' }: Props) {
   return (
     <div className="neji-boxes">
       {boxes.map((box, position) => (
@@ -70,10 +72,11 @@ export function BoxHud({ boxes, capacity, nextColor, hidden, departing }: Props)
             ))}
         </div>
       ))}
-      <div className="neji-next" aria-label="つぎのはこ">
-        <span>つぎ</span>
-        {nextColor ? <ScrewIcon color={nextColor} size={18} /> : <span>—</span>}
-      </div>
+      {onAddBox && (
+        <button className="neji-help-button" onClick={onAddBox} aria-label="はこをふやす">
+          {addBoxLabel}
+        </button>
+      )}
     </div>
   );
 }

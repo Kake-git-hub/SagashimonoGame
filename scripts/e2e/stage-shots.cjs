@@ -1,9 +1,9 @@
 // 全ステージの初期表示をスクリーンショットに保存する
-const { launch, openStage, report, OUT, DEBUG_URL } = require('./common.cjs');
+const { launch, gotoHome, openStage, report, OUT, DEBUG_URL } = require('./common.cjs');
 
 (async () => {
   const { browser, page, errors } = await launch();
-  await page.goto(DEBUG_URL, { waitUntil: 'networkidle' });
+  await gotoHome(page, DEBUG_URL);
   await page.click('text=ネジはずし');
   await page.waitForSelector('text=ステージをえらんでね');
   const names = await page.$$eval('button[aria-label$="であそぶ"]', els => els.map(e => e.getAttribute('aria-label').replace('であそぶ', '')));

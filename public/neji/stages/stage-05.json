@@ -8,7 +8,8 @@
     "orange",
     "blue",
     "red",
-    "green"
+    "green",
+    "yellow"
   ],
   "parts": [
     {
@@ -345,6 +346,60 @@
         "bottom"
       ],
       "length": 1.0
+    },
+    {
+      "id": "d1",
+      "color": "yellow",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dir": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "bottom"
+      ]
+    },
+    {
+      "id": "d2",
+      "color": "yellow",
+      "position": [
+        1.072,
+        0.5,
+        0.0
+      ],
+      "dir": [
+        0.766,
+        -0.643,
+        0.0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "bottom"
+      ]
+    },
+    {
+      "id": "d3",
+      "color": "yellow",
+      "position": [
+        -0.536,
+        0.5,
+        0.929
+      ],
+      "dir": [
+        -0.383,
+        -0.643,
+        0.663
+      ],
+      "length": 0.6,
+      "partIds": [
+        "bottom"
+      ]
     }
   ]
 }

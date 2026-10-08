@@ -15,9 +15,22 @@ async function launch(viewport = { width: 390, height: 844 }) {
   return { browser, context, page, errors };
 }
 
+// ホーム画面を開く。初回はプロフィール作成画面（なんさい？）が出るので 6 さいで作る
+async function gotoHome(page, url = BASE) {
+  await page.goto(url, { waitUntil: 'networkidle' });
+  const first = await page.$('text=はじめまして');
+  if (first) {
+    await page.click('button:has-text("6さい")');
+    await page.click('text=これで はじめる！');
+  } else if (await page.$('text=だれが あそぶ？')) {
+    await page.click('button[aria-label$="であそぶ"]');
+  }
+  await page.waitForSelector('text=あそぶゲームをえらんでね');
+}
+
 // ネジはずしのステージを開き、デバッグ情報が出るまで待つ
 async function openStage(page, stageName) {
-  await page.goto(DEBUG_URL, { waitUntil: 'networkidle' });
+  await gotoHome(page, DEBUG_URL);
   await page.click('text=ネジはずし');
   await page.waitForSelector('text=ステージをえらんでね');
   await page.click(`button[aria-label="${stageName}であそぶ"]`);
@@ -54,4 +67,4 @@ function report(errors) {
   return errors.length === 0;
 }
 
-module.exports = { BASE, DEBUG_URL, OUT, launch, openStage, clickScrew, tapScrew, hudText, report };
+module.exports = { BASE, DEBUG_URL, OUT, launch, gotoHome, openStage, clickScrew, tapScrew, hudText, report };

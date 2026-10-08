@@ -33,7 +33,15 @@ export interface SpherePartDef extends PartBase {
   radius: number;
 }
 
-export type PartDef = BoxPartDef | CylinderPartDef | SpherePartDef;
+// 飾りの形（たからもの・化石用）。当たり判定はローカル Y 軸方向の円柱で近似する
+export interface FancyPartDef extends PartBase {
+  shape: 'star' | 'heart' | 'gem' | 'bone';
+  radius: number;      // 外接円の半径（bone は端のこぶの半径）
+  height: number;      // 厚み（bone は全長）
+}
+
+export type PartDef = BoxPartDef | CylinderPartDef | SpherePartDef | FancyPartDef;
+export type PartShape = PartDef['shape'];
 
 export interface ScrewDef {
   id: string;
@@ -55,6 +63,15 @@ export interface StageDef {
   boxes: ScrewColor[];     // ボックスが登場する順番
   parts: PartDef[];
   screws: ScrewDef[];
+  treasure?: TreasureDef;  // 発掘ステージ: 周りを全部外すと手に入る核ブロック
+}
+
+// たからもの（核ブロック）。partIds のパーツは fixed にして、最後まで残す
+export interface TreasureDef {
+  id: string;          // コレクションのキー（例: heart）
+  name: string;        // 表示名（ひらがな）
+  emoji: string;
+  partIds: string[];   // 核になるパーツ
 }
 
 // 既定値を埋めた後のステージ
@@ -67,6 +84,7 @@ export interface StageSummary {
   emoji?: string;
   difficulty: number;
   screwCount: number;
+  treasure?: { id: string; name: string; emoji: string }; // 発掘ステージなら、手に入るたからもの
 }
 
 // === 進捗 ===
@@ -78,6 +96,15 @@ export interface NejiStageProgress {
 }
 
 export type NejiProgressMap = Record<string, NejiStageProgress>;
+
+// たからもの（核ブロック）のコレクション。キーは treasure.id
+export interface NejiCollectedTreasure {
+  count: number;     // 手に入れた回数
+  firstAt: number;   // 初めて手に入れた日時
+  stageId: string;
+}
+
+export type NejiCollectionMap = Record<string, NejiCollectedTreasure>;
 
 // === ゲーム中の状態 ===
 

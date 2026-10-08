@@ -1,9 +1,11 @@
-import { NejiProgressMap, StageSummary } from '../types';
+import { NejiCollectionMap, NejiProgressMap, StageSummary } from '../types';
 
 interface Props {
   stages: StageSummary[];
   progress: NejiProgressMap;
+  collection: NejiCollectionMap;
   onSelect: (stageId: string) => void;
+  onOpenCollection: () => void;
   onExit: () => void;
 }
 
@@ -20,8 +22,10 @@ function difficultyStars(level: number): string {
   return '★'.repeat(capped) + '☆'.repeat(5 - capped);
 }
 
-export function StageList({ stages, progress, onSelect, onExit }: Props) {
+export function StageList({ stages, progress, collection, onSelect, onOpenCollection, onExit }: Props) {
   const clearedCount = stages.filter(s => progress[s.id]?.cleared).length;
+  const treasureTotal = new Set(stages.filter(s => s.treasure).map(s => s.treasure!.id)).size;
+  const treasureFound = Object.keys(collection).length;
 
   return (
     <div style={styles.container}>
@@ -31,6 +35,9 @@ export function StageList({ stages, progress, onSelect, onExit }: Props) {
             ←
           </button>
           <h1 style={styles.title}>🔩 ネジはずし</h1>
+          <button style={styles.collectionButton} onClick={onOpenCollection} aria-label="たからばこをみる">
+            🏆 {treasureFound}/{treasureTotal}
+          </button>
         </div>
         <p style={styles.subtitle}>ステージをえらんでね（クリア {clearedCount} / {stages.length}）</p>
       </header>
@@ -49,6 +56,11 @@ export function StageList({ stages, progress, onSelect, onExit }: Props) {
                 <div style={{ ...styles.cardVisual, background: CARD_GRADIENTS[index % CARD_GRADIENTS.length] }}>
                   <span style={styles.cardEmoji}>{stage.emoji ?? '🔩'}</span>
                   <span style={styles.stageNumber}>{index + 1}</span>
+                  {stage.treasure && (
+                    <span style={styles.treasureBadge} title={stage.treasure.name}>
+                      {collection[stage.treasure.id] ? stage.treasure.emoji : '⛏️'}
+                    </span>
+                  )}
                   {cleared && <span style={styles.clearedBadge}>✅ クリア！</span>}
                 </div>
                 <div style={styles.cardBody}>
@@ -77,8 +89,27 @@ const styles: Record<string, React.CSSProperties> = {
   },
   header: {
     textAlign: 'center',
-    padding: '20px 20px 10px',
+    padding: 'calc(14px + env(safe-area-inset-top, 0px)) 20px 10px',
     flexShrink: 0,
+  },
+  collectionButton: {
+    padding: '6px 12px',
+    fontSize: '0.95rem',
+    fontWeight: 'bold',
+    borderRadius: '18px',
+    border: 'none',
+    backgroundColor: '#fff3e0',
+    color: '#e65100',
+    cursor: 'pointer',
+    flexShrink: 0,
+    fontFamily: 'inherit',
+  },
+  treasureBadge: {
+    position: 'absolute',
+    bottom: '8px',
+    right: '10px',
+    fontSize: '1.3rem',
+    filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.3))',
   },
   titleRow: {
     display: 'flex',

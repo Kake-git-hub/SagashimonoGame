@@ -440,7 +440,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   header: {
     textAlign: 'center',
-    padding: '20px 20px 10px',
+    padding: 'calc(14px + env(safe-area-inset-top, 0px)) 20px 10px',
     position: 'relative',
     flexShrink: 0,
   },

@@ -7,10 +7,13 @@ import {
   getCustomPuzzleSummaries as idbSummaries,
 } from './idbStorageService';
 
+import { profileStorageKey } from './profileService';
+
+// 既存ユーザーのデータを壊さないため、基本のキー名は変えない（プロフィールごとの接尾辞は profileService が付ける）
 const STORAGE_KEYS = {
-  PROGRESS: 'sagashimono_progress',
-  SETTINGS: 'sagashimono_settings',
-} as const;
+  get PROGRESS() { return profileStorageKey('sagashimono_progress'); },
+  get SETTINGS() { return profileStorageKey('sagashimono_settings'); },
+};
 
 // 進捗データの保存
 export function saveProgress(progress: Progress): void {

@@ -5,7 +5,8 @@
   "difficulty": 1,
   "boxes": [
     "red",
-    "blue"
+    "blue",
+    "red"
   ],
   "parts": [
     {
@@ -124,6 +125,60 @@
         0,
         0
       ],
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "u1",
+      "color": "red",
+      "position": [
+        -1.2,
+        -0.6,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.0,
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "u2",
+      "color": "red",
+      "position": [
+        0,
+        -0.6,
+        -1.2
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.0,
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "u3",
+      "color": "red",
+      "position": [
+        1.2,
+        -0.6,
+        -0.5
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.0,
       "partIds": [
         "base"
       ]

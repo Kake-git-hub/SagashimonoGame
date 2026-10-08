@@ -5,9 +5,13 @@ import { getAllProgress } from '../services/storageService';
 import { fetchStageList } from '../games/neji/services/stageService';
 import { getNejiProgress } from '../games/neji/services/nejiStorageService';
 import { useIsTablet } from '../hooks/useMediaQuery';
+import { Profile } from '../services/profileService';
 
 interface Props {
+  profile: Profile | null;
   onSelectGame: (game: GameId) => void;
+  onSwitchProfile: () => void;       // 「だれが あそぶ？」へ
+  onOpenParentSettings: () => void;  // おうちのひと設定へ
 }
 
 // 各ゲームのクリア数（null は未集計）
@@ -20,7 +24,7 @@ interface ClearCount {
  * ホーム画面（ゲーム選択）
  * 起動時に必ず表示され、遊ぶゲームをカードで選ぶ
  */
-export function HomeScreen({ onSelectGame }: Props) {
+export function HomeScreen({ profile, onSelectGame, onSwitchProfile, onOpenParentSettings }: Props) {
   const isTablet = useIsTablet();
   const [counts, setCounts] = useState<Partial<Record<GameId, ClearCount>>>({});
 
@@ -57,6 +61,15 @@ export function HomeScreen({ onSelectGame }: Props) {
   return (
     <div style={styles.container}>
       <header style={styles.header}>
+        <div style={styles.topRow}>
+          <button onClick={onSwitchProfile} style={styles.profileChip} aria-label="あそぶひとをかえる">
+            <span style={styles.profileAvatar}>{profile?.avatar ?? '👤'}</span>
+            <span>{profile ? `${profile.name}（${profile.age}さい）` : 'だれが あそぶ？'}</span>
+          </button>
+          <button onClick={onOpenParentSettings} style={styles.parentButton} aria-label="おうちのひと設定" title="おうちのひと設定">
+            ⚙️
+          </button>
+        </div>
         <h1 style={styles.title}>🎪 あそびひろば</h1>
         <p style={styles.subtitle}>あそぶゲームをえらんでね</p>
       </header>
@@ -108,8 +121,44 @@ const styles: Record<string, React.CSSProperties> = {
   },
   header: {
     textAlign: 'center',
-    padding: '24px 20px 12px',
+    padding: 'calc(10px + env(safe-area-inset-top, 0px)) 16px 12px',
     flexShrink: 0,
+  },
+  topRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '8px',
+  },
+  profileChip: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '6px 14px 6px 8px',
+    borderRadius: '24px',
+    border: 'none',
+    backgroundColor: 'white',
+    color: '#333',
+    fontSize: '0.95rem',
+    fontWeight: 'bold',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  },
+  profileAvatar: {
+    fontSize: '1.4rem',
+    lineHeight: 1,
+  },
+  parentButton: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    border: 'none',
+    backgroundColor: 'white',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    fontSize: '1.2rem',
+    cursor: 'pointer',
+    opacity: 0.7,
   },
   title: {
     fontSize: '2rem',

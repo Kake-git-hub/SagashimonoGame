@@ -10,7 +10,8 @@
     "blue",
     "yellow",
     "orange",
-    "purple"
+    "purple",
+    "blue"
   ],
   "parts": [
     {
@@ -599,6 +600,60 @@
         "keep"
       ],
       "length": 0.9
+    },
+    {
+      "id": "d1",
+      "color": "blue",
+      "position": [
+        0,
+        -0.3,
+        1.2
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.5,
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "d2",
+      "color": "blue",
+      "position": [
+        0,
+        -0.3,
+        -1.2
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.5,
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "d3",
+      "color": "blue",
+      "position": [
+        1.2,
+        -0.3,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.5,
+      "partIds": [
+        "base"
+      ]
     }
   ]
 }

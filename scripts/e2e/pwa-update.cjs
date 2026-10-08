@@ -1,10 +1,10 @@
 // PWA: 旧ビルド起動 → 新ビルド公開 → 自動更新でバンドルが切り替わる → オフラインで起動できる
 const { execSync } = require('child_process');
-const { launch, report, OUT, BASE } = require('./common.cjs');
+const { launch, gotoHome, report, OUT } = require('./common.cjs');
 
 (async () => {
   const { browser, context, page, errors } = await launch();
-  await page.goto(BASE, { waitUntil: 'networkidle' });
+  await gotoHome(page);
   await page.waitForSelector('text=バージョン:');
   await page.waitForFunction(() => navigator.serviceWorker && navigator.serviceWorker.controller !== null, null, { timeout: 20000 });
   const bundle1 = await page.evaluate(() => document.querySelector('script[src*="/assets/index-"]').getAttribute('src'));

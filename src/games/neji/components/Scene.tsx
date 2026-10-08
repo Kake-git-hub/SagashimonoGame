@@ -1,13 +1,23 @@
-import { useEffect, useMemo, useRef, ComponentRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, ComponentRef } from 'react';
 import { PerspectiveCamera, TOUCH, Vector3 } from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { Stage } from '../types';
+import { PartDef, Stage } from '../types';
+import { PART_DEFAULT_COLOR } from '../constants';
 import { BlockedFeedback } from '../logic/gameReducer';
-import { computeModelBounds, ModelBounds, screwHeadTop } from '../logic/geometry';
+import { computeModelBounds, ModelBounds, partCornerPoints, screwHeadTop, toVector3 } from '../logic/geometry';
 import { partFallDirection } from '../logic/rules';
 import { PartMesh } from './PartMesh';
 import { ScrewMesh, ScreenPoint } from './ScrewMesh';
+import { DebrisBurst, DebrisBurstDef } from './Debris';
+
+// HUD に隠れる領域（CSS px）。この内側に図形を収める
+export interface ViewInsets {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
 
 interface Props {
   stage: Stage;
@@ -18,6 +28,7 @@ interface Props {
   feedback: BlockedFeedback | null;
   highlightActive: boolean;
   viewResetKey: number;
+  insets: ViewInsets;
   onTapScrew: (id: string) => void;
   onScrewRemoveDone: (id: string, at: ScreenPoint) => void;
   onPartFallDone: (id: string) => void;
@@ -63,8 +74,8 @@ function DebugProbe({
   return null;
 }
 
-// 図形全体が画面に収まるようにカメラを置き、回転・ズーム操作を提供する
-function CameraRig({ bounds, resetKey }: { bounds: ModelBounds; resetKey: number }) {
+// 図形全体が HUD に隠れない領域に収まるようにカメラを置き、回転・ズーム操作を提供する
+function CameraRig({ bounds, resetKey, insets }: { bounds: ModelBounds; resetKey: number; insets: ViewInsets }) {
   const { camera, size } = useThree();
   const controlsRef = useRef<OrbitControlsRef>(null);
 
@@ -72,14 +83,42 @@ function CameraRig({ bounds, resetKey }: { bounds: ModelBounds; resetKey: number
     const cam = camera as PerspectiveCamera;
     const vFov = (cam.fov * Math.PI) / 180;
     const aspect = size.width / Math.max(size.height, 1);
-    const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect);
-    const distance = (bounds.radius / Math.sin(Math.min(vFov, hFov) / 2)) * 1.08;
+
+    // HUD を除いた領域の中心に図形の中心が来るよう、投影をずらす
+    const availW = Math.max(size.width - insets.left - insets.right, 80);
+    const availH = Math.max(size.height - insets.top - insets.bottom, 80);
+    const cx = insets.left + availW / 2;
+    const cy = insets.top + availH / 2;
+    cam.setViewOffset(size.width, size.height, size.width / 2 - cx, size.height / 2 - cy, size.width, size.height);
+
+    // その領域に収まる距離（まず外接球で置いてから、AABB の頂点を投影して詰める）
+    const tanV = Math.tan(vFov / 2) * (availH / size.height);
+    const tanH = Math.tan(vFov / 2) * aspect * (availW / size.width);
+    const halfFov = Math.atan(Math.min(tanV, tanH));
+    let distance = (bounds.radius / Math.sin(halfFov)) * 1.08;
 
     const viewDir = new Vector3(0.9, 0.7, 1.2).normalize();
-    cam.position.copy(bounds.center).addScaledVector(viewDir, distance);
-    cam.near = Math.max(distance / 100, 0.05);
-    cam.far = distance * 20;
-    cam.updateProjectionMatrix();
+    const place = () => {
+      cam.position.copy(bounds.center).addScaledVector(viewDir, distance);
+      cam.near = Math.max(distance / 100, 0.05);
+      cam.far = distance * 20;
+      cam.lookAt(bounds.center);
+      cam.updateProjectionMatrix();
+      cam.updateMatrixWorld();
+    };
+    place();
+    const limitX = (availW / size.width) * 0.86;
+    const limitY = (availH / size.height) * 0.86;
+    for (let i = 0; i < 3 && bounds.corners.length > 0; i++) {
+      let ratio = 0;
+      for (const corner of bounds.corners) {
+        const p = corner.clone().project(cam);
+        ratio = Math.max(ratio, Math.abs(p.x) / limitX, Math.abs(p.y) / limitY);
+      }
+      if (ratio <= 0) break;
+      distance *= ratio;
+      place();
+    }
 
     const controls = controlsRef.current;
     if (controls) {
@@ -88,7 +127,14 @@ function CameraRig({ bounds, resetKey }: { bounds: ModelBounds; resetKey: number
       controls.maxDistance = distance * 1.6;
       controls.update();
     }
-  }, [bounds, resetKey, size.width, size.height, camera]);
+  }, [bounds, resetKey, size.width, size.height, camera, insets]);
+
+  useEffect(() => {
+    const cam = camera as PerspectiveCamera;
+    return () => {
+      cam.clearViewOffset();
+    };
+  }, [camera]);
 
   return (
     <OrbitControls
@@ -97,11 +143,19 @@ function CameraRig({ bounds, resetKey }: { bounds: ModelBounds; resetKey: number
       enableDamping
       dampingFactor={0.12}
       rotateSpeed={0.75}
-      minPolarAngle={0.25}
-      maxPolarAngle={Math.PI - 0.25}
+      minPolarAngle={0.15}
+      maxPolarAngle={Math.PI - 0.15}
       touches={{ ONE: TOUCH.ROTATE, TWO: TOUCH.DOLLY_ROTATE }}
     />
   );
+}
+
+// パーツのだいたいの大きさ（かけらの飛び散り方に使う）
+function partSize(part: PartDef): number {
+  const points = partCornerPoints(part);
+  let max = 0;
+  for (const p of points) max = Math.max(max, p.distanceTo(toVector3(part.position)));
+  return max;
 }
 
 export function Scene({
@@ -113,6 +167,7 @@ export function Scene({
   feedback,
   highlightActive,
   viewResetKey,
+  insets,
   onTapScrew,
   onScrewRemoveDone,
   onPartFallDone,
@@ -124,11 +179,35 @@ export function Scene({
     for (const part of stage.parts) map.set(part.id, partFallDirection(stage, part));
     return map;
   }, [stage]);
+  const treasureIds = useMemo(() => new Set(stage.treasure?.partIds ?? []), [stage]);
 
   const blockerIds = useMemo(
     () => new Set(highlightActive && feedback ? feedback.blockers.map(b => b.id) : []),
     [feedback, highlightActive],
   );
+
+  // パーツが落ち始めたら、かけらを飛び散らせる
+  const [bursts, setBursts] = useState<DebrisBurstDef[]>([]);
+  const seenFallingRef = useRef(new Set<string>());
+  useEffect(() => {
+    const fresh = fallingParts.filter(id => !seenFallingRef.current.has(id));
+    if (fallingParts.length === 0) seenFallingRef.current.clear();
+    if (fresh.length === 0) return;
+    const next: DebrisBurstDef[] = [];
+    for (const id of fresh) {
+      seenFallingRef.current.add(id);
+      const part = stage.parts.find(p => p.id === id);
+      if (!part) continue;
+      next.push({
+        id: `${id}-${performance.now().toFixed(0)}`,
+        origin: toVector3(part.position),
+        color: part.color ?? PART_DEFAULT_COLOR,
+        size: partSize(part),
+      });
+    }
+    setBursts(prev => [...prev, ...next]);
+  }, [fallingParts, stage]);
+  const handleBurstDone = useCallback((id: string) => setBursts(prev => prev.filter(b => b.id !== id)), []);
 
   const visibleParts = stage.parts.filter(p => remainingParts.has(p.id) || fallingParts.includes(p.id));
   const visibleScrews = stage.screws.filter(s => remainingScrews.has(s.id) || removingScrews.includes(s.id));
@@ -145,8 +224,9 @@ export function Scene({
       <hemisphereLight args={['#ffffff', '#3d4a6b', 0.7]} />
       <directionalLight position={[5, 10, 7]} intensity={1.6} />
       <directionalLight position={[-6, 4, -5]} intensity={0.5} />
+      <directionalLight position={[2, -8, 3]} intensity={0.45} />
 
-      <CameraRig bounds={bounds} resetKey={viewResetKey} />
+      <CameraRig bounds={bounds} resetKey={viewResetKey} insets={insets} />
       {DEBUG_ENABLED && <DebugProbe stage={stage} remainingScrews={remainingScrews} onTapScrew={onTapScrew} />}
 
       {visibleParts.map(part => (
@@ -156,6 +236,7 @@ export function Scene({
           falling={fallingParts.includes(part.id)}
           fallDir={fallDirs.get(part.id) ?? new Vector3(0, 1, 0)}
           highlighted={blockerIds.has(part.id)}
+          treasure={treasureIds.has(part.id)}
           onFallDone={onPartFallDone}
         />
       ))}
@@ -170,6 +251,10 @@ export function Scene({
           onTap={onTapScrew}
           onRemoveDone={onScrewRemoveDone}
         />
+      ))}
+
+      {bursts.map(burst => (
+        <DebrisBurst key={burst.id} burst={burst} onDone={handleBurstDone} />
       ))}
     </Canvas>
   );

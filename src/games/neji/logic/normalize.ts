@@ -16,3 +16,14 @@ export function normalizeStage(def: StageDef): Stage {
     screws: def.screws ?? [],
   };
 }
+
+// 年齢に合わせた補正（おきば・同時に見えるボックスを増やす = やさしくする方向だけ）
+// 増やす方向だけなので、既定値で検証したステージは必ず解ける
+export function adjustStageForAge(stage: Stage, extra: { nejiExtraBuffer: number; nejiExtraBoxes: number }): Stage {
+  if (extra.nejiExtraBuffer <= 0 && extra.nejiExtraBoxes <= 0) return stage;
+  return {
+    ...stage,
+    bufferSlots: stage.bufferSlots + Math.max(0, extra.nejiExtraBuffer),
+    visibleBoxes: Math.min(stage.boxes.length, stage.visibleBoxes + Math.max(0, extra.nejiExtraBoxes)),
+  };
+}

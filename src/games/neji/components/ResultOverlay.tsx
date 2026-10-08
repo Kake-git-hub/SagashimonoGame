@@ -1,17 +1,32 @@
 import { useEffect, useRef } from 'react';
 import { playClearConfetti } from '../../../utils/confetti';
 
+export interface TreasureResult {
+  name: string;
+  emoji: string;
+  isNew: boolean; // 初めて手に入れた
+}
+
 interface Props {
   kind: 'cleared' | 'failed';
   stageName: string;
   moves: number;
   hasNext: boolean;
+  treasure?: TreasureResult | null;
+  canContinue: boolean;        // 失敗から少し前に戻れるか
+  continueLabel?: string;
+  nextLabel?: string;
   onNext: () => void;
+  onContinue: () => void;
   onRetry: () => void;
   onBack: () => void;
 }
 
-export function ResultOverlay({ kind, stageName, moves, hasNext, onNext, onRetry, onBack }: Props) {
+export function ResultOverlay({
+  kind, stageName, moves, hasNext, treasure, canContinue,
+  continueLabel = 'つづきから', nextLabel = 'つぎのステージへ →',
+  onNext, onContinue, onRetry, onBack,
+}: Props) {
   const hasShownConfetti = useRef(false);
 
   useEffect(() => {
@@ -25,11 +40,21 @@ export function ResultOverlay({ kind, stageName, moves, hasNext, onNext, onRetry
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
-        <div style={styles.emoji}>{cleared ? '🎉' : '😢'}</div>
-        <h2 style={styles.title}>{cleared ? 'おめでとう！' : 'ざんねん…'}</h2>
+        <div style={styles.emoji}>{cleared ? (treasure ? treasure.emoji : '🎉') : '😢'}</div>
+        <h2 style={styles.title}>{cleared ? (treasure ? 'はっけん！' : 'おめでとう！') : 'ざんねん…'}</h2>
         <p style={styles.subtitle}>
           {cleared ? (
-            <>「{stageName}」の<br />ネジをぜんぶはずしたよ！<br /><span style={styles.moves}>{moves} かい</span></>
+            treasure ? (
+              <>
+                「{treasure.name}」が でてきた！<br />
+                <span className="neji-treasure-found">
+                  {treasure.isNew ? '✨ たからばこに はいったよ' : '🏆 たからばこに ついかしたよ'}
+                </span>
+                <br /><span style={styles.moves}>{moves} かい</span>
+              </>
+            ) : (
+              <>「{stageName}」の<br />ネジをぜんぶはずしたよ！<br /><span style={styles.moves}>{moves} かい</span></>
+            )
           ) : (
             <>おきばが いっぱいに<br />なっちゃった…</>
           )}
@@ -38,10 +63,15 @@ export function ResultOverlay({ kind, stageName, moves, hasNext, onNext, onRetry
         <div style={styles.buttons}>
           {cleared && hasNext && (
             <button onClick={onNext} style={styles.nextButton}>
-              つぎのステージへ →
+              {nextLabel}
             </button>
           )}
-          <button onClick={onRetry} style={cleared ? styles.retryButton : styles.nextButton}>
+          {!cleared && canContinue && (
+            <button onClick={onContinue} style={styles.nextButton}>
+              {continueLabel}
+            </button>
+          )}
+          <button onClick={onRetry} style={cleared || canContinue ? styles.retryButton : styles.nextButton}>
             🔄 もういちど
           </button>
           <button onClick={onBack} style={styles.backButton}>
@@ -70,16 +100,19 @@ const styles: Record<string, React.CSSProperties> = {
   modal: {
     backgroundColor: 'white',
     borderRadius: '24px',
-    padding: '40px 30px',
+    padding: '30px 26px',
     textAlign: 'center',
     maxWidth: '90%',
     width: '350px',
+    maxHeight: '92dvh',
+    overflowY: 'auto',
     boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)',
     animation: 'modalBounce 0.5s ease-out',
   },
   emoji: {
     fontSize: '4rem',
-    marginBottom: '10px',
+    marginBottom: '6px',
+    lineHeight: 1.2,
   },
   title: {
     fontSize: '2rem',
@@ -89,7 +122,7 @@ const styles: Record<string, React.CSSProperties> = {
   subtitle: {
     fontSize: '1.1rem',
     color: '#666',
-    margin: '0 0 30px 0',
+    margin: '0 0 24px 0',
     lineHeight: 1.6,
   },
   moves: {
@@ -113,6 +146,7 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     fontWeight: 'bold',
     boxShadow: '0 4px 15px rgba(76, 175, 80, 0.4)',
+    fontFamily: 'inherit',
   },
   retryButton: {
     padding: '12px 25px',
@@ -123,6 +157,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '25px',
     cursor: 'pointer',
     fontWeight: 'bold',
+    fontFamily: 'inherit',
   },
   backButton: {
     padding: '12px 25px',
@@ -133,5 +168,6 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '25px',
     cursor: 'pointer',
     fontWeight: 'bold',
+    fontFamily: 'inherit',
   },
 };

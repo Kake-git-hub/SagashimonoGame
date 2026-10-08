@@ -504,7 +504,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '8px 12px',
+    padding: 'calc(8px + env(safe-area-inset-top, 0px)) 12px 8px',
     backgroundColor: '#16213e',
     color: 'white',
     flexShrink: 0,

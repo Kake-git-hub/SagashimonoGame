@@ -28,6 +28,21 @@ export function partMatrix(part: PartDef): Matrix4 {
   return new Matrix4().compose(toVector3(part.position), partQuaternion(part), new Vector3(1, 1, 1));
 }
 
+// 飾りの形（星・ハート・宝石・骨）は当たり判定上はローカル Y 軸方向の円柱として扱う
+export function partProxyCylinder(part: PartDef): { radius: number; height: number } | null {
+  switch (part.shape) {
+    case 'cylinder':
+      return { radius: part.radius, height: part.height };
+    case 'star':
+    case 'heart':
+    case 'gem':
+    case 'bone':
+      return { radius: part.radius, height: part.height };
+    default:
+      return null;
+  }
+}
+
 // パーツのローカル AABB の 8 頂点をワールド座標で返す（バウンディング計算用）
 export function partCornerPoints(part: PartDef): Vector3[] {
   let half: Vector3;
@@ -35,12 +50,14 @@ export function partCornerPoints(part: PartDef): Vector3[] {
     case 'box':
       half = new Vector3(part.size[0] / 2, part.size[1] / 2, part.size[2] / 2);
       break;
-    case 'cylinder':
-      half = new Vector3(part.radius, part.height / 2, part.radius);
-      break;
     case 'sphere':
       half = new Vector3(part.radius, part.radius, part.radius);
       break;
+    default: {
+      const cyl = partProxyCylinder(part)!;
+      half = new Vector3(cyl.radius, cyl.height / 2, cyl.radius);
+      break;
+    }
   }
   const m = partMatrix(part);
   const points: Vector3[] = [];
@@ -172,12 +189,13 @@ export function rayPartEntry(o: Vector3, d: Vector3, part: PartDef): number | nu
       const { lo, ld } = toLocal(o, d, partMatrix(part));
       return rayBoxEntry(lo, ld, new Vector3(part.size[0] / 2, part.size[1] / 2, part.size[2] / 2));
     }
-    case 'cylinder': {
-      const { lo, ld } = toLocal(o, d, partMatrix(part));
-      return rayCylinderEntry(lo, ld, part.radius, part.height / 2);
-    }
     case 'sphere':
       return raySphereEntry(o, d, toVector3(part.position), part.radius);
+    default: {
+      const cyl = partProxyCylinder(part)!;
+      const { lo, ld } = toLocal(o, d, partMatrix(part));
+      return rayCylinderEntry(lo, ld, cyl.radius, cyl.height / 2);
+    }
   }
 }
 
@@ -199,25 +217,33 @@ export function rayScrewEntry(o: Vector3, d: Vector3, screw: ScrewDef): number |
 export interface ModelBounds {
   center: Vector3;
   radius: number;
+  corners: Vector3[]; // パーツの頂点とネジの端点（カメラ合わせで輪郭を投影するための点）
 }
 
 export function computeModelBounds(stage: Stage): ModelBounds {
   const box = new Box3();
+  const corners: Vector3[] = [];
   for (const part of stage.parts) {
-    for (const p of partCornerPoints(part)) box.expandByPoint(p);
+    for (const p of partCornerPoints(part)) {
+      box.expandByPoint(p);
+      corners.push(p);
+    }
   }
   for (const screw of stage.screws) {
-    box.expandByPoint(screwHeadTop(screw));
-    box.expandByPoint(screwTip(screw));
+    const head = screwHeadTop(screw);
+    const tip = screwTip(screw);
+    box.expandByPoint(head);
+    box.expandByPoint(tip);
+    corners.push(head, tip);
   }
   if (box.isEmpty()) {
-    return { center: new Vector3(), radius: 1 };
+    return { center: new Vector3(), radius: 1, corners: [] };
   }
   const center = new Vector3();
   box.getCenter(center);
   const size = new Vector3();
   box.getSize(size);
-  return { center, radius: Math.max(size.length() / 2, 0.5) };
+  return { center, radius: Math.max(size.length() / 2, 0.5), corners };
 }
 
 export function partCenter(part: PartDef): Vector3 {

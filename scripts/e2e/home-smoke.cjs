@@ -1,11 +1,10 @@
 // ホーム画面、さがしものゲームの一覧とゲーム画面、ネジはずしの一覧が表示できる
-const { launch, report, OUT, BASE } = require('./common.cjs');
+const { launch, gotoHome, report, OUT } = require('./common.cjs');
 
 (async () => {
   for (const [label, viewport] of [['phone', { width: 390, height: 844 }], ['tablet', { width: 1024, height: 768 }]]) {
     const { browser, page, errors } = await launch(viewport);
-    await page.goto(BASE, { waitUntil: 'networkidle' });
-    await page.waitForSelector('text=あそぶゲームをえらんでね');
+    await gotoHome(page);
     await page.waitForTimeout(500);
     console.log(label, 'home counts:', (await page.$$eval('text=/クリア/', els => els.map(e => e.textContent))).join(' | '));
     await page.screenshot({ path: `${OUT}/${label}-home.png` });
