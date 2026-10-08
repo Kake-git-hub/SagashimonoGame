@@ -9,12 +9,13 @@ interface Props {
   onOpenEditor: () => void;
   onEditPuzzle: (puzzleId: string) => void;
   onEditServerPuzzle: (puzzleId: string) => void;
+  onExit?: () => void; // ホーム画面（ゲーム選択）へ戻る
   refreshKey?: number;
   devMode: boolean;
   onToggleDevMode: () => void;
 }
 
-export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditServerPuzzle, refreshKey, devMode, onToggleDevMode }: Props) {
+export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditServerPuzzle, onExit, refreshKey, devMode, onToggleDevMode }: Props) {
   const [puzzles, setPuzzles] = useState<PuzzleSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -274,6 +275,11 @@ export function PuzzleList({ onSelectPuzzle, onOpenEditor, onEditPuzzle, onEditS
     <div style={styles.container}>
       <header style={styles.header}>
         <div style={styles.titleRow}>
+          {onExit && (
+            <button style={styles.homeButton} onClick={onExit} title="ホームへもどる" aria-label="ホームへもどる">
+              ←
+            </button>
+          )}
           <h1 style={styles.title} onClick={handleTitleTap}>🔍 さがしものゲーム</h1>
           <button style={styles.createButton} onClick={onOpenEditor}>
             ＋ つくる
@@ -438,11 +444,22 @@ const styles: Record<string, React.CSSProperties> = {
     position: 'relative',
     flexShrink: 0,
   },
+  homeButton: {
+    padding: '4px 8px',
+    fontSize: '1.6rem',
+    lineHeight: 1,
+    backgroundColor: 'transparent',
+    color: '#333',
+    border: 'none',
+    cursor: 'pointer',
+    flexShrink: 0,
+  },
   titleRow: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '12px',
+    flexWrap: 'wrap',
+    gap: '8px 12px',
     marginBottom: '10px',
   },
   scrollContainer: {
@@ -452,9 +469,10 @@ const styles: Record<string, React.CSSProperties> = {
     WebkitOverflowScrolling: 'touch',
   },
   title: {
-    fontSize: '2rem',
+    fontSize: 'clamp(1.4rem, 5.5vw, 2rem)',
     color: '#333',
     margin: 0,
+    whiteSpace: 'nowrap',
   },
   createButton: {
     padding: '8px 16px',

@@ -1,7 +1,7 @@
 {
-  "name": "さがしものゲーム",
-  "short_name": "さがしもの",
-  "description": "ミッケ風もの探しゲーム - 隠されたアイテムを見つけよう！",
+  "name": "あそびひろば",
+  "short_name": "あそびひろば",
+  "description": "あそびひろば - さがしものゲームとネジはずしゲームであそぼう！",
   "start_url": "./",
   "display": "standalone",
   "orientation": "any",

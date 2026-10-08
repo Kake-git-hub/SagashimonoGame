@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sagashimono-v1';
+const CACHE_NAME = 'asobihiroba-v2';
 const urlsToCache = [
   './',
   './index.html',

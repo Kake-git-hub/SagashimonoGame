@@ -169,8 +169,42 @@ export function getMarkerPixelSize(size: MarkerSize): number {
   return getHitRadius(size);
 }
 
-// 画面モード
+// さがしものゲーム内の画面モード
 export type ScreenMode = 'list' | 'game' | 'editor';
+
+// === プラットフォーム（あそびひろば）共通 ===
+
+// 収録ゲームの ID
+export type GameId = 'sagashimono' | 'neji';
+
+// ホーム画面に表示するゲーム情報
+export interface GameInfo {
+  id: GameId;
+  name: string;
+  description: string;
+  emoji: string;
+  gradient: string;   // カードの背景
+  available: boolean; // false なら「じゅんびちゅう」表示
+}
+
+export const GAME_INFO: Record<GameId, GameInfo> = {
+  sagashimono: {
+    id: 'sagashimono',
+    name: 'さがしものゲーム',
+    description: 'えのなかにかくれたものをさがそう！',
+    emoji: '🔍',
+    gradient: 'linear-gradient(135deg, #4a90d9 0%, #2c5aa0 100%)',
+    available: true,
+  },
+  neji: {
+    id: 'neji',
+    name: 'ネジはずし',
+    description: '3Dのかたちにささったネジをぜんぶはずそう！',
+    emoji: '🔩',
+    gradient: 'linear-gradient(135deg, #ffb703 0%, #fb8500 100%)',
+    available: false,
+  },
+};
 
 // ヘルパー関数: 位置キーを生成
 export function makePositionKey(title: string, index: number): string {
