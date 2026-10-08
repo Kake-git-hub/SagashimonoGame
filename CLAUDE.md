@@ -39,7 +39,10 @@ push 前に `npm run build` / `npm run lint` / `npm test` を通す。CI（`.git
 ## 作業の流れ
 
 1. 作業ブランチで開発し、ビルド・lint・テストを通して push
-2. 実機（iPad / iPhone）で確認してもらうときは `main` へ fast-forward マージ → 自動デプロイ（2〜3 分）
+2. **毎回必ず** `main` へ fast-forward マージして push する（ユーザーは毎回実機 iPad / iPhone で確認する）→ 自動デプロイ（2〜3 分）。聞かずにマージしてよい
+   ```bash
+   git fetch origin main && git checkout main && git merge --ff-only origin/main && git merge --ff-only <作業ブランチ> && git push origin main && git checkout <作業ブランチ>
+   ```
 3. 公開中の PWA は、次の起動時か前面復帰時に新ビルドを検知し、ホーム画面にいるときに自動で切り替わる。ホーム画面下の「バージョン: 日時」がビルド日時
 
 ## 守ること
