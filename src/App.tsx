@@ -1,12 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
-import { GameId, GAME_INFO } from './types';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { GameId } from './types';
 import { migrateFromLocalStorage } from './services/storageService';
 import { HomeScreen } from './screens/HomeScreen';
 import { SagashimonoApp } from './games/sagashimono/SagashimonoApp';
 import './App.css';
 
+// ネジはずしは 3D ライブラリを含むので、選ばれたときだけ読み込む
+const NejiApp = lazy(() => import('./games/neji/NejiApp'));
+
 // アプリ全体の画面: ホーム（ゲーム選択）か、いずれかのゲーム
 type AppScreen = 'home' | GameId;
+
+function LoadingScreen() {
+  return (
+    <div className="loading-screen">
+      <div className="loading-spinner" />
+      <p>よみこみちゅう...</p>
+    </div>
+  );
+}
 
 /**
  * あそびひろば
@@ -24,12 +36,7 @@ function App() {
   const goHome = useCallback(() => setScreen('home'), []);
 
   if (!ready) {
-    return (
-      <div className="loading-screen">
-        <div className="loading-spinner" />
-        <p>よみこみちゅう...</p>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   switch (screen) {
@@ -37,26 +44,16 @@ function App() {
       return <SagashimonoApp onExit={goHome} />;
 
     case 'neji':
-      return <ComingSoonScreen gameId="neji" onExit={goHome} />;
+      return (
+        <Suspense fallback={<LoadingScreen />}>
+          <NejiApp onExit={goHome} />
+        </Suspense>
+      );
 
     case 'home':
     default:
       return <HomeScreen onSelectGame={setScreen} />;
   }
-}
-
-// 準備中のゲーム用の仮画面（フェーズ1で本体に置き換える）
-function ComingSoonScreen({ gameId, onExit }: { gameId: GameId; onExit: () => void }) {
-  const info = GAME_INFO[gameId];
-  return (
-    <div className="error-screen">
-      <p style={{ fontSize: '4rem', margin: 0, color: '#333' }}>{info.emoji}</p>
-      <p style={{ color: '#333', fontSize: '1.3rem', fontWeight: 'bold' }}>
-        「{info.name}」はじゅんびちゅうです
-      </p>
-      <button onClick={onExit}>← ホームへもどる</button>
-    </div>
-  );
 }
 
 export default App;

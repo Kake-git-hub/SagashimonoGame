@@ -1,0 +1,132 @@
+{
+  "id": "stage-01",
+  "name": "はこ",
+  "emoji": "📦",
+  "difficulty": 1,
+  "boxes": [
+    "red",
+    "blue"
+  ],
+  "parts": [
+    {
+      "id": "base",
+      "shape": "box",
+      "size": [
+        4,
+        1.2,
+        4
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "color": "#8ecae6",
+      "fixed": true
+    }
+  ],
+  "screws": [
+    {
+      "id": "t1",
+      "color": "red",
+      "position": [
+        1.2,
+        0.6,
+        1.2
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "t2",
+      "color": "red",
+      "position": [
+        -1.2,
+        0.6,
+        1.2
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "t3",
+      "color": "blue",
+      "position": [
+        1.2,
+        0.6,
+        -1.2
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "t4",
+      "color": "blue",
+      "position": [
+        -1.2,
+        0.6,
+        -1.2
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "f1",
+      "color": "red",
+      "position": [
+        0,
+        0,
+        2
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "f2",
+      "color": "blue",
+      "position": [
+        2,
+        0,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "partIds": [
+        "base"
+      ]
+    }
+  ]
+}

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { GameId, GAME_INFO } from '../types';
 import { fetchPuzzleList } from '../services/puzzleService';
 import { getAllProgress } from '../services/storageService';
+import { fetchStageList } from '../games/neji/services/stageService';
+import { getNejiProgress } from '../games/neji/services/nejiStorageService';
 import { useIsTablet } from '../hooks/useMediaQuery';
 
 interface Props {
@@ -22,7 +24,7 @@ export function HomeScreen({ onSelectGame }: Props) {
   const isTablet = useIsTablet();
   const [counts, setCounts] = useState<Partial<Record<GameId, ClearCount>>>({});
 
-  // さがしものゲームのクリア数を集計
+  // 各ゲームのクリア数を集計
   useEffect(() => {
     let cancelled = false;
     fetchPuzzleList()
@@ -36,6 +38,14 @@ export function HomeScreen({ onSelectGame }: Props) {
         setCounts(prev => ({ ...prev, sagashimono: { cleared, total: list.length } }));
       })
       .catch(err => console.error('Failed to load puzzle list:', err));
+    fetchStageList()
+      .then(list => {
+        if (cancelled) return;
+        const progress = getNejiProgress();
+        const cleared = list.filter(s => progress[s.id]?.cleared).length;
+        setCounts(prev => ({ ...prev, neji: { cleared, total: list.length } }));
+      })
+      .catch(err => console.error('Failed to load stage list:', err));
     return () => { cancelled = true; };
   }, []);
 

@@ -1,0 +1,23 @@
+{
+  "id": "stage-02",
+  "name": "きのこ",
+  "emoji": "🍄",
+  "difficulty": 2,
+  "boxes": ["blue", "green", "red"],
+  "parts": [
+    { "id": "ground", "shape": "box", "size": [4.4, 0.6, 4.4], "position": [0, 0, 0], "color": "#90be6d", "fixed": true },
+    { "id": "stem", "shape": "cylinder", "radius": 0.6, "height": 1.0, "position": [0, 0.8, 0], "color": "#f1faee", "fixed": true },
+    { "id": "cap", "shape": "cylinder", "radius": 2.0, "height": 0.5, "position": [0, 1.55, 0], "color": "#ffafcc" }
+  ],
+  "screws": [
+    { "id": "cap1", "color": "green", "position": [0.4, 1.8, 0],  "dir": [0, 1, 0], "length": 1.0, "partIds": ["cap", "stem"] },
+    { "id": "cap2", "color": "green", "position": [-0.4, 1.8, 0], "dir": [0, 1, 0], "length": 1.0, "partIds": ["cap", "stem"] },
+    { "id": "u1", "color": "red",   "position": [1.2, 0.3, 1.2],   "dir": [0, 1, 0], "partIds": ["ground"] },
+    { "id": "u2", "color": "red",   "position": [-1.2, 0.3, 1.2],  "dir": [0, 1, 0], "partIds": ["ground"] },
+    { "id": "u3", "color": "red",   "position": [1.2, 0.3, -1.2],  "dir": [0, 1, 0], "partIds": ["ground"] },
+    { "id": "u4", "color": "green", "position": [-1.2, 0.3, -1.2], "dir": [0, 1, 0], "partIds": ["ground"] },
+    { "id": "o1", "color": "blue",  "position": [1.75, 0.3, 1.75],   "dir": [0, 1, 0], "partIds": ["ground"] },
+    { "id": "o2", "color": "blue",  "position": [-1.75, 0.3, -1.75], "dir": [0, 1, 0], "partIds": ["ground"] },
+    { "id": "o3", "color": "blue",  "position": [1.75, 0.3, -1.75],  "dir": [0, 1, 0], "partIds": ["ground"] }
+  ]
+}

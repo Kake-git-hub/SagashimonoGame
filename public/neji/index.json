@@ -1,0 +1,5 @@
+[
+  { "id": "stage-01", "name": "はこ", "emoji": "📦", "difficulty": 1, "screwCount": 6 },
+  { "id": "stage-02", "name": "きのこ", "emoji": "🍄", "difficulty": 2, "screwCount": 9 },
+  { "id": "stage-03", "name": "ピンのとう", "emoji": "🗼", "difficulty": 3, "screwCount": 9 }
+]

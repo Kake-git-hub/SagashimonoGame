@@ -1,39 +1,47 @@
 import { useEffect, useRef } from 'react';
-import { playClearConfetti } from '../utils/confetti';
+import { playClearConfetti } from '../../../utils/confetti';
 
 interface Props {
-  puzzleName: string;
-  onBack: () => void;
-  onNextPuzzle: () => void;
+  kind: 'cleared' | 'failed';
+  stageName: string;
+  moves: number;
+  hasNext: boolean;
+  onNext: () => void;
   onRetry: () => void;
-  hasNextPuzzle: boolean;
+  onBack: () => void;
 }
 
-export function ClearOverlay({ puzzleName, onBack, onNextPuzzle, onRetry, hasNextPuzzle }: Props) {
+export function ResultOverlay({ kind, stageName, moves, hasNext, onNext, onRetry, onBack }: Props) {
   const hasShownConfetti = useRef(false);
 
   useEffect(() => {
-    if (hasShownConfetti.current) return;
+    if (kind !== 'cleared' || hasShownConfetti.current) return;
     hasShownConfetti.current = true;
     playClearConfetti();
-  }, []);
+  }, [kind]);
+
+  const cleared = kind === 'cleared';
 
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
-        <div style={styles.emoji}>🎉</div>
-        <h2 style={styles.title}>おめでとう！</h2>
+        <div style={styles.emoji}>{cleared ? '🎉' : '😢'}</div>
+        <h2 style={styles.title}>{cleared ? 'おめでとう！' : 'ざんねん…'}</h2>
         <p style={styles.subtitle}>
-          「{puzzleName}」を<br />ぜんぶみつけたよ！
+          {cleared ? (
+            <>「{stageName}」の<br />ネジをぜんぶはずしたよ！<br /><span style={styles.moves}>{moves} かい</span></>
+          ) : (
+            <>おきばが いっぱいに<br />なっちゃった…</>
+          )}
         </p>
 
         <div style={styles.buttons}>
-          {hasNextPuzzle && (
-            <button onClick={onNextPuzzle} style={styles.nextButton}>
-              つぎのパズルへ →
+          {cleared && hasNext && (
+            <button onClick={onNext} style={styles.nextButton}>
+              つぎのステージへ →
             </button>
           )}
-          <button onClick={onRetry} style={styles.retryButton}>
+          <button onClick={onRetry} style={cleared ? styles.retryButton : styles.nextButton}>
             🔄 もういちど
           </button>
           <button onClick={onBack} style={styles.backButton}>
@@ -83,6 +91,12 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#666',
     margin: '0 0 30px 0',
     lineHeight: 1.6,
+  },
+  moves: {
+    display: 'inline-block',
+    marginTop: '6px',
+    fontSize: '0.95rem',
+    color: '#999',
   },
   buttons: {
     display: 'flex',

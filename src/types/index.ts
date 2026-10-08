@@ -202,7 +202,7 @@ export const GAME_INFO: Record<GameId, GameInfo> = {
     description: '3Dのかたちにささったネジをぜんぶはずそう！',
     emoji: '🔩',
     gradient: 'linear-gradient(135deg, #ffb703 0%, #fb8500 100%)',
-    available: false,
+    available: true,
   },
 };
 
