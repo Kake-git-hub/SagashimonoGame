@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
+      - name: Test (ステージ検証を含む)
+        run: npm test
+      
       - name: Build
         run: npm run build
       

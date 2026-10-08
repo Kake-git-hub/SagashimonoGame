@@ -1,5 +1,72 @@
 [
-  { "id": "stage-01", "name": "はこ", "emoji": "📦", "difficulty": 1, "screwCount": 6 },
-  { "id": "stage-02", "name": "きのこ", "emoji": "🍄", "difficulty": 2, "screwCount": 9 },
-  { "id": "stage-03", "name": "ピンのとう", "emoji": "🗼", "difficulty": 3, "screwCount": 9 }
+  {
+    "id": "stage-01",
+    "name": "はこ",
+    "emoji": "📦",
+    "difficulty": 1,
+    "screwCount": 6
+  },
+  {
+    "id": "stage-02",
+    "name": "きのこ",
+    "emoji": "🍄",
+    "difficulty": 2,
+    "screwCount": 9
+  },
+  {
+    "id": "stage-04",
+    "name": "くるま",
+    "emoji": "🚗",
+    "difficulty": 2,
+    "screwCount": 12
+  },
+  {
+    "id": "stage-03",
+    "name": "ピンのとう",
+    "emoji": "🗼",
+    "difficulty": 3,
+    "screwCount": 9
+  },
+  {
+    "id": "stage-05",
+    "name": "ゆきだるま",
+    "emoji": "⛄",
+    "difficulty": 3,
+    "screwCount": 15
+  },
+  {
+    "id": "stage-06",
+    "name": "ロボット",
+    "emoji": "🤖",
+    "difficulty": 3,
+    "screwCount": 15
+  },
+  {
+    "id": "stage-07",
+    "name": "タワー",
+    "emoji": "🏯",
+    "difficulty": 4,
+    "screwCount": 15
+  },
+  {
+    "id": "stage-08",
+    "name": "ほんだな",
+    "emoji": "📚",
+    "difficulty": 4,
+    "screwCount": 18
+  },
+  {
+    "id": "stage-09",
+    "name": "ロケット",
+    "emoji": "🚀",
+    "difficulty": 4,
+    "screwCount": 18
+  },
+  {
+    "id": "stage-10",
+    "name": "おしろ",
+    "emoji": "🏰",
+    "difficulty": 5,
+    "screwCount": 21
+  }
 ]

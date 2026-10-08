@@ -1,0 +1,403 @@
+{
+  "id": "stage-06",
+  "name": "ロボット",
+  "emoji": "🤖",
+  "difficulty": 3,
+  "boxes": [
+    "red",
+    "yellow",
+    "green",
+    "blue",
+    "purple"
+  ],
+  "parts": [
+    {
+      "id": "body",
+      "shape": "box",
+      "size": [
+        2.4,
+        2.6,
+        1.4
+      ],
+      "position": [
+        0,
+        2.0,
+        0
+      ],
+      "color": "#90e0ef",
+      "fixed": true
+    },
+    {
+      "id": "head",
+      "shape": "box",
+      "size": [
+        1.4,
+        1.2,
+        1.2
+      ],
+      "position": [
+        0,
+        3.9,
+        0
+      ],
+      "color": "#caf0f8"
+    },
+    {
+      "id": "armL",
+      "shape": "box",
+      "size": [
+        0.6,
+        1.8,
+        0.6
+      ],
+      "position": [
+        1.6,
+        2.4,
+        0
+      ],
+      "color": "#ffb703"
+    },
+    {
+      "id": "armR",
+      "shape": "box",
+      "size": [
+        0.6,
+        1.8,
+        0.6
+      ],
+      "position": [
+        -1.6,
+        2.4,
+        0
+      ],
+      "color": "#ffb703"
+    },
+    {
+      "id": "legL",
+      "shape": "box",
+      "size": [
+        0.8,
+        1.6,
+        0.8
+      ],
+      "position": [
+        0.6,
+        -0.1,
+        0
+      ],
+      "color": "#ffb703",
+      "fixed": true
+    },
+    {
+      "id": "legR",
+      "shape": "box",
+      "size": [
+        0.8,
+        1.6,
+        0.8
+      ],
+      "position": [
+        -0.6,
+        -0.1,
+        0
+      ],
+      "color": "#ffb703",
+      "fixed": true
+    },
+    {
+      "id": "plate",
+      "shape": "box",
+      "size": [
+        1.6,
+        1.0,
+        0.3
+      ],
+      "position": [
+        0,
+        2.3,
+        1.15
+      ],
+      "color": "#e63946"
+    }
+  ],
+  "screws": [
+    {
+      "id": "h1",
+      "color": "yellow",
+      "position": [
+        0.4,
+        4.5,
+        -0.3
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "head",
+        "body"
+      ],
+      "length": 1.6
+    },
+    {
+      "id": "h2",
+      "color": "yellow",
+      "position": [
+        -0.4,
+        4.5,
+        -0.3
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "head",
+        "body"
+      ],
+      "length": 1.6
+    },
+    {
+      "id": "ey1",
+      "color": "blue",
+      "position": [
+        0.35,
+        4.1,
+        0.6
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "head"
+      ],
+      "length": 0.35
+    },
+    {
+      "id": "ey2",
+      "color": "blue",
+      "position": [
+        -0.35,
+        4.1,
+        0.6
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "head"
+      ],
+      "length": 0.35
+    },
+    {
+      "id": "aL1",
+      "color": "red",
+      "position": [
+        1.9,
+        2.9,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "partIds": [
+        "armL",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "aL2",
+      "color": "red",
+      "position": [
+        1.9,
+        1.9,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "partIds": [
+        "armL",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "aR1",
+      "color": "red",
+      "position": [
+        -1.9,
+        2.9,
+        0
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "partIds": [
+        "armR",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "aR2",
+      "color": "green",
+      "position": [
+        -1.9,
+        1.9,
+        0
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "partIds": [
+        "armR",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "l1",
+      "color": "green",
+      "position": [
+        0.6,
+        0.3,
+        0.4
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "legL"
+      ],
+      "length": 0.6
+    },
+    {
+      "id": "l2",
+      "color": "green",
+      "position": [
+        -0.6,
+        0.3,
+        0.4
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "legR"
+      ],
+      "length": 0.6
+    },
+    {
+      "id": "cp1",
+      "color": "purple",
+      "position": [
+        0.5,
+        2.3,
+        1.3
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "plate",
+        "body"
+      ],
+      "length": 1.3
+    },
+    {
+      "id": "cp2",
+      "color": "purple",
+      "position": [
+        -0.5,
+        2.3,
+        1.3
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "plate",
+        "body"
+      ],
+      "length": 1.3
+    },
+    {
+      "id": "ch1",
+      "color": "purple",
+      "position": [
+        0,
+        2.3,
+        0.7
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "body"
+      ],
+      "length": 0.6
+    },
+    {
+      "id": "bk1",
+      "color": "blue",
+      "position": [
+        0,
+        2.8,
+        -0.7
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "partIds": [
+        "body"
+      ],
+      "length": 0.6
+    },
+    {
+      "id": "bk2",
+      "color": "yellow",
+      "position": [
+        0.6,
+        1.6,
+        -0.7
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "partIds": [
+        "body"
+      ],
+      "length": 0.6
+    }
+  ]
+}

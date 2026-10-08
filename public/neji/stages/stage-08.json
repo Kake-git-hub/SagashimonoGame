@@ -1,0 +1,573 @@
+{
+  "id": "stage-08",
+  "name": "ほんだな",
+  "emoji": "📚",
+  "difficulty": 4,
+  "boxes": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "parts": [
+    {
+      "id": "bottom",
+      "shape": "box",
+      "size": [
+        4,
+        0.3,
+        1.2
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "color": "#bc6c25",
+      "fixed": true
+    },
+    {
+      "id": "sideL",
+      "shape": "box",
+      "size": [
+        0.3,
+        3.5,
+        1.2
+      ],
+      "position": [
+        1.85,
+        1.9,
+        0
+      ],
+      "color": "#bc6c25",
+      "fixed": true
+    },
+    {
+      "id": "sideR",
+      "shape": "box",
+      "size": [
+        0.3,
+        3.5,
+        1.2
+      ],
+      "position": [
+        -1.85,
+        1.9,
+        0
+      ],
+      "color": "#bc6c25",
+      "fixed": true
+    },
+    {
+      "id": "shelf1",
+      "shape": "box",
+      "size": [
+        3.4,
+        0.2,
+        1.1
+      ],
+      "position": [
+        0,
+        1.3,
+        0
+      ],
+      "color": "#dda15e"
+    },
+    {
+      "id": "shelf2",
+      "shape": "box",
+      "size": [
+        3.4,
+        0.2,
+        1.1
+      ],
+      "position": [
+        0,
+        2.75,
+        0
+      ],
+      "color": "#dda15e"
+    },
+    {
+      "id": "top",
+      "shape": "box",
+      "size": [
+        4,
+        0.3,
+        1.2
+      ],
+      "position": [
+        0,
+        4.25,
+        0
+      ],
+      "color": "#bc6c25"
+    },
+    {
+      "id": "lbook1",
+      "shape": "box",
+      "size": [
+        0.4,
+        1.0,
+        0.9
+      ],
+      "position": [
+        -1.3,
+        1.9,
+        0
+      ],
+      "color": "#e63946"
+    },
+    {
+      "id": "ubook1",
+      "shape": "box",
+      "size": [
+        0.4,
+        1.0,
+        0.9
+      ],
+      "position": [
+        -1.3,
+        3.35,
+        0
+      ],
+      "color": "#2dc653"
+    },
+    {
+      "id": "lbook2",
+      "shape": "box",
+      "size": [
+        0.4,
+        1.0,
+        0.9
+      ],
+      "position": [
+        -0.6,
+        1.9,
+        0
+      ],
+      "color": "#3a86ff"
+    },
+    {
+      "id": "ubook2",
+      "shape": "box",
+      "size": [
+        0.4,
+        1.0,
+        0.9
+      ],
+      "position": [
+        -0.6,
+        3.35,
+        0
+      ],
+      "color": "#ffd60a"
+    },
+    {
+      "id": "lbook3",
+      "shape": "box",
+      "size": [
+        0.4,
+        1.0,
+        0.9
+      ],
+      "position": [
+        0.1,
+        1.9,
+        0
+      ],
+      "color": "#2dc653"
+    },
+    {
+      "id": "ubook3",
+      "shape": "box",
+      "size": [
+        0.4,
+        1.0,
+        0.9
+      ],
+      "position": [
+        0.1,
+        3.35,
+        0
+      ],
+      "color": "#e63946"
+    },
+    {
+      "id": "lbook4",
+      "shape": "box",
+      "size": [
+        0.4,
+        1.0,
+        0.9
+      ],
+      "position": [
+        0.8,
+        1.9,
+        0
+      ],
+      "color": "#ffd60a"
+    },
+    {
+      "id": "ubook4",
+      "shape": "box",
+      "size": [
+        0.4,
+        1.0,
+        0.9
+      ],
+      "position": [
+        0.8,
+        3.35,
+        0
+      ],
+      "color": "#3a86ff"
+    }
+  ],
+  "screws": [
+    {
+      "id": "tp1",
+      "color": "red",
+      "position": [
+        1.85,
+        4.4,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "top",
+        "sideL"
+      ],
+      "length": 0.95
+    },
+    {
+      "id": "tp2",
+      "color": "red",
+      "position": [
+        -1.85,
+        4.4,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "top",
+        "sideR"
+      ],
+      "length": 0.95
+    },
+    {
+      "id": "lb1",
+      "color": "purple",
+      "position": [
+        -1.3,
+        2.4,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "lbook1",
+        "shelf1"
+      ],
+      "length": 1.1
+    },
+    {
+      "id": "ub1",
+      "color": "blue",
+      "position": [
+        -1.3,
+        3.85,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "ubook1",
+        "shelf2"
+      ],
+      "length": 1.1
+    },
+    {
+      "id": "lb2",
+      "color": "purple",
+      "position": [
+        -0.6,
+        2.4,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "lbook2",
+        "shelf1"
+      ],
+      "length": 1.1
+    },
+    {
+      "id": "ub2",
+      "color": "blue",
+      "position": [
+        -0.6,
+        3.85,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "ubook2",
+        "shelf2"
+      ],
+      "length": 1.1
+    },
+    {
+      "id": "lb3",
+      "color": "purple",
+      "position": [
+        0.1,
+        2.4,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "lbook3",
+        "shelf1"
+      ],
+      "length": 1.1
+    },
+    {
+      "id": "ub3",
+      "color": "blue",
+      "position": [
+        0.1,
+        3.85,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "ubook3",
+        "shelf2"
+      ],
+      "length": 1.1
+    },
+    {
+      "id": "lb4",
+      "color": "orange",
+      "position": [
+        0.8,
+        2.4,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "lbook4",
+        "shelf1"
+      ],
+      "length": 1.1
+    },
+    {
+      "id": "ub4",
+      "color": "green",
+      "position": [
+        0.8,
+        3.85,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "ubook4",
+        "shelf2"
+      ],
+      "length": 1.1
+    },
+    {
+      "id": "s2a",
+      "color": "green",
+      "position": [
+        2.0,
+        2.75,
+        0.3
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "partIds": [
+        "sideL",
+        "shelf2"
+      ],
+      "length": 0.8
+    },
+    {
+      "id": "s2b",
+      "color": "green",
+      "position": [
+        2.0,
+        2.75,
+        -0.3
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "partIds": [
+        "sideL",
+        "shelf2"
+      ],
+      "length": 0.8
+    },
+    {
+      "id": "s2c",
+      "color": "yellow",
+      "position": [
+        -2.0,
+        2.75,
+        0.3
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "partIds": [
+        "sideR",
+        "shelf2"
+      ],
+      "length": 0.8
+    },
+    {
+      "id": "s2d",
+      "color": "yellow",
+      "position": [
+        -2.0,
+        2.75,
+        -0.3
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "partIds": [
+        "sideR",
+        "shelf2"
+      ],
+      "length": 0.8
+    },
+    {
+      "id": "s1a",
+      "color": "red",
+      "position": [
+        2.0,
+        1.3,
+        0.3
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "partIds": [
+        "sideL",
+        "shelf1"
+      ],
+      "length": 0.8
+    },
+    {
+      "id": "s1b",
+      "color": "yellow",
+      "position": [
+        2.0,
+        1.3,
+        -0.3
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "partIds": [
+        "sideL",
+        "shelf1"
+      ],
+      "length": 0.8
+    },
+    {
+      "id": "s1c",
+      "color": "orange",
+      "position": [
+        -2.0,
+        1.3,
+        0.3
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "partIds": [
+        "sideR",
+        "shelf1"
+      ],
+      "length": 0.8
+    },
+    {
+      "id": "s1d",
+      "color": "orange",
+      "position": [
+        -2.0,
+        1.3,
+        -0.3
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "partIds": [
+        "sideR",
+        "shelf1"
+      ],
+      "length": 0.8
+    }
+  ]
+}

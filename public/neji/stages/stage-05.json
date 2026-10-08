@@ -1,0 +1,350 @@
+{
+  "id": "stage-05",
+  "name": "ゆきだるま",
+  "emoji": "⛄",
+  "difficulty": 3,
+  "boxes": [
+    "purple",
+    "orange",
+    "blue",
+    "red",
+    "green"
+  ],
+  "parts": [
+    {
+      "id": "bottom",
+      "shape": "sphere",
+      "radius": 1.4,
+      "position": [
+        0,
+        1.4,
+        0
+      ],
+      "color": "#f8f9fa",
+      "fixed": true
+    },
+    {
+      "id": "middle",
+      "shape": "sphere",
+      "radius": 1.0,
+      "position": [
+        0,
+        3.5,
+        0
+      ],
+      "color": "#f8f9fa"
+    },
+    {
+      "id": "head",
+      "shape": "sphere",
+      "radius": 0.7,
+      "position": [
+        0,
+        5.0,
+        0
+      ],
+      "color": "#f8f9fa"
+    },
+    {
+      "id": "brim",
+      "shape": "cylinder",
+      "radius": 0.95,
+      "height": 0.1,
+      "position": [
+        0,
+        6.0,
+        0
+      ],
+      "color": "#2b2d42"
+    },
+    {
+      "id": "hat",
+      "shape": "cylinder",
+      "radius": 0.75,
+      "height": 0.7,
+      "position": [
+        0,
+        6.4,
+        0
+      ],
+      "color": "#2b2d42"
+    }
+  ],
+  "screws": [
+    {
+      "id": "nk",
+      "color": "blue",
+      "position": [
+        0,
+        5.7,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "head",
+        "middle"
+      ],
+      "length": 1.8
+    },
+    {
+      "id": "ht1",
+      "color": "purple",
+      "position": [
+        0.45,
+        6.75,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "hat",
+        "brim",
+        "head"
+      ],
+      "length": 1.3
+    },
+    {
+      "id": "ht2",
+      "color": "purple",
+      "position": [
+        -0.45,
+        6.75,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "hat",
+        "brim",
+        "head"
+      ],
+      "length": 1.3
+    },
+    {
+      "id": "e1",
+      "color": "blue",
+      "position": [
+        0.3,
+        5.3,
+        0.557
+      ],
+      "dir": [
+        0.429,
+        0.429,
+        0.796
+      ],
+      "partIds": [
+        "head"
+      ],
+      "length": 0.3
+    },
+    {
+      "id": "e2",
+      "color": "blue",
+      "position": [
+        -0.3,
+        5.3,
+        0.557
+      ],
+      "dir": [
+        -0.429,
+        0.429,
+        0.796
+      ],
+      "partIds": [
+        "head"
+      ],
+      "length": 0.3
+    },
+    {
+      "id": "ns",
+      "color": "orange",
+      "position": [
+        0,
+        4.85,
+        0.684
+      ],
+      "dir": [
+        0,
+        -0.214,
+        0.977
+      ],
+      "partIds": [
+        "head"
+      ],
+      "length": 0.4
+    },
+    {
+      "id": "m1",
+      "color": "red",
+      "position": [
+        1.0,
+        3.5,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "partIds": [
+        "middle"
+      ],
+      "length": 0.8
+    },
+    {
+      "id": "m2",
+      "color": "red",
+      "position": [
+        -1.0,
+        3.5,
+        0
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "partIds": [
+        "middle"
+      ],
+      "length": 0.8
+    },
+    {
+      "id": "m3",
+      "color": "purple",
+      "position": [
+        0,
+        3.5,
+        -1.0
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "partIds": [
+        "middle"
+      ],
+      "length": 0.8
+    },
+    {
+      "id": "bt1",
+      "color": "orange",
+      "position": [
+        0,
+        3.9,
+        0.917
+      ],
+      "dir": [
+        0,
+        0.4,
+        0.917
+      ],
+      "partIds": [
+        "middle"
+      ],
+      "length": 0.5
+    },
+    {
+      "id": "bt2",
+      "color": "orange",
+      "position": [
+        0,
+        3.1,
+        0.917
+      ],
+      "dir": [
+        0,
+        -0.4,
+        0.917
+      ],
+      "partIds": [
+        "middle"
+      ],
+      "length": 0.5
+    },
+    {
+      "id": "b1",
+      "color": "red",
+      "position": [
+        1.4,
+        1.4,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "partIds": [
+        "bottom"
+      ],
+      "length": 1.0
+    },
+    {
+      "id": "b2",
+      "color": "green",
+      "position": [
+        -1.4,
+        1.4,
+        0
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "partIds": [
+        "bottom"
+      ],
+      "length": 1.0
+    },
+    {
+      "id": "b3",
+      "color": "green",
+      "position": [
+        0,
+        1.4,
+        1.4
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "bottom"
+      ],
+      "length": 1.0
+    },
+    {
+      "id": "b4",
+      "color": "green",
+      "position": [
+        0,
+        1.4,
+        -1.4
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "partIds": [
+        "bottom"
+      ],
+      "length": 1.0
+    }
+  ]
+}

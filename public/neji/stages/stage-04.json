@@ -1,0 +1,356 @@
+{
+  "id": "stage-04",
+  "name": "くるま",
+  "emoji": "🚗",
+  "difficulty": 2,
+  "boxes": [
+    "red",
+    "blue",
+    "yellow",
+    "green"
+  ],
+  "parts": [
+    {
+      "id": "chassis",
+      "shape": "box",
+      "size": [
+        4.4,
+        0.4,
+        2.2
+      ],
+      "position": [
+        0,
+        0.4,
+        0
+      ],
+      "color": "#577590",
+      "fixed": true
+    },
+    {
+      "id": "body",
+      "shape": "box",
+      "size": [
+        4,
+        1,
+        2
+      ],
+      "position": [
+        0,
+        1.1,
+        0
+      ],
+      "color": "#f94144"
+    },
+    {
+      "id": "cabin",
+      "shape": "box",
+      "size": [
+        2,
+        0.8,
+        1.8
+      ],
+      "position": [
+        0,
+        2.0,
+        0
+      ],
+      "color": "#f9c74f"
+    },
+    {
+      "id": "wheelFL",
+      "shape": "cylinder",
+      "radius": 0.5,
+      "height": 0.3,
+      "position": [
+        1.4,
+        0.4,
+        1.25
+      ],
+      "color": "#333333",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "wheelFR",
+      "shape": "cylinder",
+      "radius": 0.5,
+      "height": 0.3,
+      "position": [
+        1.4,
+        0.4,
+        -1.25
+      ],
+      "color": "#333333",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "wheelBL",
+      "shape": "cylinder",
+      "radius": 0.5,
+      "height": 0.3,
+      "position": [
+        -1.4,
+        0.4,
+        1.25
+      ],
+      "color": "#333333",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "wheelBR",
+      "shape": "cylinder",
+      "radius": 0.5,
+      "height": 0.3,
+      "position": [
+        -1.4,
+        0.4,
+        -1.25
+      ],
+      "color": "#333333",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    }
+  ],
+  "screws": [
+    {
+      "id": "c1",
+      "color": "yellow",
+      "position": [
+        0.6,
+        2.4,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "cabin",
+        "body"
+      ],
+      "length": 1.0
+    },
+    {
+      "id": "c2",
+      "color": "yellow",
+      "position": [
+        -0.6,
+        2.4,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "cabin",
+        "body"
+      ],
+      "length": 1.0
+    },
+    {
+      "id": "b1",
+      "color": "red",
+      "position": [
+        1.5,
+        1.6,
+        0.4
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "body",
+        "chassis"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "b2",
+      "color": "red",
+      "position": [
+        1.5,
+        1.6,
+        -0.4
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "body",
+        "chassis"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "b3",
+      "color": "red",
+      "position": [
+        -1.5,
+        1.6,
+        0.4
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "body",
+        "chassis"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "b4",
+      "color": "blue",
+      "position": [
+        -1.5,
+        1.6,
+        -0.4
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "body",
+        "chassis"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "wFL",
+      "color": "blue",
+      "position": [
+        1.4,
+        0.4,
+        1.4
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "wheelFL",
+        "chassis"
+      ],
+      "length": 0.6
+    },
+    {
+      "id": "wFR",
+      "color": "blue",
+      "position": [
+        1.4,
+        0.4,
+        -1.4
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "partIds": [
+        "wheelFR",
+        "chassis"
+      ],
+      "length": 0.6
+    },
+    {
+      "id": "wBL",
+      "color": "green",
+      "position": [
+        -1.4,
+        0.4,
+        1.4
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "wheelBL",
+        "chassis"
+      ],
+      "length": 0.6
+    },
+    {
+      "id": "wBR",
+      "color": "green",
+      "position": [
+        -1.4,
+        0.4,
+        -1.4
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "partIds": [
+        "wheelBR",
+        "chassis"
+      ],
+      "length": 0.6
+    },
+    {
+      "id": "r1",
+      "color": "green",
+      "position": [
+        0.8,
+        1.1,
+        -1.0
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "partIds": [
+        "body"
+      ],
+      "length": 0.8
+    },
+    {
+      "id": "r2",
+      "color": "yellow",
+      "position": [
+        -0.8,
+        1.1,
+        -1.0
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "partIds": [
+        "body"
+      ],
+      "length": 0.8
+    }
+  ]
+}

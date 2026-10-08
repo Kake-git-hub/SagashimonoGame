@@ -1,0 +1,364 @@
+{
+  "id": "stage-07",
+  "name": "タワー",
+  "emoji": "🏯",
+  "difficulty": 4,
+  "boxes": [
+    "yellow",
+    "green",
+    "blue",
+    "red",
+    "purple"
+  ],
+  "parts": [
+    {
+      "id": "base",
+      "shape": "box",
+      "size": [
+        4.6,
+        0.6,
+        4.6
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "color": "#a3cef1",
+      "fixed": true
+    },
+    {
+      "id": "spacer1",
+      "shape": "cylinder",
+      "radius": 0.6,
+      "height": 0.7,
+      "position": [
+        0,
+        0.65,
+        0
+      ],
+      "color": "#e0e0e0",
+      "fixed": true
+    },
+    {
+      "id": "plate1",
+      "shape": "box",
+      "size": [
+        3.6,
+        0.4,
+        3.6
+      ],
+      "position": [
+        0,
+        1.2,
+        0
+      ],
+      "color": "#ffd6a5"
+    },
+    {
+      "id": "spacer2",
+      "shape": "cylinder",
+      "radius": 0.5,
+      "height": 0.7,
+      "position": [
+        0,
+        1.75,
+        0
+      ],
+      "color": "#e0e0e0"
+    },
+    {
+      "id": "plate2",
+      "shape": "box",
+      "size": [
+        2.2,
+        0.4,
+        2.2
+      ],
+      "position": [
+        0,
+        2.3,
+        0
+      ],
+      "color": "#caffbf"
+    }
+  ],
+  "screws": [
+    {
+      "id": "p2a",
+      "color": "yellow",
+      "position": [
+        0.35,
+        2.5,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "plate2",
+        "spacer2",
+        "plate1"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "p2b",
+      "color": "yellow",
+      "position": [
+        -0.35,
+        2.5,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "plate2",
+        "spacer2",
+        "plate1"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "m1",
+      "color": "red",
+      "position": [
+        0,
+        1.4,
+        0.85
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "plate1",
+        "base"
+      ],
+      "length": 1.4
+    },
+    {
+      "id": "m2",
+      "color": "red",
+      "position": [
+        0,
+        1.4,
+        -0.85
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "plate1",
+        "base"
+      ],
+      "length": 1.4
+    },
+    {
+      "id": "e1",
+      "color": "yellow",
+      "position": [
+        1.5,
+        1.4,
+        1.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "plate1"
+      ],
+      "length": 0.4
+    },
+    {
+      "id": "e2",
+      "color": "green",
+      "position": [
+        -1.5,
+        1.4,
+        1.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "plate1"
+      ],
+      "length": 0.4
+    },
+    {
+      "id": "e3",
+      "color": "green",
+      "position": [
+        1.5,
+        1.4,
+        -1.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "plate1"
+      ],
+      "length": 0.4
+    },
+    {
+      "id": "e4",
+      "color": "green",
+      "position": [
+        -1.5,
+        1.4,
+        -1.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "plate1"
+      ],
+      "length": 0.4
+    },
+    {
+      "id": "k1",
+      "color": "blue",
+      "position": [
+        1.9,
+        0.3,
+        1.9
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "base"
+      ],
+      "length": 1.0
+    },
+    {
+      "id": "k2",
+      "color": "purple",
+      "position": [
+        -1.9,
+        0.3,
+        1.9
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "base"
+      ],
+      "length": 1.0
+    },
+    {
+      "id": "k3",
+      "color": "purple",
+      "position": [
+        1.9,
+        0.3,
+        -1.9
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "base"
+      ],
+      "length": 1.0
+    },
+    {
+      "id": "k4",
+      "color": "purple",
+      "position": [
+        -1.9,
+        0.3,
+        -1.9
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "base"
+      ],
+      "length": 1.0
+    },
+    {
+      "id": "s1",
+      "color": "blue",
+      "position": [
+        2.3,
+        0,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "partIds": [
+        "base"
+      ],
+      "length": 1.0
+    },
+    {
+      "id": "s2",
+      "color": "blue",
+      "position": [
+        -2.3,
+        0,
+        0
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "partIds": [
+        "base"
+      ],
+      "length": 1.0
+    },
+    {
+      "id": "s3",
+      "color": "red",
+      "position": [
+        0,
+        0,
+        2.3
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "base"
+      ],
+      "length": 1.0
+    }
+  ]
+}

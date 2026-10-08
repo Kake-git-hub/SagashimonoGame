@@ -1,0 +1,478 @@
+{
+  "id": "stage-09",
+  "name": "ロケット",
+  "emoji": "🚀",
+  "difficulty": 4,
+  "boxes": [
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange",
+    "red"
+  ],
+  "parts": [
+    {
+      "id": "body",
+      "shape": "cylinder",
+      "radius": 1.0,
+      "height": 4.0,
+      "position": [
+        0,
+        2.5,
+        0
+      ],
+      "color": "#f1faee",
+      "fixed": true
+    },
+    {
+      "id": "nose",
+      "shape": "sphere",
+      "radius": 1.0,
+      "position": [
+        0,
+        4.5,
+        0
+      ],
+      "color": "#e63946"
+    },
+    {
+      "id": "finPX",
+      "shape": "box",
+      "size": [
+        0.3,
+        1.5,
+        1.0
+      ],
+      "position": [
+        1.45,
+        1.2,
+        0
+      ],
+      "color": "#f8961e"
+    },
+    {
+      "id": "finNX",
+      "shape": "box",
+      "size": [
+        0.3,
+        1.5,
+        1.0
+      ],
+      "position": [
+        -1.45,
+        1.2,
+        0
+      ],
+      "color": "#f8961e"
+    },
+    {
+      "id": "finPZ",
+      "shape": "box",
+      "size": [
+        1.0,
+        1.5,
+        0.3
+      ],
+      "position": [
+        0,
+        1.2,
+        1.45
+      ],
+      "color": "#f8961e"
+    },
+    {
+      "id": "finNZ",
+      "shape": "box",
+      "size": [
+        1.0,
+        1.5,
+        0.3
+      ],
+      "position": [
+        0,
+        1.2,
+        -1.45
+      ],
+      "color": "#f8961e"
+    },
+    {
+      "id": "boosterA",
+      "shape": "cylinder",
+      "radius": 0.35,
+      "height": 1.6,
+      "position": [
+        1.1,
+        1.3,
+        1.1
+      ],
+      "color": "#577590"
+    },
+    {
+      "id": "boosterB",
+      "shape": "cylinder",
+      "radius": 0.35,
+      "height": 1.6,
+      "position": [
+        -1.1,
+        1.3,
+        -1.1
+      ],
+      "color": "#577590"
+    },
+    {
+      "id": "hatch",
+      "shape": "box",
+      "size": [
+        1.6,
+        0.8,
+        0.2
+      ],
+      "position": [
+        0,
+        2.8,
+        1.4
+      ],
+      "color": "#ffd166"
+    }
+  ],
+  "screws": [
+    {
+      "id": "n1",
+      "color": "red",
+      "position": [
+        0,
+        5.5,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "nose",
+        "body"
+      ],
+      "length": 2.2
+    },
+    {
+      "id": "fPX1",
+      "color": "blue",
+      "position": [
+        1.6,
+        1.5,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "partIds": [
+        "finPX",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "fPX2",
+      "color": "blue",
+      "position": [
+        1.6,
+        0.9,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "partIds": [
+        "finPX",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "fNX1",
+      "color": "blue",
+      "position": [
+        -1.6,
+        1.5,
+        0
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "partIds": [
+        "finNX",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "fNX2",
+      "color": "green",
+      "position": [
+        -1.6,
+        0.9,
+        0
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "partIds": [
+        "finNX",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "fPZ1",
+      "color": "green",
+      "position": [
+        0,
+        1.5,
+        1.6
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "finPZ",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "fPZ2",
+      "color": "green",
+      "position": [
+        0,
+        0.9,
+        1.6
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "finPZ",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "fNZ1",
+      "color": "yellow",
+      "position": [
+        0,
+        1.5,
+        -1.6
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "partIds": [
+        "finNZ",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "fNZ2",
+      "color": "yellow",
+      "position": [
+        0,
+        0.9,
+        -1.6
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "partIds": [
+        "finNZ",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "ph1",
+      "color": "red",
+      "position": [
+        0.70710678,
+        3.4,
+        0.70710678
+      ],
+      "dir": [
+        0.70710678,
+        0,
+        0.70710678
+      ],
+      "partIds": [
+        "body"
+      ],
+      "length": 0.6
+    },
+    {
+      "id": "ph2",
+      "color": "red",
+      "position": [
+        -0.70710678,
+        3.4,
+        -0.70710678
+      ],
+      "dir": [
+        -0.70710678,
+        0,
+        -0.70710678
+      ],
+      "partIds": [
+        "body"
+      ],
+      "length": 0.6
+    },
+    {
+      "id": "bA1",
+      "color": "purple",
+      "position": [
+        1.1,
+        2.1,
+        1.1
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "boosterA"
+      ],
+      "length": 1.0
+    },
+    {
+      "id": "bA2",
+      "color": "purple",
+      "position": [
+        1.347487373,
+        0.8,
+        1.347487373
+      ],
+      "dir": [
+        0.70710678,
+        0,
+        0.70710678
+      ],
+      "partIds": [
+        "boosterA",
+        "body"
+      ],
+      "length": 1.3
+    },
+    {
+      "id": "bB1",
+      "color": "orange",
+      "position": [
+        -1.1,
+        2.1,
+        -1.1
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "partIds": [
+        "boosterB"
+      ],
+      "length": 1.0
+    },
+    {
+      "id": "bB2",
+      "color": "orange",
+      "position": [
+        -1.347487373,
+        0.8,
+        -1.347487373
+      ],
+      "dir": [
+        -0.70710678,
+        0,
+        -0.70710678
+      ],
+      "partIds": [
+        "boosterB",
+        "body"
+      ],
+      "length": 1.3
+    },
+    {
+      "id": "ht1",
+      "color": "yellow",
+      "position": [
+        0.45,
+        2.8,
+        1.5
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "hatch",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "ht2",
+      "color": "purple",
+      "position": [
+        -0.45,
+        2.8,
+        1.5
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "hatch",
+        "body"
+      ],
+      "length": 1.2
+    },
+    {
+      "id": "uh",
+      "color": "orange",
+      "position": [
+        0,
+        2.8,
+        1.0
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "partIds": [
+        "body"
+      ],
+      "length": 0.6
+    }
+  ]
+}
