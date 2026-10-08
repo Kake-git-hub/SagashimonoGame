@@ -35,7 +35,12 @@ npm run lint
 
 # テスト（ネジはずしのロジックとステージ検証）
 npm test
+
+# ヘッドレスブラウザで実際に遊んで確認（scripts/e2e/README.md）
+bash scripts/e2e/run.sh neji-smoke
 ```
+
+開発の進め方・内部構造は `CLAUDE.md` と `docs/ネジはずし開発ガイド.md` にまとめてあります。
 
 ## ディレクトリ構成
 
