@@ -16,7 +16,7 @@ URL: https://kake-git-hub.github.io/SagashimonoGame/
 - three.js + @react-three/fiber + @react-three/drei（ネジはずしの 3D 表示）
 - canvas-confetti（紙吹雪演出）
 - vitest（ロジックの単体テストとステージ検証）
-- PWA（manifest + Service Worker）
+- PWA（vite-plugin-pwa + Workbox。オフライン起動と自動アップデート）
 
 ## 開発
 
@@ -149,6 +149,15 @@ AI画像生成ツールで画像とお題リストを同時に生成できます
 - `boxes`: ボックスが登場する順番。各色のネジ本数は `boxCapacity × その色のボックス数` と一致させる
 - 色は `red / blue / green / yellow / purple / orange`
 - ネジの軸同士が交差したり、頭が他のパーツに食い込んだりしていると検証でエラーになる
+
+## PWA（オフライン起動と自動アップデート）
+
+- Service Worker は `src/sw.ts`（Workbox）で、ビルド時に `dist/sw.js` と `dist/manifest.json` が生成されます。`public/` に手書きの `sw.js` や `manifest.json` は置きません（manifest の内容は `vite.config.ts` で編集）
+- JS / CSS / HTML / アイコン / パズル定義 / ステージ定義は事前キャッシュされ、オフラインでも起動できます。パズル画像は大きいので表示したものだけキャッシュします
+- 新しいビルドが公開されると自動で更新します（`src/services/pwaUpdateService.ts`）
+  - 確認するタイミング: 起動時、アプリが前面に戻ったとき、1 時間ごと
+  - 新バージョンが見つかると、ゲームの途中を邪魔しないよう **ホーム画面にいるとき** に「こうしんしています…」と表示して切り替えます（ゲーム中ならホームに戻ったときに切り替わります）
+- ホーム画面の下に表示される「バージョン: 日時」はビルド日時です。実機でどのビルドが動いているか確認できます
 
 ## デプロイ
 

@@ -2,6 +2,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { initPwaUpdates } from './services/pwaUpdateService'
+
+// Service Worker の登録と自動アップデートの監視
+initPwaUpdates()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

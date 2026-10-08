@@ -202,3 +202,21 @@ button:disabled {
     display: none;
   }
 }
+
+/* PWA 更新中のトースト */
+.update-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  background-color: rgba(30, 30, 50, 0.92);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 24px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  z-index: 200;
+  white-space: nowrap;
+  animation: fadeIn 0.2s ease-out;
+}

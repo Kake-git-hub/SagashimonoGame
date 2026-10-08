@@ -50,6 +50,9 @@ export function HomeScreen({ onSelectGame }: Props) {
   }, []);
 
   const games: GameId[] = ['sagashimono', 'neji'];
+  const buildTime = new Date(__BUILD_TIME__).toLocaleString('ja-JP', {
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+  });
 
   return (
     <div style={styles.container}>
@@ -89,6 +92,7 @@ export function HomeScreen({ onSelectGame }: Props) {
             );
           })}
         </div>
+        <p style={styles.buildInfo}>バージョン: {buildTime}</p>
       </div>
     </div>
   );
@@ -184,5 +188,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.95rem',
     color: '#4a90d9',
     fontWeight: 'bold',
+  },
+  buildInfo: {
+    margin: '24px 0 0',
+    textAlign: 'center',
+    fontSize: '0.75rem',
+    color: '#aaa',
   },
 };
