@@ -6,6 +6,8 @@ import { fetchStageList } from '../games/neji/services/stageService';
 import { getNejiProgress } from '../games/neji/services/nejiStorageService';
 import { useIsTablet } from '../hooks/useMediaQuery';
 import { Profile } from '../services/profileService';
+import { applyPwaUpdate, checkForUpdate } from '../services/pwaUpdateService';
+import { usePwaUpdate, usePwaUpdateCheck } from '../hooks/usePwaUpdate';
 
 interface Props {
   profile: Profile | null;
@@ -27,6 +29,38 @@ interface ClearCount {
 export function HomeScreen({ profile, onSelectGame, onSwitchProfile, onOpenParentSettings }: Props) {
   const isTablet = useIsTablet();
   const [counts, setCounts] = useState<Partial<Record<GameId, ClearCount>>>({});
+  const updateReady = usePwaUpdate();
+  const updateCheck = usePwaUpdateCheck();
+  const [checkedAt, setCheckedAt] = useState(0);
+
+  // ホーム画面を開くたびに新しいビルドが無いか確認する
+  useEffect(() => {
+    checkForUpdate().catch(() => {});
+  }, []);
+
+  const handleUpdateButton = () => {
+    if (updateReady) {
+      applyPwaUpdate();
+      return;
+    }
+    setCheckedAt(Date.now());
+    checkForUpdate()
+      .then(result => {
+        if (result === 'ready') applyPwaUpdate();
+      })
+      .catch(() => {});
+  };
+
+  let updateLabel = '🔄 さいしんにする';
+  let updateNote = '';
+  if (updateReady) {
+    updateLabel = '⬆️ あたらしいバージョンにする';
+  } else if (checkedAt > 0) {
+    if (updateCheck === 'checking') updateNote = 'かくにんちゅう…';
+    else if (updateCheck === 'none') updateNote = 'いまが さいしんです ✓';
+    else if (updateCheck === 'error') updateNote = 'かくにんできませんでした（ネットを かくにんしてね）';
+    else if (updateCheck === 'unsupported') updateNote = 'このブラウザでは じどうこうしんできません';
+  }
 
   // 各ゲームのクリア数を集計
   useEffect(() => {
@@ -105,7 +139,13 @@ export function HomeScreen({ profile, onSelectGame, onSwitchProfile, onOpenParen
             );
           })}
         </div>
-        <p style={styles.buildInfo}>バージョン: {buildTime}</p>
+        <div style={styles.buildRow}>
+          <p style={styles.buildInfo}>バージョン: {buildTime}</p>
+          <button onClick={handleUpdateButton} style={{ ...styles.updateButton, ...(updateReady ? styles.updateButtonReady : {}) }}>
+            {updateLabel}
+          </button>
+          {updateNote && <p style={styles.updateNote}>{updateNote}</p>}
+        </div>
       </div>
     </div>
   );
@@ -238,10 +278,38 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#4a90d9',
     fontWeight: 'bold',
   },
-  buildInfo: {
+  buildRow: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '6px',
     margin: '24px 0 0',
+  },
+  buildInfo: {
+    margin: 0,
     textAlign: 'center',
     fontSize: '0.75rem',
     color: '#aaa',
+  },
+  updateButton: {
+    padding: '6px 14px',
+    fontSize: '0.8rem',
+    borderRadius: '16px',
+    border: '1px solid #ccc',
+    backgroundColor: 'white',
+    color: '#666',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  },
+  updateButtonReady: {
+    border: 'none',
+    backgroundColor: '#4a90d9',
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  updateNote: {
+    margin: 0,
+    fontSize: '0.75rem',
+    color: '#888',
   },
 };
