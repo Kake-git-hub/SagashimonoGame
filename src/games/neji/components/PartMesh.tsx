@@ -84,8 +84,8 @@ export function PartMesh({ part, falling, fallDir, highlighted, onFallDone }: Pr
         color={part.color ?? PART_DEFAULT_COLOR}
         roughness={0.55}
         metalness={0.08}
-        emissive={highlighted ? '#ff2a2a' : '#000000'}
-        emissiveIntensity={highlighted ? 0.55 : 0}
+        emissive={highlighted ? '#ff1a1a' : '#000000'}
+        emissiveIntensity={highlighted ? 1.0 : 0}
       />
     </mesh>
   );
