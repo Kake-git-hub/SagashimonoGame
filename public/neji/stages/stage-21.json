@@ -1,0 +1,514 @@
+{
+  "id": "stage-21",
+  "name": "まるたのいえ",
+  "emoji": "🏠",
+  "difficulty": 5,
+  "boxes": [
+    "green",
+    "red",
+    "blue",
+    "yellow",
+    "purple",
+    "orange"
+  ],
+  "parts": [
+    {
+      "id": "ground",
+      "shape": "box",
+      "size": [
+        5.0,
+        0.4,
+        5.0
+      ],
+      "fixed": true,
+      "position": [
+        0,
+        0.2,
+        0
+      ],
+      "color": "#80b918"
+    },
+    {
+      "id": "L1F",
+      "shape": "box",
+      "size": [
+        4.2,
+        0.6,
+        0.6
+      ],
+      "position": [
+        0,
+        0.95,
+        1.5
+      ],
+      "color": "#b5651d"
+    },
+    {
+      "id": "L1B",
+      "shape": "box",
+      "size": [
+        4.2,
+        0.6,
+        0.6
+      ],
+      "position": [
+        0,
+        0.95,
+        -1.5
+      ],
+      "color": "#b5651d"
+    },
+    {
+      "id": "L2E",
+      "shape": "box",
+      "size": [
+        0.6,
+        0.6,
+        4.2
+      ],
+      "position": [
+        1.5,
+        1.8,
+        0
+      ],
+      "color": "#c77d2e"
+    },
+    {
+      "id": "L2W",
+      "shape": "box",
+      "size": [
+        0.6,
+        0.6,
+        4.2
+      ],
+      "position": [
+        -1.5,
+        1.8,
+        0
+      ],
+      "color": "#c77d2e"
+    },
+    {
+      "id": "roof",
+      "shape": "box",
+      "size": [
+        4.4,
+        0.3,
+        4.4
+      ],
+      "position": [
+        0,
+        2.5,
+        0
+      ],
+      "color": "#d62828"
+    },
+    {
+      "id": "chimney",
+      "shape": "box",
+      "size": [
+        0.6,
+        0.8,
+        1.2
+      ],
+      "position": [
+        0.6,
+        3.05,
+        1.5
+      ],
+      "color": "#6c757d"
+    },
+    {
+      "id": "door",
+      "shape": "box",
+      "size": [
+        1.0,
+        0.5,
+        0.2
+      ],
+      "position": [
+        0,
+        0.95,
+        1.9
+      ],
+      "color": "#8d5524"
+    },
+    {
+      "id": "winE",
+      "shape": "box",
+      "size": [
+        0.2,
+        0.5,
+        0.8
+      ],
+      "position": [
+        1.9,
+        1.8,
+        0
+      ],
+      "color": "#90e0ef"
+    },
+    {
+      "id": "winW",
+      "shape": "box",
+      "size": [
+        0.2,
+        0.5,
+        0.8
+      ],
+      "position": [
+        -1.9,
+        1.8,
+        0
+      ],
+      "color": "#90e0ef"
+    }
+  ],
+  "screws": [
+    {
+      "id": "L1Fa",
+      "color": "purple",
+      "position": [
+        -0.6,
+        1.25,
+        1.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.15,
+      "partIds": [
+        "L1F",
+        "ground"
+      ]
+    },
+    {
+      "id": "L1Fb",
+      "color": "orange",
+      "position": [
+        0.6,
+        1.25,
+        1.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.15,
+      "partIds": [
+        "L1F",
+        "ground"
+      ]
+    },
+    {
+      "id": "L1Ba",
+      "color": "orange",
+      "position": [
+        -0.6,
+        1.25,
+        -1.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.15,
+      "partIds": [
+        "L1B",
+        "ground"
+      ]
+    },
+    {
+      "id": "L1Bb",
+      "color": "orange",
+      "position": [
+        0.6,
+        1.25,
+        -1.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.15,
+      "partIds": [
+        "L1B",
+        "ground"
+      ]
+    },
+    {
+      "id": "L2Ea",
+      "color": "yellow",
+      "position": [
+        1.5,
+        2.1,
+        -0.6
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.5,
+      "partIds": [
+        "L2E"
+      ]
+    },
+    {
+      "id": "L2Eb",
+      "color": "yellow",
+      "position": [
+        1.5,
+        2.1,
+        0.6
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.5,
+      "partIds": [
+        "L2E"
+      ]
+    },
+    {
+      "id": "L2Wa",
+      "color": "purple",
+      "position": [
+        -1.5,
+        2.1,
+        -0.6
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.5,
+      "partIds": [
+        "L2W"
+      ]
+    },
+    {
+      "id": "L2Wb",
+      "color": "purple",
+      "position": [
+        -1.5,
+        2.1,
+        0.6
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.5,
+      "partIds": [
+        "L2W"
+      ]
+    },
+    {
+      "id": "rf0",
+      "color": "red",
+      "position": [
+        -1.5,
+        2.65,
+        -1.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 2.55,
+      "partIds": [
+        "roof",
+        "L2W",
+        "L1B",
+        "ground"
+      ]
+    },
+    {
+      "id": "rf1",
+      "color": "red",
+      "position": [
+        -1.5,
+        2.65,
+        1.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 2.55,
+      "partIds": [
+        "roof",
+        "L2W",
+        "L1F",
+        "ground"
+      ]
+    },
+    {
+      "id": "rf2",
+      "color": "red",
+      "position": [
+        1.5,
+        2.65,
+        -1.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 2.55,
+      "partIds": [
+        "roof",
+        "L2E",
+        "L1B",
+        "ground"
+      ]
+    },
+    {
+      "id": "rf3",
+      "color": "blue",
+      "position": [
+        1.5,
+        2.65,
+        1.5
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 2.55,
+      "partIds": [
+        "roof",
+        "L2E",
+        "L1F",
+        "ground"
+      ]
+    },
+    {
+      "id": "chT",
+      "color": "blue",
+      "position": [
+        0.6,
+        3.45,
+        1.9
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.05,
+      "partIds": [
+        "chimney",
+        "roof"
+      ]
+    },
+    {
+      "id": "chS",
+      "color": "blue",
+      "position": [
+        0.9,
+        3.0,
+        1.5
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "length": 0.5,
+      "partIds": [
+        "chimney"
+      ]
+    },
+    {
+      "id": "dr0",
+      "color": "green",
+      "position": [
+        -0.35,
+        0.95,
+        2.0
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.6,
+      "partIds": [
+        "door",
+        "L1F"
+      ]
+    },
+    {
+      "id": "dr1",
+      "color": "yellow",
+      "position": [
+        0.35,
+        0.95,
+        2.0
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.6,
+      "partIds": [
+        "door",
+        "L1F"
+      ]
+    },
+    {
+      "id": "wE",
+      "color": "green",
+      "position": [
+        2.0,
+        1.8,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "winE",
+        "L2E"
+      ]
+    },
+    {
+      "id": "wW",
+      "color": "green",
+      "position": [
+        -2.0,
+        1.8,
+        0
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "winW",
+        "L2W"
+      ]
+    }
+  ]
+}

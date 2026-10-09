@@ -29,6 +29,7 @@ npm run build          # tsc -b && vite build（型エラーで落ちる）
 npm run lint           # eslint
 npm test               # vitest: ロジックの単体テスト + 全ステージ検証
 npm run validate:neji  # ステージ JSON の検証だけ
+npm run metrics:neji   # ステージごとの難しさの目安（最初に外せない本数・探索状態数など）
 npm run preview        # dist を配信（PWA の動作確認はこちら）
 bash scripts/e2e/run.sh neji-smoke   # ヘッドレス Chromium で実際に遊んで確認（scripts/e2e/README.md）
 bash scripts/e2e/run.sh neji-dig     # 発掘ステージ・クイズ・おたすけ・つづきから の流れ

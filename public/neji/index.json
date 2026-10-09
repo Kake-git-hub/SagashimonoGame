@@ -127,6 +127,13 @@
     "screwCount": 15
   },
   {
+    "id": "stage-20",
+    "name": "ケーキ",
+    "emoji": "🎂",
+    "difficulty": 4,
+    "screwCount": 18
+  },
+  {
     "id": "stage-10",
     "name": "おしろ",
     "emoji": "🏰",
@@ -151,5 +158,19 @@
     "emoji": "🌾",
     "difficulty": 5,
     "screwCount": 15
+  },
+  {
+    "id": "stage-21",
+    "name": "まるたのいえ",
+    "emoji": "🏠",
+    "difficulty": 5,
+    "screwCount": 18
+  },
+  {
+    "id": "stage-22",
+    "name": "はこのなかのはこ",
+    "emoji": "🎁",
+    "difficulty": 5,
+    "screwCount": 21
   }
 ]

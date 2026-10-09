@@ -1,0 +1,481 @@
+{
+  "id": "stage-20",
+  "name": "ケーキ",
+  "emoji": "🎂",
+  "difficulty": 4,
+  "boxes": [
+    "red",
+    "green",
+    "blue",
+    "purple",
+    "yellow",
+    "orange"
+  ],
+  "parts": [
+    {
+      "id": "plate",
+      "shape": "box",
+      "size": [
+        5.0,
+        0.3,
+        5.0
+      ],
+      "fixed": true,
+      "position": [
+        0,
+        -0.15,
+        0
+      ],
+      "color": "#f1faee"
+    },
+    {
+      "id": "stand",
+      "shape": "cylinder",
+      "radius": 1.2,
+      "height": 0.6,
+      "position": [
+        0,
+        -0.85,
+        0
+      ],
+      "color": "#dee2e6"
+    },
+    {
+      "id": "tier1",
+      "shape": "cylinder",
+      "radius": 2.0,
+      "height": 0.8,
+      "position": [
+        0,
+        0.4,
+        0
+      ],
+      "color": "#ffb5a7"
+    },
+    {
+      "id": "tier2",
+      "shape": "cylinder",
+      "radius": 1.5,
+      "height": 0.8,
+      "position": [
+        0,
+        1.45,
+        0
+      ],
+      "color": "#fcd5ce"
+    },
+    {
+      "id": "tier3",
+      "shape": "cylinder",
+      "radius": 1.0,
+      "height": 0.8,
+      "position": [
+        0,
+        2.5,
+        0
+      ],
+      "color": "#ffb5a7"
+    },
+    {
+      "id": "topping",
+      "shape": "cylinder",
+      "radius": 1.0,
+      "height": 0.3,
+      "position": [
+        0,
+        3.3,
+        0
+      ],
+      "color": "#7f5539"
+    },
+    {
+      "id": "candle",
+      "shape": "cylinder",
+      "radius": 0.3,
+      "height": 0.9,
+      "position": [
+        0,
+        3.9,
+        0
+      ],
+      "color": "#ffd60a"
+    },
+    {
+      "id": "berry0",
+      "shape": "sphere",
+      "radius": 0.35,
+      "position": [
+        0.0,
+        1.45,
+        1.85
+      ],
+      "color": "#e63946"
+    },
+    {
+      "id": "berry1",
+      "shape": "sphere",
+      "radius": 0.35,
+      "position": [
+        -1.602,
+        1.45,
+        -0.925
+      ],
+      "color": "#e63946"
+    },
+    {
+      "id": "berry2",
+      "shape": "sphere",
+      "radius": 0.35,
+      "position": [
+        1.602,
+        1.45,
+        -0.925
+      ],
+      "color": "#e63946"
+    }
+  ],
+  "screws": [
+    {
+      "id": "st0",
+      "color": "green",
+      "position": [
+        0.433,
+        -1.15,
+        0.25
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.1,
+      "partIds": [
+        "stand",
+        "plate"
+      ]
+    },
+    {
+      "id": "st1",
+      "color": "green",
+      "position": [
+        -0.433,
+        -1.15,
+        0.25
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.1,
+      "partIds": [
+        "stand",
+        "plate"
+      ]
+    },
+    {
+      "id": "st2",
+      "color": "green",
+      "position": [
+        -0.0,
+        -1.15,
+        -0.5
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.1,
+      "partIds": [
+        "stand",
+        "plate"
+      ]
+    },
+    {
+      "id": "bt0",
+      "color": "purple",
+      "position": [
+        0.0,
+        -0.3,
+        0.8
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.8,
+      "partIds": [
+        "plate",
+        "tier1"
+      ]
+    },
+    {
+      "id": "bt1",
+      "color": "purple",
+      "position": [
+        -0.693,
+        -0.3,
+        -0.4
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.8,
+      "partIds": [
+        "plate",
+        "tier1"
+      ]
+    },
+    {
+      "id": "bt2",
+      "color": "purple",
+      "position": [
+        0.693,
+        -0.3,
+        -0.4
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.8,
+      "partIds": [
+        "plate",
+        "tier1"
+      ]
+    },
+    {
+      "id": "t20",
+      "color": "yellow",
+      "position": [
+        0.6,
+        1.85,
+        0.0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "tier2",
+        "tier1"
+      ]
+    },
+    {
+      "id": "t21",
+      "color": "yellow",
+      "position": [
+        -0.3,
+        1.85,
+        0.52
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "tier2",
+        "tier1"
+      ]
+    },
+    {
+      "id": "t22",
+      "color": "yellow",
+      "position": [
+        -0.3,
+        1.85,
+        -0.52
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "tier2",
+        "tier1"
+      ]
+    },
+    {
+      "id": "t30",
+      "color": "blue",
+      "position": [
+        0.3,
+        2.9,
+        0.52
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "tier3",
+        "tier2"
+      ]
+    },
+    {
+      "id": "t31",
+      "color": "blue",
+      "position": [
+        -0.6,
+        2.9,
+        0.0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "tier3",
+        "tier2"
+      ]
+    },
+    {
+      "id": "t32",
+      "color": "blue",
+      "position": [
+        0.3,
+        2.9,
+        -0.52
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "tier3",
+        "tier2"
+      ]
+    },
+    {
+      "id": "tp0",
+      "color": "red",
+      "position": [
+        -0.3,
+        3.45,
+        0.52
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.05,
+      "partIds": [
+        "topping",
+        "tier3"
+      ]
+    },
+    {
+      "id": "tp1",
+      "color": "red",
+      "position": [
+        -0.3,
+        3.45,
+        -0.52
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.05,
+      "partIds": [
+        "topping",
+        "tier3"
+      ]
+    },
+    {
+      "id": "cd",
+      "color": "red",
+      "position": [
+        0,
+        4.35,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.15,
+      "partIds": [
+        "candle",
+        "topping"
+      ]
+    },
+    {
+      "id": "br0",
+      "color": "orange",
+      "position": [
+        0.0,
+        1.45,
+        2.2
+      ],
+      "dir": [
+        0.0,
+        0,
+        1.0
+      ],
+      "length": 1.2,
+      "partIds": [
+        "berry0",
+        "tier2"
+      ]
+    },
+    {
+      "id": "br1",
+      "color": "orange",
+      "position": [
+        -1.905,
+        1.45,
+        -1.1
+      ],
+      "dir": [
+        -0.866,
+        0,
+        -0.5
+      ],
+      "length": 1.2,
+      "partIds": [
+        "berry1",
+        "tier2"
+      ]
+    },
+    {
+      "id": "br2",
+      "color": "orange",
+      "position": [
+        1.905,
+        1.45,
+        -1.1
+      ],
+      "dir": [
+        0.866,
+        0,
+        -0.5
+      ],
+      "length": 1.2,
+      "partIds": [
+        "berry2",
+        "tier2"
+      ]
+    }
+  ]
+}
