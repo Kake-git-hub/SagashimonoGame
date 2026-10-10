@@ -45,12 +45,12 @@ export const BLOCK_CHECK = {
 
 // アニメーション時間（ミリ秒）
 export const ANIM = {
-  REMOVE_MS: 450,        // ネジが回転しながら抜ける
+  REMOVE_MS: 700,        // ネジが回転しながら抜ける
   SHAKE_MS: 400,         // 外せないネジの震え
   BLOCKER_FLASH_MS: 600, // 邪魔している物の赤表示
   FALL_MS: 900,          // パーツ落下
   UNFOLD_MS: 1100,       // 展開図のパーツが開く（ちょうつがい 1 つあたりではなく全体）
-  FLY_MS: 450,           // ネジがボックスへ飛ぶ
+  FLY_MS: 800,           // ネジがボックスへ飛ぶ（neji.css には --neji-fly-ms として渡る）
   BOX_DEPART_MS: 650,    // 満杯ボックスの退場
   RESULT_DELAY_MS: 600,  // クリア/失敗オーバーレイを出すまでの待ち
 } as const;

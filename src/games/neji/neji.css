@@ -285,12 +285,13 @@
   width: 26px;
   height: 26px;
   margin: -13px 0 0 -13px;
-  transition: left 0.45s cubic-bezier(0.3, 0.7, 0.4, 1), top 0.45s cubic-bezier(0.3, 0.7, 0.4, 1);
+  /* 時間は FlyingScrewLayer が constants.ts の ANIM.FLY_MS から --neji-fly-ms で渡す */
+  transition: left var(--neji-fly-ms, 0.8s) cubic-bezier(0.3, 0.7, 0.4, 1), top var(--neji-fly-ms, 0.8s) cubic-bezier(0.3, 0.7, 0.4, 1);
 }
 
 .neji-fly > svg {
   display: block;
-  animation: nejiFlyArc 0.45s ease-out both;
+  animation: nejiFlyArc var(--neji-fly-ms, 0.8s) ease-out both;
 }
 
 .neji-drop {

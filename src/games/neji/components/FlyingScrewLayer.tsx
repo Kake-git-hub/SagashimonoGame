@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import { ScrewColor } from '../types';
 import { ANIM } from '../constants';
 import { ScrewIcon } from './ScrewIcon';
@@ -44,10 +44,13 @@ function FlyingScrew({ flight, onDone }: { flight: Flight; onDone: (id: string) 
   );
 }
 
+// 飛ぶ時間は定数から CSS 変数で渡す（CSS の transition と setTimeout を同じ長さにする）
+const LAYER_STYLE = { '--neji-fly-ms': `${ANIM.FLY_MS}ms` } as CSSProperties;
+
 export function FlyingScrewLayer({ flights, onDone }: Props) {
   if (flights.length === 0) return null;
   return (
-    <div className="neji-fly-layer">
+    <div className="neji-fly-layer" style={LAYER_STYLE}>
       {flights.map(f => (
         <FlyingScrew key={f.id} flight={f} onDone={onDone} />
       ))}
