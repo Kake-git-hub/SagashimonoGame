@@ -34,6 +34,7 @@ npm run preview        # dist を配信（PWA の動作確認はこちら）
 bash scripts/e2e/run.sh neji-smoke   # ヘッドレス Chromium で実際に遊んで確認（scripts/e2e/README.md）
 bash scripts/e2e/run.sh neji-dig     # 発掘ステージ・クイズ・おたすけ・つづきから の流れ
 bash scripts/e2e/run.sh geo-shots    # 展開図・ピラミッド・漢字ステージ（ブロックの確認とスクリーンショット）
+bash scripts/e2e/run.sh offline      # サーバーを止めて、さがしもの（絵も）とネジはずしがオフラインで遊べるか
 ```
 
 push 前に `npm run build` / `npm run lint` / `npm test` を通す。CI（`.github/workflows/deploy.yml`）も同じ順で実行し、`main` に push されると GitHub Pages へデプロイされる。
@@ -52,6 +53,7 @@ push 前に `npm run build` / `npm run lint` / `npm test` を通す。CI（`.git
 - 既存ユーザーのデータを壊さない: localStorage のキー接頭辞（`sagashimono_` / `neji_`）と IndexedDB 名 `sagashimono_db` は変えない。プロフィールごとの保存は `profileStorageKey(base)` を通す（最初のプロフィールは従来キーをそのまま使い、2 人目以降は `__<id>` が付く）。プラットフォーム共通の設定は `asobi_` 接頭辞
 - リポジトリ名と `base: '/SagashimonoGame/'` は変えない（PWA の登録パスが壊れる）
 - `public/sw.js` / `public/manifest.json` は作らない（ビルドで生成される。manifest は `vite.config.ts` で編集）
+- オフラインで全部遊べる状態を保つ: ゲームが読み込むファイル（JS/CSS/JSON/さがしものの絵 webp など）は `vite.config.ts` の `injectManifest.globPatterns` で事前キャッシュに入れる。新しい種類のファイルを足したら `bash scripts/e2e/run.sh offline` で確認する
 - ホーム画面など軽い画面から three.js に依存するモジュールを import しない（`src/games/neji/logic/geometry.ts` 等）。ネジはずしは `React.lazy` で別チャンクにしてある
 - ネジはずしのステージ JSON を追加・変更したら `npm run validate:neji` を通す。検証を弱めてごまかさない（解けないステージを配布しないための仕組み）。底面（`dir: [0,-1,0]`）にもネジを置き、外側のパーツを外さないと取れないネジ（ふた・上の段・前の画）を多めに入れる
 - 画面が切り替わった直後の連打対策: 結果画面・クイズ・たからものを見る画面のボタンは `useTapGuard` で出てから約 1 秒は押せない。新しい画面を足すときも同じにする

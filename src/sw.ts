@@ -26,7 +26,7 @@ self.addEventListener('activate', event => {
   event.waitUntil(Promise.all(LEGACY_CACHES.map(name => caches.delete(name))));
 });
 
-// ビルド時に差し込まれる事前キャッシュ一覧（JS/CSS/HTML/アイコン/定義 JSON）
+// ビルド時に差し込まれる事前キャッシュ一覧（JS/CSS/HTML/アイコン/定義 JSON/さがしものの絵）
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 clientsClaim();
@@ -34,7 +34,7 @@ clientsClaim();
 // 画面遷移はすべて事前キャッシュした index.html で応える（オフライン起動用）
 registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html')));
 
-// パズル画像は大きいので事前キャッシュせず、表示したものを保存する
+// 事前キャッシュに入っていないパズル画像（古い jpg など）は、表示したものを保存する
 registerRoute(
   ({ url }) => url.pathname.includes('/puzzles/images/'),
   new CacheFirst({

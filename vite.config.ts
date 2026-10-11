@@ -36,9 +36,12 @@ export default defineConfig({
         ],
       },
       injectManifest: {
-        // JS/CSS/HTML/アイコン/パズル定義/ステージ定義は事前キャッシュ。画像（4MB超）は表示時にキャッシュ
-        globPatterns: ['**/*.{js,css,html,svg,png,json}'],
-        globIgnores: ['**/puzzles/images/**'],
+        // オフラインでも全部遊べるよう、JS/CSS/HTML/アイコン/パズル定義/ステージ定義と
+        // さがしものゲームの絵（webp、合計 4MB ほど）をインストール時にまとめて事前キャッシュする。
+        // 絵は内容が変わらなければ新しいビルドでも再ダウンロードされない
+        globPatterns: ['**/*.{js,css,html,svg,png,json,webp}'],
+        // パズル定義から参照されていない古い jpg は配らない（表示されたら sw.ts の実行時キャッシュに入る）
+        globIgnores: ['**/puzzles/images/**/*.{jpg,jpeg,png}'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
     }),

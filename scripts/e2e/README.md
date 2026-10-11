@@ -12,6 +12,7 @@ bash scripts/e2e/run.sh stage-shots     # 全ステージの初期表示をス�
 bash scripts/e2e/run.sh treasure-shots  # 発掘ステージの土を外して、たからもの（ほし・ダイヤ・骨）が見える状態を撮る
 bash scripts/e2e/run.sh pwa-update      # 旧ビルド起動 → 新ビルド公開 → 自動更新 → オフライン起動
 bash scripts/e2e/run.sh home-smoke      # ホーム / さがしもの一覧 / ゲーム画面 の表示
+bash scripts/e2e/run.sh offline         # ホームを開いただけでサーバーを止め、さがしもの（絵も）とネジはずしが遊べるか
 ```
 
 初回起動はプロフィール作成画面（なんさい？）が出るので、`common.cjs` の `gotoHome` が 6 さいで作ってからホームへ進む（6 さいはおきばが +1 される）。
@@ -19,5 +20,7 @@ bash scripts/e2e/run.sh home-smoke      # ホーム / さがしもの一覧 / �
 
 `run.sh` は `npm run build` → `vite preview`（ポート 4173）→ スクリプト実行 → サーバー停止 を行う。
 スクリーンショットは `scripts/e2e/out/` に出る（git 管理外）。
+
+Playwright の `context.setOffline(true)` は Service Worker 自身の通信を止めないため、キャッシュに無いファイルもネットから取れてしまう。オフラインの確認は `offline.cjs` のようにサーバーを止めて行う。
 
 各スクリプトは `?nejidebug=1` で公開される `window.__nejiDebug`（ネジの画面座標と `tap(id)`）を使う。
