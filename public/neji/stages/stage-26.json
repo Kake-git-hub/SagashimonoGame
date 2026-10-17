@@ -1,0 +1,715 @@
+{
+  "id": "stage-26",
+  "name": "きしゃ",
+  "emoji": "🚂",
+  "difficulty": 4,
+  "boxes": [
+    "orange",
+    "green",
+    "green",
+    "red",
+    "blue",
+    "purple",
+    "yellow",
+    "orange"
+  ],
+  "parts": [
+    {
+      "id": "chassis",
+      "shape": "box",
+      "size": [
+        6,
+        0.6,
+        2
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "color": "#343a40",
+      "fixed": true
+    },
+    {
+      "id": "boiler",
+      "shape": "cylinder",
+      "radius": 0.9,
+      "height": 3.6,
+      "position": [
+        1,
+        1.2,
+        0
+      ],
+      "color": "#2a9d8f",
+      "rotation": [
+        0,
+        0,
+        90
+      ]
+    },
+    {
+      "id": "cab",
+      "shape": "box",
+      "size": [
+        1.8,
+        2.2,
+        2
+      ],
+      "position": [
+        -2,
+        1.4,
+        0
+      ],
+      "color": "#e9c46a"
+    },
+    {
+      "id": "roof",
+      "shape": "box",
+      "size": [
+        2.2,
+        0.3,
+        2.4
+      ],
+      "position": [
+        -2,
+        2.9,
+        0
+      ],
+      "color": "#e63946"
+    },
+    {
+      "id": "chimney",
+      "shape": "cylinder",
+      "radius": 0.35,
+      "height": 1,
+      "position": [
+        2.3,
+        2.6,
+        0
+      ],
+      "color": "#212529"
+    },
+    {
+      "id": "dome",
+      "shape": "cylinder",
+      "radius": 0.45,
+      "height": 0.5,
+      "position": [
+        0.8,
+        2.35,
+        0
+      ],
+      "color": "#f4a261"
+    },
+    {
+      "id": "lamp",
+      "shape": "cylinder",
+      "radius": 0.3,
+      "height": 0.3,
+      "position": [
+        2.95,
+        1.6,
+        0
+      ],
+      "color": "#ffd60a",
+      "rotation": [
+        0,
+        0,
+        90
+      ]
+    },
+    {
+      "id": "wheelF0",
+      "shape": "cylinder",
+      "radius": 0.7,
+      "height": 0.3,
+      "position": [
+        -1.8,
+        -0.2,
+        1.15
+      ],
+      "color": "#6c757d",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "wheelF1",
+      "shape": "cylinder",
+      "radius": 0.7,
+      "height": 0.3,
+      "position": [
+        0,
+        -0.2,
+        1.15
+      ],
+      "color": "#6c757d",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "wheelF2",
+      "shape": "cylinder",
+      "radius": 0.7,
+      "height": 0.3,
+      "position": [
+        1.8,
+        -0.2,
+        1.15
+      ],
+      "color": "#6c757d",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "rodF",
+      "shape": "box",
+      "size": [
+        4.4,
+        0.25,
+        0.15
+      ],
+      "position": [
+        0,
+        -0.2,
+        1.63
+      ],
+      "color": "#e63946"
+    },
+    {
+      "id": "wheelK0",
+      "shape": "cylinder",
+      "radius": 0.7,
+      "height": 0.3,
+      "position": [
+        -1.8,
+        -0.2,
+        -1.15
+      ],
+      "color": "#6c757d",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "wheelK1",
+      "shape": "cylinder",
+      "radius": 0.7,
+      "height": 0.3,
+      "position": [
+        0,
+        -0.2,
+        -1.15
+      ],
+      "color": "#6c757d",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "wheelK2",
+      "shape": "cylinder",
+      "radius": 0.7,
+      "height": 0.3,
+      "position": [
+        1.8,
+        -0.2,
+        -1.15
+      ],
+      "color": "#6c757d",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "rodK",
+      "shape": "box",
+      "size": [
+        4.4,
+        0.25,
+        0.15
+      ],
+      "position": [
+        0,
+        -0.2,
+        -1.62
+      ],
+      "color": "#e63946"
+    },
+    {
+      "id": "cow",
+      "shape": "box",
+      "size": [
+        0.6,
+        0.9,
+        2.2
+      ],
+      "position": [
+        3.3,
+        0.15,
+        0
+      ],
+      "color": "#e63946"
+    }
+  ],
+  "screws": [
+    {
+      "id": "roof1",
+      "color": "green",
+      "position": [
+        -2,
+        3.05,
+        0.9
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.15,
+      "partIds": [
+        "roof",
+        "cab"
+      ]
+    },
+    {
+      "id": "roof2",
+      "color": "orange",
+      "position": [
+        -2,
+        3.05,
+        -0.9
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.15,
+      "partIds": [
+        "roof",
+        "cab"
+      ]
+    },
+    {
+      "id": "cabT1",
+      "color": "yellow",
+      "position": [
+        -2.5,
+        2.5,
+        0.4
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "cab"
+      ]
+    },
+    {
+      "id": "cabT2",
+      "color": "purple",
+      "position": [
+        -1.5,
+        2.5,
+        -0.4
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "cab"
+      ]
+    },
+    {
+      "id": "cabK",
+      "color": "green",
+      "position": [
+        -2.9,
+        1.4,
+        0
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "cab"
+      ]
+    },
+    {
+      "id": "cabF",
+      "color": "red",
+      "position": [
+        -2,
+        0.8,
+        1
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1,
+      "partIds": [
+        "cab"
+      ]
+    },
+    {
+      "id": "chimney",
+      "color": "orange",
+      "position": [
+        2.3,
+        3.1,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.6,
+      "partIds": [
+        "chimney",
+        "boiler"
+      ]
+    },
+    {
+      "id": "dome",
+      "color": "yellow",
+      "position": [
+        0.8,
+        2.6,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.2,
+      "partIds": [
+        "dome",
+        "boiler"
+      ]
+    },
+    {
+      "id": "lamp",
+      "color": "red",
+      "position": [
+        3.1,
+        1.6,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "length": 0.5,
+      "partIds": [
+        "lamp",
+        "boiler"
+      ]
+    },
+    {
+      "id": "boilerT",
+      "color": "green",
+      "position": [
+        1.6,
+        2.1,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "boiler"
+      ]
+    },
+    {
+      "id": "boilerK",
+      "color": "blue",
+      "position": [
+        0.4,
+        1.2,
+        -0.9
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.8,
+      "partIds": [
+        "boiler"
+      ]
+    },
+    {
+      "id": "axleF0",
+      "color": "green",
+      "position": [
+        -1.8,
+        -0.2,
+        1.3
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.6,
+      "partIds": [
+        "wheelF0",
+        "chassis"
+      ]
+    },
+    {
+      "id": "axleF1",
+      "color": "yellow",
+      "position": [
+        0,
+        -0.2,
+        1.3
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.6,
+      "partIds": [
+        "wheelF1",
+        "chassis"
+      ]
+    },
+    {
+      "id": "axleF2",
+      "color": "blue",
+      "position": [
+        1.8,
+        -0.2,
+        1.3
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.6,
+      "partIds": [
+        "wheelF2",
+        "chassis"
+      ]
+    },
+    {
+      "id": "rodF1",
+      "color": "orange",
+      "position": [
+        -0.9,
+        -0.2,
+        1.7
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.5,
+      "partIds": [
+        "rodF"
+      ]
+    },
+    {
+      "id": "rodF2",
+      "color": "green",
+      "position": [
+        0.9,
+        -0.2,
+        1.7
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.5,
+      "partIds": [
+        "rodF"
+      ]
+    },
+    {
+      "id": "axleK0",
+      "color": "purple",
+      "position": [
+        -1.8,
+        -0.2,
+        -1.3
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.6,
+      "partIds": [
+        "wheelK0",
+        "chassis"
+      ]
+    },
+    {
+      "id": "axleK1",
+      "color": "orange",
+      "position": [
+        0,
+        -0.2,
+        -1.3
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.6,
+      "partIds": [
+        "wheelK1",
+        "chassis"
+      ]
+    },
+    {
+      "id": "axleK2",
+      "color": "blue",
+      "position": [
+        1.8,
+        -0.2,
+        -1.3
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.6,
+      "partIds": [
+        "wheelK2",
+        "chassis"
+      ]
+    },
+    {
+      "id": "rodK1",
+      "color": "green",
+      "position": [
+        -0.9,
+        -0.2,
+        -1.7
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.5,
+      "partIds": [
+        "rodK"
+      ]
+    },
+    {
+      "id": "rodK2",
+      "color": "purple",
+      "position": [
+        0.9,
+        -0.2,
+        -1.7
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.5,
+      "partIds": [
+        "rodK"
+      ]
+    },
+    {
+      "id": "cow",
+      "color": "orange",
+      "position": [
+        3.6,
+        0.15,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "cow",
+        "chassis"
+      ]
+    },
+    {
+      "id": "bottom1",
+      "color": "orange",
+      "position": [
+        -0.9,
+        -0.3,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "chassis"
+      ]
+    },
+    {
+      "id": "bottom2",
+      "color": "red",
+      "position": [
+        0.9,
+        -0.3,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "chassis"
+      ]
+    }
+  ]
+}

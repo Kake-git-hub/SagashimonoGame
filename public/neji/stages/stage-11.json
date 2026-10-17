@@ -12,11 +12,11 @@
     ]
   },
   "boxes": [
-    "red",
+    "purple",
+    "orange",
+    "orange",
     "blue",
-    "green",
-    "yellow",
-    "purple"
+    "red"
   ],
   "parts": [
     {
@@ -46,8 +46,8 @@
         1.4
       ],
       "position": [
-        -2.0,
-        2.0,
+        -2,
+        2,
         0
       ],
       "color": "#8b5a2b"
@@ -61,8 +61,8 @@
         1.4
       ],
       "position": [
-        0.0,
-        2.0,
+        0,
+        2,
         0
       ],
       "color": "#a0522d"
@@ -76,8 +76,8 @@
         1.4
       ],
       "position": [
-        2.0,
-        2.0,
+        2,
+        2,
         0
       ],
       "color": "#7a4a22"
@@ -91,8 +91,8 @@
         1.4
       ],
       "position": [
-        -2.0,
-        0.0,
+        -2,
+        0,
         0
       ],
       "color": "#9c6b3c"
@@ -106,8 +106,8 @@
         1.4
       ],
       "position": [
-        2.0,
-        0.0,
+        2,
+        0,
         0
       ],
       "color": "#b07040"
@@ -121,8 +121,8 @@
         1.4
       ],
       "position": [
-        -2.0,
-        -2.0,
+        -2,
+        -2,
         0
       ],
       "color": "#86593a"
@@ -136,8 +136,8 @@
         1.4
       ],
       "position": [
-        0.0,
-        -2.0,
+        0,
+        -2,
         0
       ],
       "color": "#8b5a2b"
@@ -151,8 +151,8 @@
         1.4
       ],
       "position": [
-        2.0,
-        -2.0,
+        2,
+        -2,
         0
       ],
       "color": "#a0522d"
@@ -206,9 +206,9 @@
   "screws": [
     {
       "id": "t0",
-      "color": "yellow",
+      "color": "blue",
       "position": [
-        -2.0,
+        -2,
         2.9,
         0
       ],
@@ -217,16 +217,16 @@
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d02"
       ]
     },
     {
       "id": "t1",
-      "color": "purple",
+      "color": "red",
       "position": [
-        0.0,
+        0,
         2.9,
         0
       ],
@@ -235,16 +235,16 @@
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d12"
       ]
     },
     {
       "id": "t2",
-      "color": "purple",
+      "color": "blue",
       "position": [
-        2.0,
+        2,
         2.9,
         0
       ],
@@ -253,16 +253,16 @@
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d22"
       ]
     },
     {
       "id": "b0",
-      "color": "red",
+      "color": "orange",
       "position": [
-        -2.0,
+        -2,
         -2.9,
         0
       ],
@@ -271,16 +271,16 @@
         -1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d00"
       ]
     },
     {
       "id": "b1",
-      "color": "red",
+      "color": "blue",
       "position": [
-        0.0,
+        0,
         -2.9,
         0
       ],
@@ -289,16 +289,16 @@
         -1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d10"
       ]
     },
     {
       "id": "b2",
-      "color": "red",
+      "color": "orange",
       "position": [
-        2.0,
+        2,
         -2.9,
         0
       ],
@@ -307,16 +307,16 @@
         -1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d20"
       ]
     },
     {
       "id": "sL",
-      "color": "yellow",
+      "color": "purple",
       "position": [
-        -2.0,
+        -2,
         0,
         0.7
       ],
@@ -325,16 +325,16 @@
         0,
         1
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d01"
       ]
     },
     {
       "id": "sR",
-      "color": "yellow",
+      "color": "orange",
       "position": [
-        2.0,
+        2,
         0,
         0.7
       ],
@@ -343,17 +343,17 @@
         0,
         1
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d21"
       ]
     },
     {
       "id": "f1",
-      "color": "blue",
+      "color": "orange",
       "position": [
-        -2.0,
-        1.0,
+        -2,
+        1,
         1.45
       ],
       "dir": [
@@ -369,10 +369,10 @@
     },
     {
       "id": "f2",
-      "color": "blue",
+      "color": "red",
       "position": [
-        2.0,
-        -1.0,
+        2,
+        -1,
         1.45
       ],
       "dir": [
@@ -388,10 +388,10 @@
     },
     {
       "id": "k1",
-      "color": "blue",
+      "color": "red",
       "position": [
-        -2.0,
-        -1.0,
+        -2,
+        -1,
         -1.45
       ],
       "dir": [
@@ -407,10 +407,10 @@
     },
     {
       "id": "k2",
-      "color": "purple",
+      "color": "orange",
       "position": [
-        2.0,
-        1.0,
+        2,
+        1,
         -1.45
       ],
       "dir": [
@@ -426,7 +426,7 @@
     },
     {
       "id": "c1",
-      "color": "green",
+      "color": "purple",
       "position": [
         -1.4,
         3.7,
@@ -437,7 +437,7 @@
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "cap",
         "d02"
@@ -445,7 +445,7 @@
     },
     {
       "id": "c2",
-      "color": "green",
+      "color": "purple",
       "position": [
         1.4,
         3.7,
@@ -456,7 +456,7 @@
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "cap",
         "d22"
@@ -464,18 +464,18 @@
     },
     {
       "id": "c3",
-      "color": "green",
+      "color": "orange",
       "position": [
         0.5,
         3.7,
-        0.0
+        0
       ],
       "dir": [
         0,
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "cap",
         "d12"

@@ -4,14 +4,14 @@
   "emoji": "🏰",
   "difficulty": 5,
   "boxes": [
+    "orange",
+    "yellow",
+    "blue",
     "red",
     "orange",
     "green",
-    "blue",
-    "yellow",
-    "orange",
     "purple",
-    "blue",
+    "red",
     "green"
   ],
   "parts": [
@@ -133,7 +133,7 @@
       ],
       "position": [
         0,
-        1.0,
+        1,
         2.2
       ],
       "color": "#f8edeb"
@@ -148,7 +148,7 @@
       ],
       "position": [
         0,
-        1.0,
+        1,
         -2.2
       ],
       "color": "#f8edeb"
@@ -163,7 +163,7 @@
       ],
       "position": [
         2.2,
-        1.0,
+        1,
         0
       ],
       "color": "#f8edeb"
@@ -178,7 +178,7 @@
       ],
       "position": [
         -2.2,
-        1.0,
+        1,
         0
       ],
       "color": "#f8edeb"
@@ -218,12 +218,12 @@
       "shape": "box",
       "size": [
         2.4,
-        1.0,
+        1,
         0.3
       ],
       "position": [
         0,
-        1.0,
+        1,
         2.9
       ],
       "color": "#6a4c93"
@@ -262,7 +262,7 @@
   "screws": [
     {
       "id": "rfNE",
-      "color": "orange",
+      "color": "red",
       "position": [
         2.2,
         3.45,
@@ -277,14 +277,14 @@
         "roofNE",
         "towerNE"
       ],
-      "length": 2.0
+      "length": 2
     },
     {
       "id": "tNE",
-      "color": "blue",
+      "color": "orange",
       "position": [
         2.8000000000000003,
-        1.0,
+        1,
         2.2
       ],
       "dir": [
@@ -299,7 +299,7 @@
     },
     {
       "id": "rfNW",
-      "color": "orange",
+      "color": "green",
       "position": [
         -2.2,
         3.45,
@@ -314,14 +314,14 @@
         "roofNW",
         "towerNW"
       ],
-      "length": 2.0
+      "length": 2
     },
     {
       "id": "tNW",
-      "color": "green",
+      "color": "blue",
       "position": [
         -2.8000000000000003,
-        1.0,
+        1,
         2.2
       ],
       "dir": [
@@ -336,7 +336,7 @@
     },
     {
       "id": "rfSE",
-      "color": "orange",
+      "color": "green",
       "position": [
         2.2,
         3.45,
@@ -351,14 +351,14 @@
         "roofSE",
         "towerSE"
       ],
-      "length": 2.0
+      "length": 2
     },
     {
       "id": "tSE",
-      "color": "green",
+      "color": "red",
       "position": [
         2.8000000000000003,
-        1.0,
+        1,
         -2.2
       ],
       "dir": [
@@ -373,7 +373,7 @@
     },
     {
       "id": "rfSW",
-      "color": "orange",
+      "color": "green",
       "position": [
         -2.2,
         3.45,
@@ -388,14 +388,14 @@
         "roofSW",
         "towerSW"
       ],
-      "length": 2.0
+      "length": 2
     },
     {
       "id": "tSW",
-      "color": "green",
+      "color": "purple",
       "position": [
         -2.8000000000000003,
-        1.0,
+        1,
         -2.2
       ],
       "dir": [
@@ -410,10 +410,10 @@
     },
     {
       "id": "wN1",
-      "color": "orange",
+      "color": "yellow",
       "position": [
         0.8,
-        1.0,
+        1,
         2.4
       ],
       "dir": [
@@ -431,7 +431,7 @@
       "color": "orange",
       "position": [
         -0.8,
-        1.0,
+        1,
         2.4
       ],
       "dir": [
@@ -446,10 +446,10 @@
     },
     {
       "id": "wS1",
-      "color": "yellow",
+      "color": "blue",
       "position": [
         0.8,
-        1.0,
+        1,
         -2.4
       ],
       "dir": [
@@ -464,10 +464,10 @@
     },
     {
       "id": "wS2",
-      "color": "yellow",
+      "color": "green",
       "position": [
         -0.8,
-        1.0,
+        1,
         -2.4
       ],
       "dir": [
@@ -482,10 +482,10 @@
     },
     {
       "id": "wE1",
-      "color": "yellow",
+      "color": "green",
       "position": [
         2.4,
-        1.0,
+        1,
         0.8
       ],
       "dir": [
@@ -500,10 +500,10 @@
     },
     {
       "id": "wE2",
-      "color": "purple",
+      "color": "orange",
       "position": [
         2.4,
-        1.0,
+        1,
         -0.8
       ],
       "dir": [
@@ -521,7 +521,7 @@
       "color": "purple",
       "position": [
         -2.4,
-        1.0,
+        1,
         0.8
       ],
       "dir": [
@@ -536,10 +536,10 @@
     },
     {
       "id": "wW2",
-      "color": "purple",
+      "color": "red",
       "position": [
         -2.4,
-        1.0,
+        1,
         -0.8
       ],
       "dir": [
@@ -573,7 +573,7 @@
     },
     {
       "id": "k2",
-      "color": "blue",
+      "color": "purple",
       "position": [
         -0.5,
         2.3,
@@ -592,11 +592,11 @@
     },
     {
       "id": "rp1",
-      "color": "red",
+      "color": "orange",
       "position": [
-        1.0,
-        3.0,
-        1.0
+        1,
+        3,
+        1
       ],
       "dir": [
         0,
@@ -613,9 +613,9 @@
       "id": "rp2",
       "color": "red",
       "position": [
-        -1.0,
-        3.0,
-        1.0
+        -1,
+        3,
+        1
       ],
       "dir": [
         0,
@@ -633,8 +633,8 @@
       "color": "red",
       "position": [
         0,
-        3.0,
-        -1.0
+        3,
+        -1
       ],
       "dir": [
         0,
@@ -649,7 +649,7 @@
     },
     {
       "id": "d1",
-      "color": "blue",
+      "color": "red",
       "position": [
         0,
         -0.3,
@@ -667,7 +667,7 @@
     },
     {
       "id": "d2",
-      "color": "blue",
+      "color": "orange",
       "position": [
         0,
         -0.3,
@@ -685,7 +685,7 @@
     },
     {
       "id": "d3",
-      "color": "blue",
+      "color": "yellow",
       "position": [
         1.2,
         -0.3,
@@ -706,7 +706,7 @@
       "color": "green",
       "position": [
         0,
-        1.0,
+        1,
         3.05
       ],
       "dir": [
@@ -722,7 +722,7 @@
     },
     {
       "id": "cne",
-      "color": "green",
+      "color": "yellow",
       "position": [
         2.65,
         4.2,
@@ -733,7 +733,7 @@
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "capNE",
         "roofNE"
@@ -741,7 +741,7 @@
     },
     {
       "id": "csw",
-      "color": "green",
+      "color": "orange",
       "position": [
         -2.65,
         4.2,
@@ -752,7 +752,7 @@
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "capSW",
         "roofSW"

@@ -4,21 +4,21 @@
   "emoji": "🎂",
   "difficulty": 4,
   "boxes": [
+    "orange",
     "red",
     "green",
-    "blue",
-    "purple",
     "yellow",
-    "orange"
+    "blue",
+    "purple"
   ],
   "parts": [
     {
       "id": "plate",
       "shape": "box",
       "size": [
-        5.0,
+        5,
         0.3,
-        5.0
+        5
       ],
       "fixed": true,
       "position": [
@@ -43,7 +43,7 @@
     {
       "id": "tier1",
       "shape": "cylinder",
-      "radius": 2.0,
+      "radius": 2,
       "height": 0.8,
       "position": [
         0,
@@ -67,7 +67,7 @@
     {
       "id": "tier3",
       "shape": "cylinder",
-      "radius": 1.0,
+      "radius": 1,
       "height": 0.8,
       "position": [
         0,
@@ -79,7 +79,7 @@
     {
       "id": "topping",
       "shape": "cylinder",
-      "radius": 1.0,
+      "radius": 1,
       "height": 0.3,
       "position": [
         0,
@@ -105,7 +105,7 @@
       "shape": "sphere",
       "radius": 0.35,
       "position": [
-        0.0,
+        0,
         1.45,
         1.85
       ],
@@ -156,7 +156,7 @@
     },
     {
       "id": "st1",
-      "color": "green",
+      "color": "yellow",
       "position": [
         -0.433,
         -1.15,
@@ -175,9 +175,9 @@
     },
     {
       "id": "st2",
-      "color": "green",
+      "color": "red",
       "position": [
-        -0.0,
+        0,
         -1.15,
         -0.5
       ],
@@ -194,9 +194,9 @@
     },
     {
       "id": "bt0",
-      "color": "purple",
+      "color": "blue",
       "position": [
-        0.0,
+        0,
         -0.3,
         0.8
       ],
@@ -232,7 +232,7 @@
     },
     {
       "id": "bt2",
-      "color": "purple",
+      "color": "yellow",
       "position": [
         0.693,
         -0.3,
@@ -251,11 +251,11 @@
     },
     {
       "id": "t20",
-      "color": "yellow",
+      "color": "purple",
       "position": [
         0.6,
         1.85,
-        0.0
+        0
       ],
       "dir": [
         0,
@@ -289,7 +289,7 @@
     },
     {
       "id": "t22",
-      "color": "yellow",
+      "color": "blue",
       "position": [
         -0.3,
         1.85,
@@ -308,7 +308,7 @@
     },
     {
       "id": "t30",
-      "color": "blue",
+      "color": "orange",
       "position": [
         0.3,
         2.9,
@@ -327,11 +327,11 @@
     },
     {
       "id": "t31",
-      "color": "blue",
+      "color": "red",
       "position": [
         -0.6,
         2.9,
-        0.0
+        0
       ],
       "dir": [
         0,
@@ -346,7 +346,7 @@
     },
     {
       "id": "t32",
-      "color": "blue",
+      "color": "green",
       "position": [
         0.3,
         2.9,
@@ -365,7 +365,7 @@
     },
     {
       "id": "tp0",
-      "color": "red",
+      "color": "blue",
       "position": [
         -0.3,
         3.45,
@@ -384,7 +384,7 @@
     },
     {
       "id": "tp1",
-      "color": "red",
+      "color": "orange",
       "position": [
         -0.3,
         3.45,
@@ -403,7 +403,7 @@
     },
     {
       "id": "cd",
-      "color": "red",
+      "color": "purple",
       "position": [
         0,
         4.35,
@@ -422,16 +422,16 @@
     },
     {
       "id": "br0",
-      "color": "orange",
+      "color": "green",
       "position": [
-        0.0,
+        0,
         1.45,
         2.2
       ],
       "dir": [
-        0.0,
         0,
-        1.0
+        0,
+        1
       ],
       "length": 1.2,
       "partIds": [
@@ -460,7 +460,7 @@
     },
     {
       "id": "br2",
-      "color": "orange",
+      "color": "red",
       "position": [
         1.905,
         1.45,

@@ -4,9 +4,9 @@
   "emoji": "📦",
   "difficulty": 1,
   "boxes": [
+    "purple",
     "red",
-    "blue",
-    "red"
+    "green"
   ],
   "parts": [
     {
@@ -29,7 +29,7 @@
   "screws": [
     {
       "id": "t1",
-      "color": "red",
+      "color": "purple",
       "position": [
         1.2,
         0.6,
@@ -63,7 +63,7 @@
     },
     {
       "id": "t3",
-      "color": "blue",
+      "color": "purple",
       "position": [
         1.2,
         0.6,
@@ -80,7 +80,7 @@
     },
     {
       "id": "t4",
-      "color": "blue",
+      "color": "green",
       "position": [
         -1.2,
         0.6,
@@ -97,7 +97,7 @@
     },
     {
       "id": "f1",
-      "color": "red",
+      "color": "green",
       "position": [
         0,
         0,
@@ -114,7 +114,7 @@
     },
     {
       "id": "f2",
-      "color": "blue",
+      "color": "red",
       "position": [
         2,
         0,
@@ -131,7 +131,7 @@
     },
     {
       "id": "u1",
-      "color": "red",
+      "color": "purple",
       "position": [
         -1.2,
         -0.6,
@@ -142,7 +142,7 @@
         -1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "base"
       ]
@@ -160,14 +160,14 @@
         -1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "base"
       ]
     },
     {
       "id": "u3",
-      "color": "red",
+      "color": "green",
       "position": [
         1.2,
         -0.6,
@@ -178,7 +178,7 @@
         -1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "base"
       ]

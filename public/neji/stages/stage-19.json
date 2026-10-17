@@ -4,11 +4,11 @@
   "emoji": "🌾",
   "difficulty": 5,
   "boxes": [
-    "red",
-    "blue",
-    "green",
+    "purple",
     "yellow",
-    "purple"
+    "red",
+    "orange",
+    "blue"
   ],
   "parts": [
     {
@@ -121,9 +121,9 @@
   "screws": [
     {
       "id": "tp1",
-      "color": "red",
+      "color": "yellow",
       "position": [
-        -1.0,
+        -1,
         1.575,
         0.85
       ],
@@ -140,9 +140,9 @@
     },
     {
       "id": "tp2",
-      "color": "red",
+      "color": "purple",
       "position": [
-        1.0,
+        1,
         1.575,
         0.85
       ],
@@ -159,9 +159,9 @@
     },
     {
       "id": "bt1",
-      "color": "red",
+      "color": "orange",
       "position": [
-        -1.0,
+        -1,
         -1.575,
         0.85
       ],
@@ -180,7 +180,7 @@
       "id": "bt2",
       "color": "blue",
       "position": [
-        1.0,
+        1,
         -1.575,
         0.85
       ],
@@ -197,7 +197,7 @@
     },
     {
       "id": "lf1",
-      "color": "blue",
+      "color": "red",
       "position": [
         -1.575,
         0.7,
@@ -235,7 +235,7 @@
     },
     {
       "id": "rt1",
-      "color": "green",
+      "color": "yellow",
       "position": [
         1.575,
         0.7,
@@ -254,7 +254,7 @@
     },
     {
       "id": "rt2",
-      "color": "green",
+      "color": "purple",
       "position": [
         1.575,
         -0.7,
@@ -273,7 +273,7 @@
     },
     {
       "id": "v1",
-      "color": "green",
+      "color": "blue",
       "position": [
         0,
         1.4,
@@ -311,7 +311,7 @@
     },
     {
       "id": "v3",
-      "color": "yellow",
+      "color": "red",
       "position": [
         0,
         0,
@@ -331,7 +331,7 @@
     },
     {
       "id": "w1",
-      "color": "yellow",
+      "color": "purple",
       "position": [
         -1.4,
         0,
@@ -350,7 +350,7 @@
     },
     {
       "id": "w2",
-      "color": "purple",
+      "color": "orange",
       "position": [
         1.4,
         0,
@@ -369,7 +369,7 @@
     },
     {
       "id": "d1",
-      "color": "purple",
+      "color": "red",
       "position": [
         -1.5,
         -2.5,
@@ -387,7 +387,7 @@
     },
     {
       "id": "d2",
-      "color": "purple",
+      "color": "orange",
       "position": [
         1.5,
         -2.5,

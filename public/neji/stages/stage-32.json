@@ -1,0 +1,732 @@
+{
+  "id": "stage-32",
+  "name": "ゆびわのはっくつ",
+  "emoji": "💍",
+  "difficulty": 4,
+  "boxes": [
+    "green",
+    "green",
+    "purple",
+    "yellow",
+    "orange",
+    "blue",
+    "blue",
+    "red"
+  ],
+  "parts": [
+    {
+      "id": "ring",
+      "shape": "ring",
+      "radius": 0.8,
+      "height": 0.3,
+      "position": [
+        0,
+        -0.2,
+        0
+      ],
+      "color": "#ffd700",
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "fixed": true
+    },
+    {
+      "id": "ringGem",
+      "shape": "gem",
+      "radius": 0.35,
+      "height": 0.6,
+      "position": [
+        0,
+        0.75,
+        0
+      ],
+      "color": "#ff4d6d",
+      "fixed": true
+    },
+    {
+      "id": "d00",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        -2,
+        -2,
+        0
+      ],
+      "color": "#9c6644"
+    },
+    {
+      "id": "d10",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        0,
+        -2,
+        0
+      ],
+      "color": "#b08968"
+    },
+    {
+      "id": "d20",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        2,
+        -2,
+        0
+      ],
+      "color": "#7f5539"
+    },
+    {
+      "id": "d01",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        -2,
+        0,
+        0
+      ],
+      "color": "#a37b5c"
+    },
+    {
+      "id": "d21",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        2,
+        0,
+        0
+      ],
+      "color": "#9c6644"
+    },
+    {
+      "id": "d02",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        -2,
+        2,
+        0
+      ],
+      "color": "#b08968"
+    },
+    {
+      "id": "d12",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        0,
+        2,
+        0
+      ],
+      "color": "#7f5539"
+    },
+    {
+      "id": "d22",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        2,
+        2,
+        0
+      ],
+      "color": "#a37b5c"
+    },
+    {
+      "id": "plank0",
+      "shape": "box",
+      "size": [
+        5.8,
+        1.8,
+        0.5
+      ],
+      "position": [
+        0,
+        -2,
+        1.3
+      ],
+      "color": "#6f4e37"
+    },
+    {
+      "id": "plank1",
+      "shape": "box",
+      "size": [
+        5.8,
+        1.8,
+        0.5
+      ],
+      "position": [
+        0,
+        0,
+        1.3
+      ],
+      "color": "#6f4e37"
+    },
+    {
+      "id": "plank2",
+      "shape": "box",
+      "size": [
+        5.8,
+        1.8,
+        0.5
+      ],
+      "position": [
+        0,
+        2,
+        1.3
+      ],
+      "color": "#6f4e37"
+    },
+    {
+      "id": "back",
+      "shape": "box",
+      "size": [
+        5.8,
+        5.8,
+        0.5
+      ],
+      "position": [
+        0,
+        0,
+        -1.3
+      ],
+      "color": "#6f4e37"
+    },
+    {
+      "id": "tray",
+      "shape": "box",
+      "size": [
+        5.8,
+        0.5,
+        1.6
+      ],
+      "position": [
+        0,
+        -3.4,
+        0
+      ],
+      "color": "#6f4e37"
+    },
+    {
+      "id": "stone0",
+      "shape": "sphere",
+      "radius": 0.7,
+      "position": [
+        -1.45,
+        -1.9,
+        2.5
+      ],
+      "color": "#8d99ae"
+    },
+    {
+      "id": "stone1",
+      "shape": "sphere",
+      "radius": 0.7,
+      "position": [
+        1.45,
+        -1.9,
+        2.5
+      ],
+      "color": "#8d99ae"
+    },
+    {
+      "id": "stone2",
+      "shape": "sphere",
+      "radius": 0.7,
+      "position": [
+        -1.45,
+        -0.1,
+        2.5
+      ],
+      "color": "#8d99ae"
+    }
+  ],
+  "screws": [
+    {
+      "id": "b0",
+      "color": "red",
+      "position": [
+        -2,
+        -2.9,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d00"
+      ]
+    },
+    {
+      "id": "b1",
+      "color": "purple",
+      "position": [
+        0,
+        -2.9,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d10"
+      ]
+    },
+    {
+      "id": "b2",
+      "color": "orange",
+      "position": [
+        2,
+        -2.9,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d20"
+      ]
+    },
+    {
+      "id": "f01",
+      "color": "orange",
+      "position": [
+        -2,
+        0,
+        0.8
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1,
+      "partIds": [
+        "d01"
+      ]
+    },
+    {
+      "id": "k21",
+      "color": "blue",
+      "position": [
+        2,
+        0,
+        -0.8
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1,
+      "partIds": [
+        "d21"
+      ]
+    },
+    {
+      "id": "t0",
+      "color": "blue",
+      "position": [
+        -2,
+        2.9,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d02"
+      ]
+    },
+    {
+      "id": "t1",
+      "color": "red",
+      "position": [
+        0,
+        2.9,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d12"
+      ]
+    },
+    {
+      "id": "t2",
+      "color": "blue",
+      "position": [
+        2,
+        2.9,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d22"
+      ]
+    },
+    {
+      "id": "P00",
+      "color": "green",
+      "position": [
+        -1.45,
+        -1.9,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "plank0",
+        "d00"
+      ]
+    },
+    {
+      "id": "P02",
+      "color": "yellow",
+      "position": [
+        1.45,
+        -1.9,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "plank0",
+        "d20"
+      ]
+    },
+    {
+      "id": "P10",
+      "color": "blue",
+      "position": [
+        -1.45,
+        -0.1,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "plank1",
+        "d01"
+      ]
+    },
+    {
+      "id": "P12",
+      "color": "purple",
+      "position": [
+        1.45,
+        -0.1,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "plank1",
+        "d21"
+      ]
+    },
+    {
+      "id": "P20",
+      "color": "green",
+      "position": [
+        -1.45,
+        2.1,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "plank2",
+        "d02"
+      ]
+    },
+    {
+      "id": "P22",
+      "color": "orange",
+      "position": [
+        1.45,
+        2.1,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "plank2",
+        "d22"
+      ]
+    },
+    {
+      "id": "K22",
+      "color": "green",
+      "position": [
+        1.45,
+        1.55,
+        -1.55
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "back",
+        "d22"
+      ]
+    },
+    {
+      "id": "K00",
+      "color": "blue",
+      "position": [
+        -1.45,
+        -1.55,
+        -1.55
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "back",
+        "d00"
+      ]
+    },
+    {
+      "id": "K01",
+      "color": "purple",
+      "position": [
+        -1.45,
+        0.45,
+        -1.55
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "back",
+        "d01"
+      ]
+    },
+    {
+      "id": "B0",
+      "color": "green",
+      "position": [
+        -2.6,
+        -3.65,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "tray",
+        "d00"
+      ]
+    },
+    {
+      "id": "B1",
+      "color": "yellow",
+      "position": [
+        -0.6,
+        -3.65,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "tray",
+        "d10"
+      ]
+    },
+    {
+      "id": "B2",
+      "color": "blue",
+      "position": [
+        2.6,
+        -3.65,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "tray",
+        "d20"
+      ]
+    },
+    {
+      "id": "S0",
+      "color": "yellow",
+      "position": [
+        -1.9,
+        -1.9,
+        3.04
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.02,
+      "partIds": [
+        "stone0"
+      ]
+    },
+    {
+      "id": "S1",
+      "color": "green",
+      "position": [
+        1.9,
+        -1.9,
+        3.04
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.02,
+      "partIds": [
+        "stone1"
+      ]
+    },
+    {
+      "id": "S2",
+      "color": "red",
+      "position": [
+        -1.9,
+        -0.1,
+        3.04
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.02,
+      "partIds": [
+        "stone2"
+      ]
+    },
+    {
+      "id": "E0",
+      "color": "green",
+      "position": [
+        2.9,
+        -1.7,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "d20"
+      ]
+    }
+  ],
+  "treasure": {
+    "id": "ring",
+    "name": "ほうせきの ゆびわ",
+    "emoji": "💍",
+    "partIds": [
+      "ring",
+      "ringGem"
+    ]
+  }
+}

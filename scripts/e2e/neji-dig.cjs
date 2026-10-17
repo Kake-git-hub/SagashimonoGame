@@ -1,5 +1,5 @@
 // ネジはずし: 発掘ステージ（ハート）を解いてたからばこに入る、＋おきば（クイズ）、しっぱい → つづきから（クイズ）
-const { launch, gotoHome, openStage, tapScrew, hudText, report, OUT, DEBUG_URL } = require('./common.cjs');
+const { launch, gotoHome, openStage, tapScrew, hudText, report, OUT, DEBUG_URL, solutionFor, playsFor, findStageWith } = require('./common.cjs');
 
 async function answerQuiz(page) {
   await page.waitForSelector('[aria-label="べんきょうクイズ"]', { timeout: 5000 });
@@ -38,7 +38,7 @@ async function answerQuiz(page) {
   check('blocked under front lid', (await hudText(page)).includes('のこり 15'), await hudText(page));
 
   // 解いてクリア → たからもの発見
-  const order = ['b0', 'b1', 'b2', 'f1', 'f2', 'k1', 'c1', 'c2', 'c3', 'sL', 'sR', 't0', 'k2', 't1', 't2'];
+  const order = solutionFor('ハートのはっくつ');
   for (const [n, id] of order.entries()) {
     await tapScrew(page, id);
     await page.waitForTimeout(350);
@@ -72,10 +72,13 @@ async function answerQuiz(page) {
 
   // 縦向きの表示と、しっぱい → つづきから（クイズ）
   await page.setViewportSize({ width: 390, height: 844 });
-  await openStage(page, 'くるま');
+  const failStage = findStageWith('fail');
+  const failPlay = playsFor(failStage).fail;
+  await openStage(page, failStage);
   await page.screenshot({ path: `${OUT}/neji-portrait.png` });
-  // 箱の無い色（黄・緑・紫）を 7 本外すと、おきば 6 こではあふれて失敗
-  for (const id of ['c1', 'c2', 'r2', 'wBL', 'wBR', 'r1', 'd1']) { await tapScrew(page, id); await page.waitForTimeout(300); }
+  // 先を読まずに外す手順（生成時に求めたもの）で、おきば 6 こがあふれて失敗する
+  const total = (await hudText(page)).match(/のこり (\d+)/)[1];
+  for (const id of failPlay) { await tapScrew(page, id); await page.waitForTimeout(300); }
   await page.waitForSelector('text=おきばが いっぱい！', { timeout: 10000 });
   // 出た直後の連打は無視される（ボタンは押せない）
   const disabledAtFirst = await page.$eval('button:has-text("つづきから")', b => b.disabled);
@@ -85,7 +88,7 @@ async function answerQuiz(page) {
   await answerQuiz(page);
   await page.waitForTimeout(500);
   const after = await hudText(page);
-  check('rewound 3 moves after quiz', after.includes('のこり 11') && after.includes('おきば 4/6'), after);
+  check('rewound 3 moves after quiz', after.includes(`のこり ${Number(total) - failPlay.length + 3}`), after);
   check('result overlay closed', (await page.$('text=おきばが いっぱい！')) === null);
   await page.screenshot({ path: `${OUT}/neji-continued.png` });
 

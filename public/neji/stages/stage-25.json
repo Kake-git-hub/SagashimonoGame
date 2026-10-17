@@ -1,0 +1,559 @@
+{
+  "id": "stage-25",
+  "name": "ふね",
+  "emoji": "🚢",
+  "difficulty": 5,
+  "boxes": [
+    "orange",
+    "red",
+    "green",
+    "yellow",
+    "purple",
+    "blue",
+    "blue"
+  ],
+  "parts": [
+    {
+      "id": "hull",
+      "shape": "box",
+      "size": [
+        6,
+        1.2,
+        2.4
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "color": "#1d3557",
+      "fixed": true
+    },
+    {
+      "id": "bow",
+      "shape": "box",
+      "size": [
+        1,
+        1.2,
+        1.4
+      ],
+      "position": [
+        3.5,
+        0,
+        0
+      ],
+      "color": "#1d3557"
+    },
+    {
+      "id": "deck",
+      "shape": "box",
+      "size": [
+        5.6,
+        0.3,
+        2.2
+      ],
+      "position": [
+        0,
+        1,
+        0
+      ],
+      "color": "#c9a66b"
+    },
+    {
+      "id": "cabin",
+      "shape": "box",
+      "size": [
+        2.2,
+        1.2,
+        1.5
+      ],
+      "position": [
+        -0.5,
+        1.75,
+        0
+      ],
+      "color": "#f8f9fa"
+    },
+    {
+      "id": "bridge",
+      "shape": "box",
+      "size": [
+        1.2,
+        0.8,
+        1
+      ],
+      "position": [
+        -0.7,
+        2.75,
+        0
+      ],
+      "color": "#ffb703"
+    },
+    {
+      "id": "funnel",
+      "shape": "cylinder",
+      "radius": 0.35,
+      "height": 1.3,
+      "position": [
+        -2.2,
+        1.8,
+        0
+      ],
+      "color": "#e63946"
+    },
+    {
+      "id": "mast",
+      "shape": "cylinder",
+      "radius": 0.22,
+      "height": 2.6,
+      "position": [
+        2,
+        2.3,
+        0
+      ],
+      "color": "#8d6e63"
+    },
+    {
+      "id": "flag",
+      "shape": "box",
+      "size": [
+        1,
+        0.6,
+        0.1
+      ],
+      "position": [
+        2.65,
+        3.2,
+        0
+      ],
+      "color": "#2a9d8f"
+    },
+    {
+      "id": "boatF",
+      "shape": "cylinder",
+      "radius": 0.3,
+      "height": 1.2,
+      "position": [
+        -0.5,
+        0.9,
+        1.45
+      ],
+      "color": "#ff8c1a",
+      "rotation": [
+        0,
+        0,
+        90
+      ]
+    },
+    {
+      "id": "boatK",
+      "shape": "cylinder",
+      "radius": 0.3,
+      "height": 1.2,
+      "position": [
+        0.8,
+        0.9,
+        -1.45
+      ],
+      "color": "#ff8c1a",
+      "rotation": [
+        0,
+        0,
+        90
+      ]
+    }
+  ],
+  "screws": [
+    {
+      "id": "bow",
+      "color": "orange",
+      "position": [
+        4,
+        0,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "length": 1.4,
+      "partIds": [
+        "bow",
+        "hull"
+      ]
+    },
+    {
+      "id": "deck1",
+      "color": "blue",
+      "position": [
+        2.3,
+        1.15,
+        0.7
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.05,
+      "partIds": [
+        "deck",
+        "hull"
+      ]
+    },
+    {
+      "id": "deck2",
+      "color": "purple",
+      "position": [
+        2.3,
+        1.15,
+        -0.7
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.05,
+      "partIds": [
+        "deck",
+        "hull"
+      ]
+    },
+    {
+      "id": "deck3",
+      "color": "green",
+      "position": [
+        -2.4,
+        1.15,
+        -0.7
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.05,
+      "partIds": [
+        "deck",
+        "hull"
+      ]
+    },
+    {
+      "id": "hullU1",
+      "color": "green",
+      "position": [
+        1.2,
+        0.6,
+        0.7
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.8,
+      "partIds": [
+        "hull"
+      ]
+    },
+    {
+      "id": "hullU2",
+      "color": "purple",
+      "position": [
+        -1.3,
+        0.6,
+        -0.7
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.8,
+      "partIds": [
+        "hull"
+      ]
+    },
+    {
+      "id": "cabin1",
+      "color": "red",
+      "position": [
+        0.3,
+        2.35,
+        0.45
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "cabin",
+        "deck"
+      ]
+    },
+    {
+      "id": "cabin2",
+      "color": "yellow",
+      "position": [
+        0.3,
+        2.35,
+        -0.45
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.55,
+      "partIds": [
+        "cabin",
+        "deck"
+      ]
+    },
+    {
+      "id": "bridge",
+      "color": "orange",
+      "position": [
+        -0.7,
+        3.15,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.6,
+      "partIds": [
+        "bridge",
+        "cabin"
+      ]
+    },
+    {
+      "id": "cabinF",
+      "color": "purple",
+      "position": [
+        0,
+        1.75,
+        0.75
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.8,
+      "partIds": [
+        "cabin"
+      ]
+    },
+    {
+      "id": "funnel",
+      "color": "blue",
+      "position": [
+        -2.2,
+        2.45,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.9,
+      "partIds": [
+        "funnel",
+        "deck",
+        "hull"
+      ]
+    },
+    {
+      "id": "mast",
+      "color": "blue",
+      "position": [
+        2,
+        3.6,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 2.6,
+      "partIds": [
+        "mast",
+        "deck",
+        "hull"
+      ]
+    },
+    {
+      "id": "flag",
+      "color": "red",
+      "position": [
+        2.75,
+        3.2,
+        0.05
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.1,
+      "partIds": [
+        "flag"
+      ]
+    },
+    {
+      "id": "boatF",
+      "color": "blue",
+      "position": [
+        -0.5,
+        0.9,
+        1.75
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.2,
+      "partIds": [
+        "boatF",
+        "deck"
+      ]
+    },
+    {
+      "id": "boatK",
+      "color": "blue",
+      "position": [
+        0.8,
+        0.9,
+        -1.75
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1.2,
+      "partIds": [
+        "boatK",
+        "deck"
+      ]
+    },
+    {
+      "id": "keel1",
+      "color": "red",
+      "position": [
+        1.5,
+        -0.6,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "hull"
+      ]
+    },
+    {
+      "id": "keel2",
+      "color": "orange",
+      "position": [
+        -1.5,
+        -0.6,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "hull"
+      ]
+    },
+    {
+      "id": "stern",
+      "color": "blue",
+      "position": [
+        -3,
+        0,
+        0
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "hull"
+      ]
+    },
+    {
+      "id": "sideF",
+      "color": "yellow",
+      "position": [
+        0.4,
+        -0.2,
+        1.2
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1,
+      "partIds": [
+        "hull"
+      ]
+    },
+    {
+      "id": "sideK",
+      "color": "green",
+      "position": [
+        -0.6,
+        -0.2,
+        -1.2
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1,
+      "partIds": [
+        "hull"
+      ]
+    },
+    {
+      "id": "sideF2",
+      "color": "yellow",
+      "position": [
+        -2,
+        0.3,
+        1.2
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1,
+      "partIds": [
+        "hull"
+      ]
+    }
+  ]
+}

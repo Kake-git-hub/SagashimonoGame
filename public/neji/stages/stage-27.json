@@ -1,0 +1,374 @@
+{
+  "id": "stage-27",
+  "name": "くま",
+  "emoji": "🐻",
+  "difficulty": 2,
+  "boxes": [
+    "purple",
+    "green",
+    "blue",
+    "yellow"
+  ],
+  "parts": [
+    {
+      "id": "body",
+      "shape": "sphere",
+      "radius": 1.5,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "color": "#a9714b",
+      "fixed": true
+    },
+    {
+      "id": "head",
+      "shape": "sphere",
+      "radius": 1.1,
+      "position": [
+        0,
+        2.2,
+        0
+      ],
+      "color": "#b07a52"
+    },
+    {
+      "id": "earL",
+      "shape": "cylinder",
+      "radius": 0.4,
+      "height": 0.3,
+      "position": [
+        -1.05,
+        3.1,
+        0
+      ],
+      "color": "#8c5a3c",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "earR",
+      "shape": "cylinder",
+      "radius": 0.4,
+      "height": 0.3,
+      "position": [
+        1.05,
+        3.1,
+        0
+      ],
+      "color": "#8c5a3c",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "snout",
+      "shape": "cylinder",
+      "radius": 0.5,
+      "height": 0.4,
+      "position": [
+        0,
+        2,
+        1.1
+      ],
+      "color": "#e8c39e",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "pawL",
+      "shape": "sphere",
+      "radius": 0.55,
+      "position": [
+        -1.6,
+        0.2,
+        0.6
+      ],
+      "color": "#8c5a3c"
+    },
+    {
+      "id": "pawR",
+      "shape": "sphere",
+      "radius": 0.55,
+      "position": [
+        1.6,
+        0.2,
+        0.6
+      ],
+      "color": "#8c5a3c"
+    },
+    {
+      "id": "legL",
+      "shape": "sphere",
+      "radius": 0.6,
+      "position": [
+        -0.8,
+        -1.4,
+        0.5
+      ],
+      "color": "#8c5a3c"
+    },
+    {
+      "id": "legR",
+      "shape": "sphere",
+      "radius": 0.6,
+      "position": [
+        0.8,
+        -1.4,
+        0.5
+      ],
+      "color": "#8c5a3c"
+    },
+    {
+      "id": "belly",
+      "shape": "cylinder",
+      "radius": 0.7,
+      "height": 0.3,
+      "position": [
+        0,
+        -0.1,
+        1.9
+      ],
+      "color": "#e8c39e",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    }
+  ],
+  "screws": [
+    {
+      "id": "head",
+      "color": "purple",
+      "position": [
+        0,
+        3.3,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 2,
+      "partIds": [
+        "head",
+        "body"
+      ]
+    },
+    {
+      "id": "earL",
+      "color": "green",
+      "position": [
+        -1.05,
+        3.1,
+        0.15
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.3,
+      "partIds": [
+        "earL"
+      ]
+    },
+    {
+      "id": "earR",
+      "color": "yellow",
+      "position": [
+        1.05,
+        3.1,
+        0.15
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.3,
+      "partIds": [
+        "earR"
+      ]
+    },
+    {
+      "id": "snout",
+      "color": "blue",
+      "position": [
+        0,
+        2,
+        1.3
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1,
+      "partIds": [
+        "snout",
+        "head"
+      ]
+    },
+    {
+      "id": "pawL",
+      "color": "blue",
+      "position": [
+        -2.15,
+        0.2,
+        0.6
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "length": 1.4,
+      "partIds": [
+        "pawL",
+        "body"
+      ]
+    },
+    {
+      "id": "pawR",
+      "color": "purple",
+      "position": [
+        2.15,
+        0.2,
+        0.6
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "length": 1.4,
+      "partIds": [
+        "pawR",
+        "body"
+      ]
+    },
+    {
+      "id": "legL",
+      "color": "purple",
+      "position": [
+        -0.8,
+        -2,
+        0.5
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.4,
+      "partIds": [
+        "legL",
+        "body"
+      ]
+    },
+    {
+      "id": "legR",
+      "color": "yellow",
+      "position": [
+        0.8,
+        -2,
+        0.5
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.4,
+      "partIds": [
+        "legR",
+        "body"
+      ]
+    },
+    {
+      "id": "belly",
+      "color": "green",
+      "position": [
+        0,
+        -0.1,
+        2.05
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.05,
+      "partIds": [
+        "belly",
+        "body"
+      ]
+    },
+    {
+      "id": "hidden",
+      "color": "yellow",
+      "position": [
+        -0.45,
+        0.35,
+        1.39
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.8,
+      "partIds": [
+        "body"
+      ]
+    },
+    {
+      "id": "back1",
+      "color": "green",
+      "position": [
+        0,
+        0,
+        -1.5
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1,
+      "partIds": [
+        "body"
+      ]
+    },
+    {
+      "id": "back2",
+      "color": "blue",
+      "position": [
+        0,
+        -0.8,
+        -1.27
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1,
+      "partIds": [
+        "body"
+      ]
+    }
+  ]
+}

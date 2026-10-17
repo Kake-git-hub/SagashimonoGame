@@ -14,7 +14,7 @@ const index = indexJson as StageSummary[];
 
 describe('ステージの難しさの目安', () => {
   it('全ステージを測って一覧にする', () => {
-    const lines = ['id        難易度 ネジ 最初に外せない 探索状態 外せる手の平均 失敗しない手の平均 一手に絞られる場面'];
+    const lines = ['id        難易度 ネジ 最初に外せない 探索状態 外せる手の平均 失敗しない手の平均 一手に絞られる場面 手当たりしだいの失敗率'];
     for (const summary of index) {
       const def = byId.get(summary.id);
       expect(def, `${summary.id} の JSON が無い`).toBeDefined();
@@ -30,6 +30,7 @@ describe('ステージの難しさの目安', () => {
           m.avgRemovable.toFixed(1).padStart(12),
           m.avgSafe.toFixed(1).padStart(16),
           String(m.forcedMoves).padStart(14),
+          `${Math.round(m.naiveFailRate * 100)}%`.padStart(14),
           ` ${summary.name}`,
         ].join(' '),
       );
@@ -37,5 +38,5 @@ describe('ステージの難しさの目安', () => {
     // vitest は console.log を隠すので、標準出力に直接書く（@types/node 無しで通るように型だけ付ける）
     const out = (globalThis as { process?: { stdout: { write(text: string): void } } }).process;
     out?.stdout.write(`${lines.join('\n')}\n`);
-  });
+  }, 120_000); // 手当たりしだいの失敗率の計測を含むので、全ステージで数十秒かかる
 });

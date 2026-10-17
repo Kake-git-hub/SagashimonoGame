@@ -12,18 +12,18 @@
     ]
   },
   "boxes": [
-    "red",
-    "blue",
-    "orange",
     "green",
+    "purple",
+    "orange",
+    "orange",
     "yellow",
-    "purple"
+    "blue"
   ],
   "parts": [
     {
       "id": "star",
       "shape": "star",
-      "radius": 1.0,
+      "radius": 1,
       "height": 0.5,
       "position": [
         0,
@@ -47,8 +47,8 @@
         1.4
       ],
       "position": [
-        -2.0,
-        2.0,
+        -2,
+        2,
         0
       ],
       "color": "#8b5a2b"
@@ -62,8 +62,8 @@
         1.4
       ],
       "position": [
-        0.0,
-        2.0,
+        0,
+        2,
         0
       ],
       "color": "#a0522d"
@@ -77,8 +77,8 @@
         1.4
       ],
       "position": [
-        2.0,
-        2.0,
+        2,
+        2,
         0
       ],
       "color": "#7a4a22"
@@ -92,8 +92,8 @@
         1.4
       ],
       "position": [
-        -2.0,
-        0.0,
+        -2,
+        0,
         0
       ],
       "color": "#9c6b3c"
@@ -107,8 +107,8 @@
         1.4
       ],
       "position": [
-        2.0,
-        0.0,
+        2,
+        0,
         0
       ],
       "color": "#b07040"
@@ -122,8 +122,8 @@
         1.4
       ],
       "position": [
-        -2.0,
-        -2.0,
+        -2,
+        -2,
         0
       ],
       "color": "#86593a"
@@ -137,8 +137,8 @@
         1.4
       ],
       "position": [
-        0.0,
-        -2.0,
+        0,
+        -2,
         0
       ],
       "color": "#8b5a2b"
@@ -152,8 +152,8 @@
         1.4
       ],
       "position": [
-        2.0,
-        -2.0,
+        2,
+        -2,
         0
       ],
       "color": "#a0522d"
@@ -222,9 +222,9 @@
   "screws": [
     {
       "id": "t0",
-      "color": "yellow",
+      "color": "orange",
       "position": [
-        -2.0,
+        -2,
         2.9,
         0
       ],
@@ -233,16 +233,16 @@
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d02"
       ]
     },
     {
       "id": "b0",
-      "color": "purple",
+      "color": "orange",
       "position": [
-        -2.0,
+        -2,
         -2.9,
         0
       ],
@@ -251,7 +251,7 @@
         -1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d00"
       ]
@@ -260,7 +260,7 @@
       "id": "t1",
       "color": "yellow",
       "position": [
-        0.0,
+        0,
         2.9,
         0
       ],
@@ -269,16 +269,16 @@
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d12"
       ]
     },
     {
       "id": "b1",
-      "color": "purple",
+      "color": "blue",
       "position": [
-        0.0,
+        0,
         -2.9,
         0
       ],
@@ -287,7 +287,7 @@
         -1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d10"
       ]
@@ -296,7 +296,7 @@
       "id": "t2",
       "color": "purple",
       "position": [
-        2.0,
+        2,
         2.9,
         0
       ],
@@ -305,16 +305,16 @@
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d22"
       ]
     },
     {
       "id": "b2",
-      "color": "yellow",
+      "color": "green",
       "position": [
-        2.0,
+        2,
         -2.9,
         0
       ],
@@ -323,16 +323,16 @@
         -1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d20"
       ]
     },
     {
       "id": "sL",
-      "color": "red",
+      "color": "blue",
       "position": [
-        -2.0,
+        -2,
         0,
         0.7
       ],
@@ -341,16 +341,16 @@
         0,
         1
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d01"
       ]
     },
     {
       "id": "sR",
-      "color": "blue",
+      "color": "yellow",
       "position": [
-        2.0,
+        2,
         0,
         0.7
       ],
@@ -359,7 +359,7 @@
         0,
         1
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "d21"
       ]
@@ -368,8 +368,8 @@
       "id": "f1",
       "color": "green",
       "position": [
-        -2.0,
-        1.0,
+        -2,
+        1,
         1.45
       ],
       "dir": [
@@ -387,8 +387,8 @@
       "id": "f2",
       "color": "orange",
       "position": [
-        2.0,
-        -1.0,
+        2,
+        -1,
         1.45
       ],
       "dir": [
@@ -404,10 +404,10 @@
     },
     {
       "id": "k1",
-      "color": "green",
+      "color": "purple",
       "position": [
-        -2.0,
-        -1.0,
+        -2,
+        -1,
         -1.45
       ],
       "dir": [
@@ -423,10 +423,10 @@
     },
     {
       "id": "k2",
-      "color": "green",
+      "color": "orange",
       "position": [
-        2.0,
-        1.0,
+        2,
+        1,
         -1.45
       ],
       "dir": [
@@ -442,7 +442,7 @@
     },
     {
       "id": "c1",
-      "color": "red",
+      "color": "blue",
       "position": [
         -1.4,
         3.7,
@@ -453,7 +453,7 @@
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "cap",
         "d02"
@@ -461,7 +461,7 @@
     },
     {
       "id": "c2",
-      "color": "red",
+      "color": "orange",
       "position": [
         1.4,
         3.7,
@@ -472,7 +472,7 @@
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "cap",
         "d22"
@@ -480,7 +480,7 @@
     },
     {
       "id": "c3",
-      "color": "orange",
+      "color": "green",
       "position": [
         0.5,
         3.7,
@@ -491,7 +491,7 @@
         1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "cap",
         "d12"
@@ -499,7 +499,7 @@
     },
     {
       "id": "l1",
-      "color": "blue",
+      "color": "yellow",
       "position": [
         -1.4,
         -3.7,
@@ -510,7 +510,7 @@
         -1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "floor",
         "d00"
@@ -518,7 +518,7 @@
     },
     {
       "id": "l2",
-      "color": "blue",
+      "color": "orange",
       "position": [
         1.4,
         -3.7,
@@ -529,7 +529,7 @@
         -1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "floor",
         "d20"
@@ -537,7 +537,7 @@
     },
     {
       "id": "l3",
-      "color": "orange",
+      "color": "purple",
       "position": [
         0.5,
         -3.7,
@@ -548,7 +548,7 @@
         -1,
         0
       ],
-      "length": 1.0,
+      "length": 1,
       "partIds": [
         "floor",
         "d10"

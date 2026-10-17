@@ -43,10 +43,13 @@ export interface SpherePartDef extends PartBase {
 }
 
 // 飾りの形（たからもの・化石用）。当たり判定はローカル Y 軸方向の円柱で近似する
+//   star / heart: XY 平面の板を Y 方向に押し出した形（立てるには rotation: [90, 0, 0]）
+//   gem: 縦に伸ばした八面体  bone: 骨（Y 方向に長い）  egg: たまご（Y 方向に長い）
+//   ring: 指輪（穴が Y 軸方向）  crown: 王冠（Y が上）  shell: アンモナイト（うずまきが XZ 平面）
 export interface FancyPartDef extends PartBase {
-  shape: 'star' | 'heart' | 'gem' | 'bone';
+  shape: 'star' | 'heart' | 'gem' | 'bone' | 'egg' | 'ring' | 'crown' | 'shell';
   radius: number;      // 外接円の半径（bone は端のこぶの半径）
-  height: number;      // 厚み（bone は全長）
+  height: number;      // 厚み（bone / egg は全長、ring は輪の太さ）
 }
 
 export type PartDef = BoxPartDef | CylinderPartDef | SpherePartDef | FancyPartDef;

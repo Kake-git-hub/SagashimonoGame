@@ -1,0 +1,903 @@
+{
+  "id": "stage-34",
+  "name": "アンモナイトのはっくつ",
+  "emoji": "🐚",
+  "difficulty": 5,
+  "boxes": [
+    "yellow",
+    "green",
+    "red",
+    "orange",
+    "blue",
+    "yellow",
+    "purple",
+    "blue",
+    "green",
+    "purple"
+  ],
+  "parts": [
+    {
+      "id": "shell",
+      "shape": "shell",
+      "radius": 0.85,
+      "height": 0.5,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "color": "#c9b79c",
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "fixed": true
+    },
+    {
+      "id": "d00",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        -2,
+        -4,
+        0
+      ],
+      "color": "#6c757d"
+    },
+    {
+      "id": "d10",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        0,
+        -4,
+        0
+      ],
+      "color": "#5c636a"
+    },
+    {
+      "id": "d20",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        2,
+        -4,
+        0
+      ],
+      "color": "#7d868f"
+    },
+    {
+      "id": "d01",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        -2,
+        -2,
+        0
+      ],
+      "color": "#868e96"
+    },
+    {
+      "id": "d11",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        0,
+        -2,
+        0
+      ],
+      "color": "#6c757d"
+    },
+    {
+      "id": "d21",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        2,
+        -2,
+        0
+      ],
+      "color": "#5c636a"
+    },
+    {
+      "id": "d02",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        -2,
+        0,
+        0
+      ],
+      "color": "#7d868f"
+    },
+    {
+      "id": "d22",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        2,
+        0,
+        0
+      ],
+      "color": "#868e96"
+    },
+    {
+      "id": "d03",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        -2,
+        2,
+        0
+      ],
+      "color": "#6c757d"
+    },
+    {
+      "id": "d13",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        0,
+        2,
+        0
+      ],
+      "color": "#5c636a"
+    },
+    {
+      "id": "d23",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        2,
+        2,
+        0
+      ],
+      "color": "#7d868f"
+    },
+    {
+      "id": "d04",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        -2,
+        4,
+        0
+      ],
+      "color": "#868e96"
+    },
+    {
+      "id": "d14",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        0,
+        4,
+        0
+      ],
+      "color": "#6c757d"
+    },
+    {
+      "id": "d24",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        2,
+        4,
+        0
+      ],
+      "color": "#5c636a"
+    },
+    {
+      "id": "front",
+      "shape": "box",
+      "size": [
+        5.8,
+        9.8,
+        0.5
+      ],
+      "position": [
+        0,
+        0,
+        1.3
+      ],
+      "color": "#3f474e"
+    },
+    {
+      "id": "back",
+      "shape": "box",
+      "size": [
+        5.8,
+        9.8,
+        0.5
+      ],
+      "position": [
+        0,
+        0,
+        -1.3
+      ],
+      "color": "#3f474e"
+    },
+    {
+      "id": "cap",
+      "shape": "box",
+      "size": [
+        5.8,
+        0.5,
+        1.6
+      ],
+      "position": [
+        0,
+        5.4,
+        0
+      ],
+      "color": "#3f474e"
+    },
+    {
+      "id": "tray",
+      "shape": "box",
+      "size": [
+        5.8,
+        0.5,
+        1.6
+      ],
+      "position": [
+        0,
+        -5.4,
+        0
+      ],
+      "color": "#3f474e"
+    },
+    {
+      "id": "stone0",
+      "shape": "sphere",
+      "radius": 0.7,
+      "position": [
+        -1.45,
+        3.55,
+        2.5
+      ],
+      "color": "#adb5bd"
+    },
+    {
+      "id": "stone1",
+      "shape": "sphere",
+      "radius": 0.7,
+      "position": [
+        1.45,
+        -3.55,
+        2.5
+      ],
+      "color": "#adb5bd"
+    },
+    {
+      "id": "stone2",
+      "shape": "sphere",
+      "radius": 0.7,
+      "position": [
+        1.45,
+        0.45,
+        2.5
+      ],
+      "color": "#adb5bd"
+    }
+  ],
+  "screws": [
+    {
+      "id": "b0",
+      "color": "green",
+      "position": [
+        -2,
+        -4.9,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d00"
+      ]
+    },
+    {
+      "id": "b1",
+      "color": "purple",
+      "position": [
+        0,
+        -4.9,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d10"
+      ]
+    },
+    {
+      "id": "b2",
+      "color": "yellow",
+      "position": [
+        2,
+        -4.9,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d20"
+      ]
+    },
+    {
+      "id": "f01",
+      "color": "purple",
+      "position": [
+        -2,
+        -2,
+        0.8
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1,
+      "partIds": [
+        "d01"
+      ]
+    },
+    {
+      "id": "f11",
+      "color": "yellow",
+      "position": [
+        0,
+        -2,
+        0.8
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1,
+      "partIds": [
+        "d11"
+      ]
+    },
+    {
+      "id": "k21",
+      "color": "blue",
+      "position": [
+        2,
+        -2,
+        -0.8
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1,
+      "partIds": [
+        "d21"
+      ]
+    },
+    {
+      "id": "f02",
+      "color": "red",
+      "position": [
+        -2,
+        0,
+        0.8
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1,
+      "partIds": [
+        "d02"
+      ]
+    },
+    {
+      "id": "k22",
+      "color": "green",
+      "position": [
+        2,
+        0,
+        -0.8
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1,
+      "partIds": [
+        "d22"
+      ]
+    },
+    {
+      "id": "f03",
+      "color": "blue",
+      "position": [
+        -2,
+        2,
+        0.8
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1,
+      "partIds": [
+        "d03"
+      ]
+    },
+    {
+      "id": "f13",
+      "color": "green",
+      "position": [
+        0,
+        2,
+        0.8
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1,
+      "partIds": [
+        "d13"
+      ]
+    },
+    {
+      "id": "k23",
+      "color": "purple",
+      "position": [
+        2,
+        2,
+        -0.8
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1,
+      "partIds": [
+        "d23"
+      ]
+    },
+    {
+      "id": "t0",
+      "color": "green",
+      "position": [
+        -2,
+        4.9,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d04"
+      ]
+    },
+    {
+      "id": "t1",
+      "color": "blue",
+      "position": [
+        0,
+        4.9,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d14"
+      ]
+    },
+    {
+      "id": "t2",
+      "color": "purple",
+      "position": [
+        2,
+        4.9,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d24"
+      ]
+    },
+    {
+      "id": "F04",
+      "color": "red",
+      "position": [
+        -1.45,
+        3.55,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "front",
+        "d04"
+      ]
+    },
+    {
+      "id": "F20",
+      "color": "blue",
+      "position": [
+        1.45,
+        -3.55,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "front",
+        "d20"
+      ]
+    },
+    {
+      "id": "F22",
+      "color": "orange",
+      "position": [
+        1.45,
+        0.45,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "front",
+        "d22"
+      ]
+    },
+    {
+      "id": "K24",
+      "color": "yellow",
+      "position": [
+        1.45,
+        3.55,
+        -1.55
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "back",
+        "d24"
+      ]
+    },
+    {
+      "id": "K00",
+      "color": "orange",
+      "position": [
+        -1.45,
+        -3.55,
+        -1.55
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "back",
+        "d00"
+      ]
+    },
+    {
+      "id": "K02",
+      "color": "yellow",
+      "position": [
+        -1.45,
+        0.45,
+        -1.55
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "back",
+        "d02"
+      ]
+    },
+    {
+      "id": "C0",
+      "color": "orange",
+      "position": [
+        -1.4,
+        5.65,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "cap",
+        "d04"
+      ]
+    },
+    {
+      "id": "C1",
+      "color": "red",
+      "position": [
+        0.6,
+        5.65,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "cap",
+        "d14"
+      ]
+    },
+    {
+      "id": "C2",
+      "color": "yellow",
+      "position": [
+        1.4,
+        5.65,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "cap",
+        "d24"
+      ]
+    },
+    {
+      "id": "B0",
+      "color": "yellow",
+      "position": [
+        -2.6,
+        -5.65,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "tray",
+        "d00"
+      ]
+    },
+    {
+      "id": "B1",
+      "color": "blue",
+      "position": [
+        -0.6,
+        -5.65,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "tray",
+        "d10"
+      ]
+    },
+    {
+      "id": "B2",
+      "color": "green",
+      "position": [
+        2.6,
+        -5.65,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "tray",
+        "d20"
+      ]
+    },
+    {
+      "id": "S0",
+      "color": "purple",
+      "position": [
+        -1.9,
+        3.55,
+        3.04
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.02,
+      "partIds": [
+        "stone0"
+      ]
+    },
+    {
+      "id": "S1",
+      "color": "green",
+      "position": [
+        1.9,
+        -3.55,
+        3.04
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.02,
+      "partIds": [
+        "stone1"
+      ]
+    },
+    {
+      "id": "S2",
+      "color": "blue",
+      "position": [
+        1.9,
+        0.45,
+        3.04
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.02,
+      "partIds": [
+        "stone2"
+      ]
+    },
+    {
+      "id": "E0",
+      "color": "purple",
+      "position": [
+        2.9,
+        -3.7,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "length": 0.6,
+      "partIds": [
+        "d20"
+      ]
+    }
+  ],
+  "treasure": {
+    "id": "shell",
+    "name": "アンモナイトの かせき",
+    "emoji": "🐚",
+    "partIds": [
+      "shell"
+    ]
+  }
+}

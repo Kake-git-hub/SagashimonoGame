@@ -29,7 +29,8 @@ npm run build          # tsc -b && vite build（型エラーで落ちる）
 npm run lint           # eslint
 npm test               # vitest: ロジックの単体テスト + 全ステージ検証
 npm run validate:neji  # ステージ JSON の検証だけ
-npm run metrics:neji   # ステージごとの難しさの目安（最初に外せない本数・探索状態数など）
+npm run metrics:neji   # ステージごとの難しさの目安（最初に外せない本数・手当たりしだいの失敗率など）
+npm run gen:neji       # scripts/neji/stages.ts のステージを組み立て、全ステージのネジの色を混ぜ直して public/neji/ に書く
 npm run preview        # dist を配信（PWA の動作確認はこちら）
 bash scripts/e2e/run.sh neji-smoke   # ヘッドレス Chromium で実際に遊んで確認（scripts/e2e/README.md）
 bash scripts/e2e/run.sh neji-dig     # 発掘ステージ・クイズ・おたすけ・つづきから の流れ
@@ -56,6 +57,7 @@ push 前に `npm run build` / `npm run lint` / `npm test` を通す。CI（`.git
 - オフラインで全部遊べる状態を保つ: ゲームが読み込むファイル（JS/CSS/JSON/さがしものの絵 webp など）は `vite.config.ts` の `injectManifest.globPatterns` で事前キャッシュに入れる。新しい種類のファイルを足したら `bash scripts/e2e/run.sh offline` で確認する
 - ホーム画面など軽い画面から three.js に依存するモジュールを import しない（`src/games/neji/logic/geometry.ts` 等）。ネジはずしは `React.lazy` で別チャンクにしてある
 - ネジはずしのステージ JSON を追加・変更したら `npm run validate:neji` を通す。検証を弱めてごまかさない（解けないステージを配布しないための仕組み）。底面（`dir: [0,-1,0]`）にもネジを置き、外側のパーツを外さないと取れないネジ（ふた・上の段・前の画）を多めに入れる
+- ネジの色は手で決めず `npm run gen:neji`（`logic/colorize.ts`）で混ぜる。同じ色が近くに固まると簡単になりすぎる。新しいお題は `scripts/neji/stages.ts` に形だけ書く（`scripts/neji/README.md`）
 - 画面が切り替わった直後の連打対策: 結果画面・クイズ・たからものを見る画面のボタンは `useTapGuard` で出てから約 1 秒は押せない。新しい画面を足すときも同じにする
 - ネジはずしの画面は 3D を全面に敷き、HUD（ボックス・おきば・ヘッダー）を透過で重ねる。HUD の位置は `neji.css` の `@media (orientation: landscape)` で切り替え、`NejiGameScreen` が HUD の大きさを測って `Scene` に `insets` として渡し、図形がその内側に収まるようにしている
 - ステータスバー（アンテナ・バッテリー）と重ならないよう、各画面のヘッダーは `env(safe-area-inset-top)` 分の余白を取る

@@ -1,0 +1,587 @@
+{
+  "id": "stage-28",
+  "name": "とけい",
+  "emoji": "🕰️",
+  "difficulty": 5,
+  "boxes": [
+    "blue",
+    "orange",
+    "blue",
+    "purple",
+    "green",
+    "yellow",
+    "red"
+  ],
+  "parts": [
+    {
+      "id": "base",
+      "shape": "cylinder",
+      "radius": 3,
+      "height": 0.5,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "color": "#8d6e63",
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "fixed": true
+    },
+    {
+      "id": "dial",
+      "shape": "cylinder",
+      "radius": 2.6,
+      "height": 0.3,
+      "position": [
+        0,
+        0,
+        0.65
+      ],
+      "color": "#fffaf0",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "num0",
+      "shape": "box",
+      "size": [
+        0.5,
+        0.5,
+        0.3
+      ],
+      "position": [
+        0,
+        2,
+        0.95
+      ],
+      "color": "#1d3557"
+    },
+    {
+      "id": "num1",
+      "shape": "box",
+      "size": [
+        0.5,
+        0.5,
+        0.3
+      ],
+      "position": [
+        2,
+        0,
+        0.95
+      ],
+      "color": "#1d3557"
+    },
+    {
+      "id": "num2",
+      "shape": "box",
+      "size": [
+        0.5,
+        0.5,
+        0.3
+      ],
+      "position": [
+        0,
+        -2,
+        0.95
+      ],
+      "color": "#1d3557"
+    },
+    {
+      "id": "num3",
+      "shape": "box",
+      "size": [
+        0.5,
+        0.5,
+        0.3
+      ],
+      "position": [
+        -2,
+        0,
+        0.95
+      ],
+      "color": "#1d3557"
+    },
+    {
+      "id": "minute",
+      "shape": "box",
+      "size": [
+        0.4,
+        1.9,
+        0.2
+      ],
+      "position": [
+        0,
+        0.65,
+        0.95
+      ],
+      "color": "#1d3557"
+    },
+    {
+      "id": "hour",
+      "shape": "box",
+      "size": [
+        1.6,
+        0.4,
+        0.2
+      ],
+      "position": [
+        0.6,
+        0,
+        1.15
+      ],
+      "color": "#e63946"
+    },
+    {
+      "id": "hub",
+      "shape": "cylinder",
+      "radius": 0.45,
+      "height": 0.3,
+      "position": [
+        0,
+        0,
+        1.4
+      ],
+      "color": "#ffb703",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "rod",
+      "shape": "box",
+      "size": [
+        0.2,
+        2,
+        0.2
+      ],
+      "position": [
+        0,
+        -3.8,
+        0
+      ],
+      "color": "#495057"
+    },
+    {
+      "id": "bob",
+      "shape": "cylinder",
+      "radius": 0.5,
+      "height": 0.3,
+      "position": [
+        0,
+        -5.1,
+        0
+      ],
+      "color": "#ffb703",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    }
+  ],
+  "screws": [
+    {
+      "id": "dial0",
+      "color": "purple",
+      "position": [
+        1.99,
+        1.15,
+        0.8
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.95,
+      "partIds": [
+        "dial",
+        "base"
+      ]
+    },
+    {
+      "id": "dial1",
+      "color": "orange",
+      "position": [
+        -1.15,
+        1.99,
+        0.8
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.95,
+      "partIds": [
+        "dial",
+        "base"
+      ]
+    },
+    {
+      "id": "dial2",
+      "color": "blue",
+      "position": [
+        -1.99,
+        -1.15,
+        0.8
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.95,
+      "partIds": [
+        "dial",
+        "base"
+      ]
+    },
+    {
+      "id": "dial3",
+      "color": "red",
+      "position": [
+        1.15,
+        -1.99,
+        0.8
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.95,
+      "partIds": [
+        "dial",
+        "base"
+      ]
+    },
+    {
+      "id": "baseH0",
+      "color": "orange",
+      "position": [
+        1.34,
+        1.34,
+        0.25
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.8,
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "baseH1",
+      "color": "yellow",
+      "position": [
+        -1.34,
+        1.34,
+        0.25
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.8,
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "baseH2",
+      "color": "red",
+      "position": [
+        -1.34,
+        -1.34,
+        0.25
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.8,
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "baseH3",
+      "color": "green",
+      "position": [
+        1.34,
+        -1.34,
+        0.25
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.8,
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "num0",
+      "color": "blue",
+      "position": [
+        0,
+        2,
+        1.1
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.7,
+      "partIds": [
+        "num0",
+        "dial"
+      ]
+    },
+    {
+      "id": "num1",
+      "color": "yellow",
+      "position": [
+        2,
+        0,
+        1.1
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.7,
+      "partIds": [
+        "num1",
+        "dial"
+      ]
+    },
+    {
+      "id": "num2",
+      "color": "blue",
+      "position": [
+        0,
+        -2,
+        1.1
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.7,
+      "partIds": [
+        "num2",
+        "dial"
+      ]
+    },
+    {
+      "id": "num3",
+      "color": "purple",
+      "position": [
+        -2,
+        0,
+        1.1
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.7,
+      "partIds": [
+        "num3",
+        "dial"
+      ]
+    },
+    {
+      "id": "center",
+      "color": "yellow",
+      "position": [
+        0,
+        0,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.55,
+      "partIds": [
+        "hub",
+        "hour",
+        "minute",
+        "dial",
+        "base"
+      ]
+    },
+    {
+      "id": "minuteT",
+      "color": "green",
+      "position": [
+        0,
+        1.3,
+        1.05
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.55,
+      "partIds": [
+        "minute",
+        "dial"
+      ]
+    },
+    {
+      "id": "hourT",
+      "color": "red",
+      "position": [
+        1.25,
+        0,
+        1.25
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.75,
+      "partIds": [
+        "hour",
+        "dial"
+      ]
+    },
+    {
+      "id": "dialH",
+      "color": "blue",
+      "position": [
+        0.62,
+        0,
+        0.8
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.3,
+      "partIds": [
+        "dial"
+      ]
+    },
+    {
+      "id": "pendulum",
+      "color": "orange",
+      "position": [
+        0,
+        -5.6,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 2.9,
+      "partIds": [
+        "bob",
+        "rod",
+        "base"
+      ]
+    },
+    {
+      "id": "back0",
+      "color": "blue",
+      "position": [
+        1.7,
+        1.7,
+        -0.25
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.45,
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "back1",
+      "color": "purple",
+      "position": [
+        -1.7,
+        1.7,
+        -0.25
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.45,
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "back2",
+      "color": "green",
+      "position": [
+        -1.7,
+        -1.7,
+        -0.25
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.45,
+      "partIds": [
+        "base"
+      ]
+    },
+    {
+      "id": "back3",
+      "color": "blue",
+      "position": [
+        1.7,
+        -1.7,
+        -0.25
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.45,
+      "partIds": [
+        "base"
+      ]
+    }
+  ]
+}

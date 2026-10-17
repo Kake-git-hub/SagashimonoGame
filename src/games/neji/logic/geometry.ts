@@ -66,6 +66,10 @@ export function partProxyCylinder(part: PartDef): { radius: number; height: numb
     case 'heart':
     case 'gem':
     case 'bone':
+    case 'egg':
+    case 'ring':
+    case 'crown':
+    case 'shell':
       return { radius: part.radius, height: part.height };
     default:
       return null;

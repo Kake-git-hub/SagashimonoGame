@@ -40,6 +40,13 @@
     "screwCount": 12
   },
   {
+    "id": "stage-27",
+    "name": "くま",
+    "emoji": "🐻",
+    "difficulty": 2,
+    "screwCount": 12
+  },
+  {
     "id": "stage-03",
     "name": "ピンのとう",
     "emoji": "🗼",
@@ -73,6 +80,13 @@
     }
   },
   {
+    "id": "stage-16",
+    "name": "ろっかくの はこ",
+    "emoji": "⬡",
+    "difficulty": 3,
+    "screwCount": 12
+  },
+  {
     "id": "stage-18",
     "name": "かんじ「木」",
     "emoji": "🌳",
@@ -80,11 +94,23 @@
     "screwCount": 12
   },
   {
-    "id": "stage-16",
-    "name": "ろっかくの はこ",
-    "emoji": "⬡",
+    "id": "stage-29",
+    "name": "しましまの さかな",
+    "emoji": "🐟",
     "difficulty": 3,
-    "screwCount": 12
+    "screwCount": 15
+  },
+  {
+    "id": "stage-30",
+    "name": "たまごのはっくつ",
+    "emoji": "🥚",
+    "difficulty": 3,
+    "screwCount": 21,
+    "treasure": {
+      "id": "egg",
+      "name": "きょうりゅうのたまご",
+      "emoji": "🥚"
+    }
   },
   {
     "id": "stage-07",
@@ -134,6 +160,51 @@
     "screwCount": 18
   },
   {
+    "id": "stage-23",
+    "name": "ちょうちょ",
+    "emoji": "🦋",
+    "difficulty": 4,
+    "screwCount": 18
+  },
+  {
+    "id": "stage-24",
+    "name": "ひこうき",
+    "emoji": "✈️",
+    "difficulty": 4,
+    "screwCount": 21
+  },
+  {
+    "id": "stage-26",
+    "name": "きしゃ",
+    "emoji": "🚂",
+    "difficulty": 4,
+    "screwCount": 24
+  },
+  {
+    "id": "stage-31",
+    "name": "おうかんのはっくつ",
+    "emoji": "👑",
+    "difficulty": 4,
+    "screwCount": 24,
+    "treasure": {
+      "id": "crown",
+      "name": "おうさまの おうかん",
+      "emoji": "👑"
+    }
+  },
+  {
+    "id": "stage-32",
+    "name": "ゆびわのはっくつ",
+    "emoji": "💍",
+    "difficulty": 4,
+    "screwCount": 24,
+    "treasure": {
+      "id": "ring",
+      "name": "ほうせきの ゆびわ",
+      "emoji": "💍"
+    }
+  },
+  {
     "id": "stage-10",
     "name": "おしろ",
     "emoji": "🏰",
@@ -172,5 +243,43 @@
     "emoji": "🎁",
     "difficulty": 5,
     "screwCount": 21
+  },
+  {
+    "id": "stage-25",
+    "name": "ふね",
+    "emoji": "🚢",
+    "difficulty": 5,
+    "screwCount": 21
+  },
+  {
+    "id": "stage-28",
+    "name": "とけい",
+    "emoji": "🕰️",
+    "difficulty": 5,
+    "screwCount": 21
+  },
+  {
+    "id": "stage-33",
+    "name": "きんかのはっくつ",
+    "emoji": "🪙",
+    "difficulty": 5,
+    "screwCount": 24,
+    "treasure": {
+      "id": "coins",
+      "name": "かいぞくの きんか",
+      "emoji": "🪙"
+    }
+  },
+  {
+    "id": "stage-34",
+    "name": "アンモナイトのはっくつ",
+    "emoji": "🐚",
+    "difficulty": 5,
+    "screwCount": 30,
+    "treasure": {
+      "id": "shell",
+      "name": "アンモナイトの かせき",
+      "emoji": "🐚"
+    }
   }
 ]

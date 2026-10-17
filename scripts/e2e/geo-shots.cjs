@@ -1,5 +1,5 @@
 // 幾何学・展開図・漢字ステージ: さいころを解いて展開図になるのを確認し、各ステージの途中をスクリーンショットに保存する
-const { launch, openStage, tapScrew, hudText, report, OUT } = require('./common.cjs');
+const { launch, openStage, tapScrew, hudText, report, OUT, solutionFor } = require('./common.cjs');
 
 (async () => {
   const { browser, page, errors } = await launch({ width: 844, height: 390 });
@@ -10,10 +10,11 @@ const { launch, openStage, tapScrew, hudText, report, OUT } = require('./common.
 
   // さいころ: 側面を 2 つ開いたところで撮る → 全部開いてクリア
   await openStage(page, 'さいころの てんかいず');
-  for (const id of ['px1', 'px2', 'pz1', 'pz2']) { await tapScrew(page, id); await page.waitForTimeout(300); }
+  const dice = solutionFor('さいころの てんかいず');
+  for (const id of dice.slice(0, 4)) { await tapScrew(page, id); await page.waitForTimeout(300); }
   await page.waitForTimeout(1600);
   await page.screenshot({ path: `${OUT}/geo-dice-unfolding.png` });
-  for (const id of ['nx1', 'nx2', 'nz1', 'nz2', 't1', 't2', 't3', 't4']) { await tapScrew(page, id); await page.waitForTimeout(300); }
+  for (const id of dice.slice(4)) { await tapScrew(page, id); await page.waitForTimeout(300); }
   await page.waitForTimeout(1600);
   await page.screenshot({ path: `${OUT}/geo-dice-net.png` });
   await page.waitForSelector('text=おめでとう！', { timeout: 10000 });

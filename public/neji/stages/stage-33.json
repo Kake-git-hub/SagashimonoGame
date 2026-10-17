@@ -1,0 +1,790 @@
+{
+  "id": "stage-33",
+  "name": "きんかのはっくつ",
+  "emoji": "🪙",
+  "difficulty": 5,
+  "boxes": [
+    "yellow",
+    "orange",
+    "purple",
+    "blue",
+    "green",
+    "green",
+    "red",
+    "purple"
+  ],
+  "parts": [
+    {
+      "id": "coin0",
+      "shape": "cylinder",
+      "radius": 0.75,
+      "height": 0.22,
+      "position": [
+        0,
+        -0.5,
+        0
+      ],
+      "color": "#ffd700",
+      "fixed": true
+    },
+    {
+      "id": "coin1",
+      "shape": "cylinder",
+      "radius": 0.75,
+      "height": 0.22,
+      "position": [
+        0.15,
+        -0.26,
+        0.1
+      ],
+      "color": "#f5c518",
+      "rotation": [
+        0,
+        20,
+        0
+      ],
+      "fixed": true
+    },
+    {
+      "id": "coin2",
+      "shape": "cylinder",
+      "radius": 0.75,
+      "height": 0.22,
+      "position": [
+        -0.1,
+        -0.02,
+        -0.05
+      ],
+      "color": "#ffd700",
+      "rotation": [
+        0,
+        50,
+        0
+      ],
+      "fixed": true
+    },
+    {
+      "id": "coin3",
+      "shape": "cylinder",
+      "radius": 0.75,
+      "height": 0.22,
+      "position": [
+        0.05,
+        0.22,
+        0.12
+      ],
+      "color": "#f5c518",
+      "rotation": [
+        0,
+        75,
+        0
+      ],
+      "fixed": true
+    },
+    {
+      "id": "coin4",
+      "shape": "cylinder",
+      "radius": 0.75,
+      "height": 0.22,
+      "position": [
+        -0.05,
+        0.46,
+        -0.08
+      ],
+      "color": "#ffd700",
+      "rotation": [
+        0,
+        100,
+        0
+      ],
+      "fixed": true
+    },
+    {
+      "id": "d00",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        -2,
+        -2,
+        0
+      ],
+      "color": "#e9c46a"
+    },
+    {
+      "id": "d10",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        0,
+        -2,
+        0
+      ],
+      "color": "#f1d58c"
+    },
+    {
+      "id": "d20",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        2,
+        -2,
+        0
+      ],
+      "color": "#d9b25a"
+    },
+    {
+      "id": "d01",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        -2,
+        0,
+        0
+      ],
+      "color": "#e6c87a"
+    },
+    {
+      "id": "d21",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        2,
+        0,
+        0
+      ],
+      "color": "#e9c46a"
+    },
+    {
+      "id": "d02",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        -2,
+        2,
+        0
+      ],
+      "color": "#f1d58c"
+    },
+    {
+      "id": "d12",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        0,
+        2,
+        0
+      ],
+      "color": "#d9b25a"
+    },
+    {
+      "id": "d22",
+      "shape": "box",
+      "size": [
+        1.8,
+        1.8,
+        1.6
+      ],
+      "position": [
+        2,
+        2,
+        0
+      ],
+      "color": "#e6c87a"
+    },
+    {
+      "id": "plank0",
+      "shape": "box",
+      "size": [
+        5.8,
+        2.8,
+        0.5
+      ],
+      "position": [
+        0,
+        -1.5,
+        1.3
+      ],
+      "color": "#8d6e63"
+    },
+    {
+      "id": "plank1",
+      "shape": "box",
+      "size": [
+        5.8,
+        2.8,
+        0.5
+      ],
+      "position": [
+        0,
+        1.5,
+        1.3
+      ],
+      "color": "#8d6e63"
+    },
+    {
+      "id": "back",
+      "shape": "box",
+      "size": [
+        5.8,
+        5.8,
+        0.5
+      ],
+      "position": [
+        0,
+        0,
+        -1.3
+      ],
+      "color": "#8d6e63"
+    },
+    {
+      "id": "cap",
+      "shape": "box",
+      "size": [
+        5.8,
+        0.5,
+        1.6
+      ],
+      "position": [
+        0,
+        3.4,
+        0
+      ],
+      "color": "#8d6e63"
+    },
+    {
+      "id": "tray",
+      "shape": "box",
+      "size": [
+        5.8,
+        0.5,
+        1.6
+      ],
+      "position": [
+        0,
+        -3.4,
+        0
+      ],
+      "color": "#8d6e63"
+    },
+    {
+      "id": "stone0",
+      "shape": "sphere",
+      "radius": 0.7,
+      "position": [
+        -1.45,
+        -1.4,
+        2.5
+      ],
+      "color": "#6c757d"
+    },
+    {
+      "id": "stone1",
+      "shape": "sphere",
+      "radius": 0.7,
+      "position": [
+        1.45,
+        -1.4,
+        2.5
+      ],
+      "color": "#6c757d"
+    },
+    {
+      "id": "stone2",
+      "shape": "sphere",
+      "radius": 0.7,
+      "position": [
+        -1.45,
+        1.4,
+        2.5
+      ],
+      "color": "#6c757d"
+    }
+  ],
+  "screws": [
+    {
+      "id": "b0",
+      "color": "blue",
+      "position": [
+        -2,
+        -2.9,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d00"
+      ]
+    },
+    {
+      "id": "b1",
+      "color": "purple",
+      "position": [
+        0,
+        -2.9,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d10"
+      ]
+    },
+    {
+      "id": "b2",
+      "color": "green",
+      "position": [
+        2,
+        -2.9,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d20"
+      ]
+    },
+    {
+      "id": "f01",
+      "color": "blue",
+      "position": [
+        -2,
+        0,
+        0.8
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1,
+      "partIds": [
+        "d01"
+      ]
+    },
+    {
+      "id": "k21",
+      "color": "purple",
+      "position": [
+        2,
+        0,
+        -0.8
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1,
+      "partIds": [
+        "d21"
+      ]
+    },
+    {
+      "id": "t0",
+      "color": "red",
+      "position": [
+        -2,
+        2.9,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d02"
+      ]
+    },
+    {
+      "id": "t1",
+      "color": "purple",
+      "position": [
+        0,
+        2.9,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d12"
+      ]
+    },
+    {
+      "id": "t2",
+      "color": "orange",
+      "position": [
+        2,
+        2.9,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "d22"
+      ]
+    },
+    {
+      "id": "P00",
+      "color": "purple",
+      "position": [
+        -1.45,
+        -1.4,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "plank0",
+        "d00"
+      ]
+    },
+    {
+      "id": "P02",
+      "color": "yellow",
+      "position": [
+        1.45,
+        -1.4,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "plank0",
+        "d20"
+      ]
+    },
+    {
+      "id": "P10",
+      "color": "purple",
+      "position": [
+        -1.45,
+        1.4,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "plank1",
+        "d02"
+      ]
+    },
+    {
+      "id": "P12",
+      "color": "green",
+      "position": [
+        1.45,
+        1.4,
+        1.55
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "plank1",
+        "d22"
+      ]
+    },
+    {
+      "id": "K22",
+      "color": "red",
+      "position": [
+        1.45,
+        1.55,
+        -1.55
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "back",
+        "d22"
+      ]
+    },
+    {
+      "id": "K00",
+      "color": "orange",
+      "position": [
+        -1.45,
+        -1.55,
+        -1.55
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "back",
+        "d00"
+      ]
+    },
+    {
+      "id": "K01",
+      "color": "green",
+      "position": [
+        -1.45,
+        0.45,
+        -1.55
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 1.25,
+      "partIds": [
+        "back",
+        "d01"
+      ]
+    },
+    {
+      "id": "C0",
+      "color": "green",
+      "position": [
+        -1.4,
+        3.65,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "cap",
+        "d02"
+      ]
+    },
+    {
+      "id": "C1",
+      "color": "yellow",
+      "position": [
+        0.6,
+        3.65,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "cap",
+        "d12"
+      ]
+    },
+    {
+      "id": "C2",
+      "color": "red",
+      "position": [
+        1.4,
+        3.65,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "cap",
+        "d22"
+      ]
+    },
+    {
+      "id": "B0",
+      "color": "yellow",
+      "position": [
+        -2.6,
+        -3.65,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "tray",
+        "d00"
+      ]
+    },
+    {
+      "id": "B1",
+      "color": "green",
+      "position": [
+        -0.6,
+        -3.65,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "tray",
+        "d10"
+      ]
+    },
+    {
+      "id": "B2",
+      "color": "blue",
+      "position": [
+        2.6,
+        -3.65,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.25,
+      "partIds": [
+        "tray",
+        "d20"
+      ]
+    },
+    {
+      "id": "S0",
+      "color": "green",
+      "position": [
+        -1.9,
+        -1.4,
+        3.04
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.02,
+      "partIds": [
+        "stone0"
+      ]
+    },
+    {
+      "id": "S1",
+      "color": "purple",
+      "position": [
+        1.9,
+        -1.4,
+        3.04
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.02,
+      "partIds": [
+        "stone1"
+      ]
+    },
+    {
+      "id": "S2",
+      "color": "orange",
+      "position": [
+        -1.9,
+        1.4,
+        3.04
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 1.02,
+      "partIds": [
+        "stone2"
+      ]
+    }
+  ],
+  "treasure": {
+    "id": "coins",
+    "name": "かいぞくの きんか",
+    "emoji": "🪙",
+    "partIds": [
+      "coin0",
+      "coin1",
+      "coin2",
+      "coin3",
+      "coin4"
+    ]
+  }
+}

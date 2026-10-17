@@ -1,5 +1,5 @@
 // ネジはずし: ステージ 1 をクリア、ブロック表示、色仕分け（一時置き場 → 箱の入れ替え）
-const { launch, openStage, clickScrew, tapScrew, hudText, report, OUT } = require('./common.cjs');
+const { launch, openStage, clickScrew, tapScrew, hudText, report, OUT, playsFor, findStageWith } = require('./common.cjs');
 
 (async () => {
   const { browser, page, errors } = await launch();
@@ -30,15 +30,23 @@ const { launch, openStage, clickScrew, tapScrew, hudText, report, OUT } = requir
   await tapScrew(page, 'u1'); await page.waitForTimeout(600);
   check('after cap fell', await hudText(page), 'のこり 9');
 
-  // ステージ 3: 赤は箱が無いので一時置き場 → 青 3 本で箱が満杯 → 赤の箱が来て置き場から移動
-  await openStage(page, 'ピンのとう');
-  await tapScrew(page, 'top'); await page.waitForTimeout(1200);
-  check('red goes to buffer', await hudText(page), 'おきば 1/6'); // 6 さいのプロフィールなので +1
-  for (const id of ['pinX', 'pinZ', 'free']) { await tapScrew(page, id); await page.waitForTimeout(300); }
+  // 色仕分け: おきばを使う手順でクリアする。ボックスの無い色は一時置き場に置かれ、その色のボックスが来ると移る（最後は置き場が空）
+  const demoStage = findStageWith('demo', { treasure: false }); // 発掘ステージはクリア時の画面が違うので除く
+  await openStage(page, demoStage);
+  let bufferUsed = false;
+  for (const id of playsFor(demoStage).demo) {
+    await tapScrew(page, id);
+    await page.waitForTimeout(350);
+    if (!bufferUsed && /おきば [1-9]/.test(await hudText(page))) {
+      bufferUsed = true;
+      await page.screenshot({ path: `${OUT}/neji-sort-buffer.png` });
+    }
+  }
   await page.waitForTimeout(2200);
-  await page.screenshot({ path: `${OUT}/neji-stage3-redbox.png` });
-  check('red box arrived with buffered screw', await hudText(page), 'あかのはこ 1/3');
-  check('buffer emptied', await hudText(page), 'おきば 0/6');
+  await page.screenshot({ path: `${OUT}/neji-sort-clear.png` });
+  check(`buffer was used during ${demoStage}`, bufferUsed ? 'yes' : 'no', 'yes');
+  check('buffer emptied', await hudText(page), 'おきば 0/6'); // 6 さいのプロフィールなので +1
+  await page.waitForSelector('text=おめでとう！', { timeout: 10000 });
 
   await browser.close();
   process.exit(report(errors) ? 0 : 1);

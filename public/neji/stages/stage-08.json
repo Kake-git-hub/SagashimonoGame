@@ -4,12 +4,12 @@
   "emoji": "📚",
   "difficulty": 4,
   "boxes": [
+    "orange",
     "red",
-    "blue",
-    "green",
     "yellow",
     "purple",
-    "orange",
+    "green",
+    "yellow",
     "blue"
   ],
   "parts": [
@@ -111,7 +111,7 @@
       "shape": "box",
       "size": [
         0.4,
-        1.0,
+        1,
         0.9
       ],
       "position": [
@@ -126,7 +126,7 @@
       "shape": "box",
       "size": [
         0.4,
-        1.0,
+        1,
         0.9
       ],
       "position": [
@@ -141,7 +141,7 @@
       "shape": "box",
       "size": [
         0.4,
-        1.0,
+        1,
         0.9
       ],
       "position": [
@@ -156,7 +156,7 @@
       "shape": "box",
       "size": [
         0.4,
-        1.0,
+        1,
         0.9
       ],
       "position": [
@@ -171,7 +171,7 @@
       "shape": "box",
       "size": [
         0.4,
-        1.0,
+        1,
         0.9
       ],
       "position": [
@@ -186,7 +186,7 @@
       "shape": "box",
       "size": [
         0.4,
-        1.0,
+        1,
         0.9
       ],
       "position": [
@@ -201,7 +201,7 @@
       "shape": "box",
       "size": [
         0.4,
-        1.0,
+        1,
         0.9
       ],
       "position": [
@@ -216,7 +216,7 @@
       "shape": "box",
       "size": [
         0.4,
-        1.0,
+        1,
         0.9
       ],
       "position": [
@@ -230,7 +230,7 @@
   "screws": [
     {
       "id": "tp1",
-      "color": "red",
+      "color": "yellow",
       "position": [
         1.85,
         4.4,
@@ -268,7 +268,7 @@
     },
     {
       "id": "lb1",
-      "color": "purple",
+      "color": "blue",
       "position": [
         -1.3,
         2.4,
@@ -287,7 +287,7 @@
     },
     {
       "id": "ub1",
-      "color": "blue",
+      "color": "yellow",
       "position": [
         -1.3,
         3.85,
@@ -306,7 +306,7 @@
     },
     {
       "id": "lb2",
-      "color": "purple",
+      "color": "green",
       "position": [
         -0.6,
         2.4,
@@ -325,7 +325,7 @@
     },
     {
       "id": "ub2",
-      "color": "blue",
+      "color": "orange",
       "position": [
         -0.6,
         3.85,
@@ -344,7 +344,7 @@
     },
     {
       "id": "lb3",
-      "color": "purple",
+      "color": "red",
       "position": [
         0.1,
         2.4,
@@ -382,7 +382,7 @@
     },
     {
       "id": "lb4",
-      "color": "orange",
+      "color": "yellow",
       "position": [
         0.8,
         2.4,
@@ -401,7 +401,7 @@
     },
     {
       "id": "ub4",
-      "color": "green",
+      "color": "purple",
       "position": [
         0.8,
         3.85,
@@ -420,9 +420,9 @@
     },
     {
       "id": "s2a",
-      "color": "green",
+      "color": "red",
       "position": [
-        2.0,
+        2,
         2.75,
         0.3
       ],
@@ -439,9 +439,9 @@
     },
     {
       "id": "s2b",
-      "color": "green",
+      "color": "purple",
       "position": [
-        2.0,
+        2,
         2.75,
         -0.3
       ],
@@ -460,7 +460,7 @@
       "id": "s2c",
       "color": "yellow",
       "position": [
-        -2.0,
+        -2,
         2.75,
         0.3
       ],
@@ -477,9 +477,9 @@
     },
     {
       "id": "s2d",
-      "color": "yellow",
+      "color": "orange",
       "position": [
-        -2.0,
+        -2,
         2.75,
         -0.3
       ],
@@ -496,9 +496,9 @@
     },
     {
       "id": "s1a",
-      "color": "red",
+      "color": "yellow",
       "position": [
-        2.0,
+        2,
         1.3,
         0.3
       ],
@@ -515,9 +515,9 @@
     },
     {
       "id": "s1b",
-      "color": "yellow",
+      "color": "orange",
       "position": [
-        2.0,
+        2,
         1.3,
         -0.3
       ],
@@ -534,9 +534,9 @@
     },
     {
       "id": "s1c",
-      "color": "orange",
+      "color": "green",
       "position": [
-        -2.0,
+        -2,
         1.3,
         0.3
       ],
@@ -553,9 +553,9 @@
     },
     {
       "id": "s1d",
-      "color": "orange",
+      "color": "blue",
       "position": [
-        -2.0,
+        -2,
         1.3,
         -0.3
       ],
@@ -572,7 +572,7 @@
     },
     {
       "id": "d1",
-      "color": "blue",
+      "color": "yellow",
       "position": [
         -1.2,
         -0.15,
@@ -590,7 +590,7 @@
     },
     {
       "id": "d2",
-      "color": "blue",
+      "color": "green",
       "position": [
         0,
         -0.15,
@@ -608,7 +608,7 @@
     },
     {
       "id": "d3",
-      "color": "blue",
+      "color": "purple",
       "position": [
         1.2,
         -0.15,

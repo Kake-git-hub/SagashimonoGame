@@ -1,0 +1,618 @@
+{
+  "id": "stage-24",
+  "name": "ひこうき",
+  "emoji": "✈️",
+  "difficulty": 4,
+  "boxes": [
+    "blue",
+    "yellow",
+    "purple",
+    "orange",
+    "green",
+    "red",
+    "purple"
+  ],
+  "parts": [
+    {
+      "id": "fuse",
+      "shape": "box",
+      "size": [
+        6,
+        1.2,
+        1.2
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "color": "#f1f3f5",
+      "fixed": true
+    },
+    {
+      "id": "nose",
+      "shape": "cylinder",
+      "radius": 0.6,
+      "height": 0.8,
+      "position": [
+        3.4,
+        0,
+        0
+      ],
+      "color": "#e63946",
+      "rotation": [
+        0,
+        0,
+        90
+      ]
+    },
+    {
+      "id": "propV",
+      "shape": "box",
+      "size": [
+        0.25,
+        2.4,
+        0.15
+      ],
+      "position": [
+        3.95,
+        0,
+        0
+      ],
+      "color": "#495057"
+    },
+    {
+      "id": "propH",
+      "shape": "box",
+      "size": [
+        0.25,
+        0.15,
+        2.4
+      ],
+      "position": [
+        3.95,
+        0,
+        0
+      ],
+      "color": "#495057"
+    },
+    {
+      "id": "wing",
+      "shape": "box",
+      "size": [
+        1.6,
+        0.3,
+        7
+      ],
+      "position": [
+        0.3,
+        1,
+        0
+      ],
+      "color": "#4cc9f0"
+    },
+    {
+      "id": "engL",
+      "shape": "cylinder",
+      "radius": 0.4,
+      "height": 1.4,
+      "position": [
+        0.3,
+        0.45,
+        2
+      ],
+      "color": "#adb5bd",
+      "rotation": [
+        0,
+        0,
+        90
+      ]
+    },
+    {
+      "id": "engR",
+      "shape": "cylinder",
+      "radius": 0.4,
+      "height": 1.4,
+      "position": [
+        0.3,
+        0.45,
+        -2
+      ],
+      "color": "#adb5bd",
+      "rotation": [
+        0,
+        0,
+        90
+      ]
+    },
+    {
+      "id": "stab",
+      "shape": "box",
+      "size": [
+        1,
+        0.25,
+        3
+      ],
+      "position": [
+        -2.6,
+        0.725,
+        0
+      ],
+      "color": "#4cc9f0"
+    },
+    {
+      "id": "fin",
+      "shape": "box",
+      "size": [
+        1.2,
+        1.4,
+        0.3
+      ],
+      "position": [
+        -2.5,
+        1.55,
+        0
+      ],
+      "color": "#e63946"
+    },
+    {
+      "id": "cockpit",
+      "shape": "box",
+      "size": [
+        1.2,
+        0.5,
+        0.9
+      ],
+      "position": [
+        1.8,
+        0.85,
+        0
+      ],
+      "color": "#90e0ef"
+    },
+    {
+      "id": "strut",
+      "shape": "box",
+      "size": [
+        0.3,
+        0.5,
+        1.2
+      ],
+      "position": [
+        1,
+        -0.8,
+        0
+      ],
+      "color": "#495057"
+    },
+    {
+      "id": "wheelL",
+      "shape": "cylinder",
+      "radius": 0.45,
+      "height": 0.3,
+      "position": [
+        1,
+        -1,
+        0.75
+      ],
+      "color": "#212529",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "wheelR",
+      "shape": "cylinder",
+      "radius": 0.45,
+      "height": 0.3,
+      "position": [
+        1,
+        -1,
+        -0.75
+      ],
+      "color": "#212529",
+      "rotation": [
+        90,
+        0,
+        0
+      ]
+    }
+  ],
+  "screws": [
+    {
+      "id": "prop",
+      "color": "yellow",
+      "position": [
+        4.08,
+        0,
+        0
+      ],
+      "dir": [
+        1,
+        0,
+        0
+      ],
+      "length": 1.5,
+      "partIds": [
+        "propV",
+        "propH",
+        "nose",
+        "fuse"
+      ]
+    },
+    {
+      "id": "noseT",
+      "color": "green",
+      "position": [
+        3.4,
+        0.6,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.3,
+      "partIds": [
+        "nose"
+      ]
+    },
+    {
+      "id": "wing1",
+      "color": "blue",
+      "position": [
+        0.3,
+        1.15,
+        1.2
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.05,
+      "partIds": [
+        "wing",
+        "fuse"
+      ]
+    },
+    {
+      "id": "wing2",
+      "color": "purple",
+      "position": [
+        0.3,
+        1.15,
+        -1.2
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.05,
+      "partIds": [
+        "wing",
+        "fuse"
+      ]
+    },
+    {
+      "id": "wing3",
+      "color": "orange",
+      "position": [
+        0.3,
+        1.15,
+        3
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.3,
+      "partIds": [
+        "wing"
+      ]
+    },
+    {
+      "id": "wing4",
+      "color": "yellow",
+      "position": [
+        0.3,
+        1.15,
+        -3
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.3,
+      "partIds": [
+        "wing"
+      ]
+    },
+    {
+      "id": "under1",
+      "color": "yellow",
+      "position": [
+        0.3,
+        0.6,
+        0.3
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.8,
+      "partIds": [
+        "fuse"
+      ]
+    },
+    {
+      "id": "under2",
+      "color": "orange",
+      "position": [
+        0.3,
+        0.6,
+        -0.3
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 0.8,
+      "partIds": [
+        "fuse"
+      ]
+    },
+    {
+      "id": "engL",
+      "color": "purple",
+      "position": [
+        0.3,
+        0.05,
+        2
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.1,
+      "partIds": [
+        "engL",
+        "wing"
+      ]
+    },
+    {
+      "id": "engR",
+      "color": "green",
+      "position": [
+        0.3,
+        0.05,
+        -2
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1.1,
+      "partIds": [
+        "engR",
+        "wing"
+      ]
+    },
+    {
+      "id": "finT",
+      "color": "purple",
+      "position": [
+        -2.5,
+        2.25,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1.9,
+      "partIds": [
+        "fin",
+        "stab",
+        "fuse"
+      ]
+    },
+    {
+      "id": "finS",
+      "color": "red",
+      "position": [
+        -2.1,
+        1.3,
+        0.15
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.3,
+      "partIds": [
+        "fin"
+      ]
+    },
+    {
+      "id": "stabL",
+      "color": "blue",
+      "position": [
+        -2.6,
+        0.85,
+        1.1
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "stab",
+        "fuse"
+      ]
+    },
+    {
+      "id": "stabR",
+      "color": "green",
+      "position": [
+        -2.6,
+        0.85,
+        -1.1
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "stab",
+        "fuse"
+      ]
+    },
+    {
+      "id": "cockpit",
+      "color": "purple",
+      "position": [
+        1.8,
+        1.1,
+        0
+      ],
+      "dir": [
+        0,
+        1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "cockpit",
+        "fuse"
+      ]
+    },
+    {
+      "id": "strut",
+      "color": "red",
+      "position": [
+        1,
+        -1.05,
+        0
+      ],
+      "dir": [
+        0,
+        -1,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "strut",
+        "fuse"
+      ]
+    },
+    {
+      "id": "wheelL",
+      "color": "blue",
+      "position": [
+        1,
+        -1,
+        0.9
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.4,
+      "partIds": [
+        "wheelL",
+        "strut"
+      ]
+    },
+    {
+      "id": "wheelR",
+      "color": "purple",
+      "position": [
+        1,
+        -1,
+        -0.9
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.4,
+      "partIds": [
+        "wheelR",
+        "strut"
+      ]
+    },
+    {
+      "id": "tail",
+      "color": "purple",
+      "position": [
+        -3,
+        0,
+        0
+      ],
+      "dir": [
+        -1,
+        0,
+        0
+      ],
+      "length": 1,
+      "partIds": [
+        "fuse"
+      ]
+    },
+    {
+      "id": "sideF",
+      "color": "orange",
+      "position": [
+        -1.5,
+        0.25,
+        0.6
+      ],
+      "dir": [
+        0,
+        0,
+        1
+      ],
+      "length": 0.5,
+      "partIds": [
+        "fuse"
+      ]
+    },
+    {
+      "id": "sideK",
+      "color": "red",
+      "position": [
+        -1.5,
+        -0.25,
+        -0.6
+      ],
+      "dir": [
+        0,
+        0,
+        -1
+      ],
+      "length": 0.5,
+      "partIds": [
+        "fuse"
+      ]
+    }
+  ]
+}

@@ -4,9 +4,9 @@
   "emoji": "🗼",
   "difficulty": 3,
   "boxes": [
-    "green",
     "blue",
-    "red",
+    "purple",
+    "orange",
     "yellow"
   ],
   "parts": [
@@ -45,7 +45,7 @@
   "screws": [
     {
       "id": "top",
-      "color": "red",
+      "color": "blue",
       "position": [
         0.35,
         3.5,
@@ -64,7 +64,7 @@
     },
     {
       "id": "pinX",
-      "color": "blue",
+      "color": "orange",
       "position": [
         0.6,
         1.5,
@@ -82,7 +82,7 @@
     },
     {
       "id": "pinZ",
-      "color": "blue",
+      "color": "purple",
       "position": [
         0,
         1.2,
@@ -100,7 +100,7 @@
     },
     {
       "id": "underX",
-      "color": "red",
+      "color": "orange",
       "position": [
         -1.2,
         0.5,
@@ -117,7 +117,7 @@
     },
     {
       "id": "underZ",
-      "color": "red",
+      "color": "yellow",
       "position": [
         0,
         0.5,
@@ -134,7 +134,7 @@
     },
     {
       "id": "free",
-      "color": "blue",
+      "color": "yellow",
       "position": [
         1.5,
         0.5,
@@ -151,7 +151,7 @@
     },
     {
       "id": "g1",
-      "color": "green",
+      "color": "blue",
       "position": [
         1.5,
         0.5,
@@ -168,7 +168,7 @@
     },
     {
       "id": "g2",
-      "color": "green",
+      "color": "yellow",
       "position": [
         -1.5,
         0.5,
@@ -185,7 +185,7 @@
     },
     {
       "id": "g3",
-      "color": "green",
+      "color": "blue",
       "position": [
         -1.8,
         0.5,
@@ -202,7 +202,7 @@
     },
     {
       "id": "d1",
-      "color": "yellow",
+      "color": "purple",
       "position": [
         1.2,
         -0.5,
@@ -220,7 +220,7 @@
     },
     {
       "id": "d2",
-      "color": "yellow",
+      "color": "orange",
       "position": [
         0,
         -0.5,
@@ -238,7 +238,7 @@
     },
     {
       "id": "d3",
-      "color": "yellow",
+      "color": "purple",
       "position": [
         -1.2,
         -0.5,

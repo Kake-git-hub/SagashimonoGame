@@ -12,12 +12,12 @@
     ]
   },
   "boxes": [
-    "red",
     "blue",
-    "green",
+    "red",
     "yellow",
-    "purple",
-    "orange"
+    "green",
+    "orange",
+    "purple"
   ],
   "parts": [
     {
@@ -217,11 +217,11 @@
   "screws": [
     {
       "id": "iE",
-      "color": "purple",
+      "color": "blue",
       "position": [
         2.3,
-        0.0,
-        0.0
+        0,
+        0
       ],
       "dir": [
         1,
@@ -235,11 +235,11 @@
     },
     {
       "id": "iW",
-      "color": "orange",
+      "color": "red",
       "position": [
         -2.3,
-        0.0,
-        0.0
+        0,
+        0
       ],
       "dir": [
         -1,
@@ -253,10 +253,10 @@
     },
     {
       "id": "iN",
-      "color": "orange",
+      "color": "yellow",
       "position": [
-        0.0,
-        0.0,
+        0,
+        0,
         -2.3
       ],
       "dir": [
@@ -271,10 +271,10 @@
     },
     {
       "id": "iS",
-      "color": "purple",
+      "color": "green",
       "position": [
-        0.0,
-        0.0,
+        0,
+        0,
         2.3
       ],
       "dir": [
@@ -289,11 +289,11 @@
     },
     {
       "id": "iT",
-      "color": "purple",
+      "color": "orange",
       "position": [
-        0.0,
+        0,
         2.3,
-        0.0
+        0
       ],
       "dir": [
         0,
@@ -307,11 +307,11 @@
     },
     {
       "id": "iB",
-      "color": "orange",
+      "color": "purple",
       "position": [
-        0.0,
+        0,
         -2.3,
-        0.0
+        0
       ],
       "dir": [
         0,
@@ -325,7 +325,7 @@
     },
     {
       "id": "oE0",
-      "color": "blue",
+      "color": "orange",
       "position": [
         3.15,
         0.5,
@@ -344,7 +344,7 @@
     },
     {
       "id": "oE1",
-      "color": "blue",
+      "color": "red",
       "position": [
         3.15,
         -0.5,
@@ -363,7 +363,7 @@
     },
     {
       "id": "oW0",
-      "color": "green",
+      "color": "orange",
       "position": [
         -3.15,
         0.5,
@@ -382,7 +382,7 @@
     },
     {
       "id": "oW1",
-      "color": "green",
+      "color": "yellow",
       "position": [
         -3.15,
         -0.5,
@@ -420,7 +420,7 @@
     },
     {
       "id": "oN1",
-      "color": "yellow",
+      "color": "blue",
       "position": [
         -0.5,
         -0.5,
@@ -439,7 +439,7 @@
     },
     {
       "id": "oS0",
-      "color": "red",
+      "color": "yellow",
       "position": [
         0.5,
         -0.5,
@@ -458,7 +458,7 @@
     },
     {
       "id": "oS1",
-      "color": "blue",
+      "color": "purple",
       "position": [
         -0.5,
         0.5,
@@ -477,7 +477,7 @@
     },
     {
       "id": "oT0",
-      "color": "red",
+      "color": "purple",
       "position": [
         0.5,
         3.15,
@@ -496,7 +496,7 @@
     },
     {
       "id": "oT1",
-      "color": "red",
+      "color": "blue",
       "position": [
         -0.5,
         3.15,
@@ -515,7 +515,7 @@
     },
     {
       "id": "oB0",
-      "color": "yellow",
+      "color": "red",
       "position": [
         0.5,
         -3.15,
@@ -534,7 +534,7 @@
     },
     {
       "id": "oB1",
-      "color": "yellow",
+      "color": "green",
       "position": [
         -0.5,
         -3.15,

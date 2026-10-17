@@ -28,6 +28,23 @@ async function gotoHome(page, url = BASE) {
   await page.waitForSelector('text=あそぶゲームをえらんでね');
 }
 
+// ステージ id → 手順（npm run gen:neji が書き出す。6 さいのプロフィール = おきば +1 の条件）
+//   order: ソルバーの解  fail: 先を読まずに外しておきばがあふれる手順  demo: おきばを使いつつクリアする手順
+const SOLUTIONS = require('./solutions.json');
+const STAGE_INDEX = require('../../public/neji/index.json');
+function playsFor(stageName) {
+  const entry = STAGE_INDEX.find(s => s.name === stageName);
+  if (!entry || !SOLUTIONS[entry.id]) throw new Error(`no plays for ${stageName} (run npm run gen:neji)`);
+  return SOLUTIONS[entry.id];
+}
+const solutionFor = stageName => playsFor(stageName).order;
+// 一覧の順（やさしい順）で、条件に合う手順を持つ最初のステージ名を返す
+function findStageWith(kind, { treasure = true } = {}) {
+  const entry = STAGE_INDEX.find(s => SOLUTIONS[s.id] && SOLUTIONS[s.id][kind] && (treasure || !s.treasure));
+  if (!entry) throw new Error(`no stage with ${kind} play`);
+  return entry.name;
+}
+
 // ネジはずしのステージを開き、デバッグ情報が出るまで待つ
 async function openStage(page, stageName) {
   await gotoHome(page, DEBUG_URL);
@@ -67,4 +84,4 @@ function report(errors) {
   return errors.length === 0;
 }
 
-module.exports = { BASE, DEBUG_URL, OUT, launch, gotoHome, openStage, clickScrew, tapScrew, hudText, report };
+module.exports = { BASE, DEBUG_URL, OUT, launch, gotoHome, openStage, clickScrew, tapScrew, hudText, report, solutionFor, playsFor, findStageWith };

@@ -79,6 +79,78 @@ function FancyGeometry({ part, material }: { part: FancyPartDef; material: MeshS
           <octahedronGeometry args={[part.radius, 0]} />
         </mesh>
       );
+    case 'egg':
+      // たまご: 球を縦に伸ばし、上をすこし細く見せる
+      return (
+        <group>
+          <mesh material={material} scale={[1, part.height / 2 / part.radius, 1]}>
+            <sphereGeometry args={[part.radius, 32, 24]} />
+          </mesh>
+          {[0.35, -0.2, 0.05].map((y, i) => (
+            <mesh key={i} material={material} position={[Math.cos(i * 2.1) * part.radius * 0.7, (part.height / 2) * y, Math.sin(i * 2.1) * part.radius * 0.7]}>
+              <sphereGeometry args={[part.radius * 0.16, 10, 8]} />
+            </mesh>
+          ))}
+        </group>
+      );
+    case 'ring': {
+      // 指輪: 輪（穴がローカル Y 軸方向）
+      const tube = part.height / 2;
+      return (
+        <mesh material={material} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[part.radius - tube, tube, 16, 48]} />
+        </mesh>
+      );
+    }
+    case 'crown': {
+      // 王冠: 帯と、縁にならぶとがり（ローカル Y が上）
+      const band = part.height * 0.55;
+      const spike = part.height - band;
+      const points = 6;
+      return (
+        <group>
+          <mesh material={material} position={[0, -spike / 2, 0]}>
+            <cylinderGeometry args={[part.radius, part.radius * 0.92, band, 24, 1, true]} />
+          </mesh>
+          <mesh material={material} position={[0, -spike / 2, 0]}>
+            <cylinderGeometry args={[part.radius * 0.9, part.radius * 0.84, band, 24]} />
+          </mesh>
+          {Array.from({ length: points }, (_, i) => {
+            const a = (i / points) * Math.PI * 2;
+            return (
+              <mesh key={i} material={material} position={[Math.cos(a) * part.radius * 0.9, band / 2 - spike / 2 + spike / 2, Math.sin(a) * part.radius * 0.9]}>
+                <coneGeometry args={[part.radius * 0.28, spike, 8]} />
+              </mesh>
+            );
+          })}
+          <mesh material={material} position={[0, band / 2 - spike / 2 + spike * 0.9, 0]}>
+            <sphereGeometry args={[part.radius * 0.18, 12, 10]} />
+          </mesh>
+        </group>
+      );
+    }
+    case 'shell': {
+      // アンモナイト: うずまきにならぶ球（XZ 平面。外側ほど大きい）
+      const turns = 1.75;
+      const count = 26;
+      const balls: { x: number; z: number; r: number }[] = [];
+      for (let i = 0; i < count; i++) {
+        const t = i / (count - 1);
+        const a = t * turns * Math.PI * 2;
+        const r = part.radius * (0.12 + 0.88 * t);
+        const ball = part.radius * (0.08 + 0.3 * t);
+        balls.push({ x: Math.cos(a) * (r - ball), z: Math.sin(a) * (r - ball), r: ball });
+      }
+      return (
+        <group>
+          {balls.map((b, i) => (
+            <mesh key={i} material={material} position={[b.x, 0, b.z]} scale={[1, Math.min(1, part.height / 2 / b.r), 1]}>
+              <sphereGeometry args={[b.r, 14, 12]} />
+            </mesh>
+          ))}
+        </group>
+      );
+    }
     case 'bone': {
       // 骨: 細い軸と両端のこぶ（ローカル Y 軸方向に長い）
       const knob = part.radius;

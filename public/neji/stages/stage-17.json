@@ -4,10 +4,10 @@
   "emoji": "🔺",
   "difficulty": 4,
   "boxes": [
-    "red",
     "purple",
     "yellow",
     "green",
+    "red",
     "blue"
   ],
   "parts": [
@@ -46,9 +46,9 @@
       "id": "L2",
       "shape": "box",
       "size": [
-        3.0,
+        3,
         0.8,
-        3.0
+        3
       ],
       "position": [
         0,
@@ -87,7 +87,7 @@
   "screws": [
     {
       "id": "g1",
-      "color": "red",
+      "color": "yellow",
       "position": [
         -1.5,
         0,
@@ -105,7 +105,7 @@
     },
     {
       "id": "g2",
-      "color": "red",
+      "color": "green",
       "position": [
         1.5,
         0,
@@ -160,7 +160,7 @@
     },
     {
       "id": "a1",
-      "color": "blue",
+      "color": "green",
       "position": [
         -1,
         2.05,
@@ -179,7 +179,7 @@
     },
     {
       "id": "a2",
-      "color": "blue",
+      "color": "yellow",
       "position": [
         1,
         2.05,
@@ -198,7 +198,7 @@
     },
     {
       "id": "a3",
-      "color": "green",
+      "color": "purple",
       "position": [
         -1,
         2.05,
@@ -217,7 +217,7 @@
     },
     {
       "id": "a4",
-      "color": "green",
+      "color": "red",
       "position": [
         0,
         2.05,
@@ -274,7 +274,7 @@
     },
     {
       "id": "b2",
-      "color": "yellow",
+      "color": "purple",
       "position": [
         0.45,
         3.1,
@@ -293,7 +293,7 @@
     },
     {
       "id": "b3",
-      "color": "yellow",
+      "color": "blue",
       "position": [
         -0.45,
         3.1,
@@ -312,7 +312,7 @@
     },
     {
       "id": "c0",
-      "color": "purple",
+      "color": "blue",
       "position": [
         0,
         4.15,
@@ -331,7 +331,7 @@
     },
     {
       "id": "c1",
-      "color": "purple",
+      "color": "red",
       "position": [
         0,
         4.15,

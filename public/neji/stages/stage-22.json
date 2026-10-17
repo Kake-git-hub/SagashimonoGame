@@ -4,13 +4,13 @@
   "emoji": "🎁",
   "difficulty": 5,
   "boxes": [
-    "green",
-    "red",
     "yellow",
+    "red",
     "blue",
     "purple",
-    "orange",
-    "red"
+    "green",
+    "blue",
+    "orange"
   ],
   "parts": [
     {
@@ -39,7 +39,7 @@
       ],
       "position": [
         0,
-        1.0,
+        1,
         0
       ],
       "color": "#5390d9"
@@ -54,7 +54,7 @@
       ],
       "position": [
         0,
-        -1.0,
+        -1,
         0
       ],
       "color": "#5390d9"
@@ -215,7 +215,7 @@
       "size": [
         2.8,
         0.4,
-        6.0
+        6
       ],
       "position": [
         0,
@@ -228,7 +228,7 @@
   "screws": [
     {
       "id": "iT",
-      "color": "blue",
+      "color": "orange",
       "position": [
         0,
         1.3,
@@ -246,7 +246,7 @@
     },
     {
       "id": "iB",
-      "color": "red",
+      "color": "orange",
       "position": [
         0,
         -1.3,
@@ -264,7 +264,7 @@
     },
     {
       "id": "iE",
-      "color": "orange",
+      "color": "red",
       "position": [
         1.8,
         0,
@@ -282,7 +282,7 @@
     },
     {
       "id": "iW",
-      "color": "orange",
+      "color": "yellow",
       "position": [
         -1.8,
         0,
@@ -300,7 +300,7 @@
     },
     {
       "id": "iN",
-      "color": "red",
+      "color": "blue",
       "position": [
         0,
         0,
@@ -318,7 +318,7 @@
     },
     {
       "id": "iS",
-      "color": "red",
+      "color": "purple",
       "position": [
         0,
         0,
@@ -336,7 +336,7 @@
     },
     {
       "id": "oT0",
-      "color": "blue",
+      "color": "green",
       "position": [
         -0.9,
         2.15,
@@ -355,7 +355,7 @@
     },
     {
       "id": "oB0",
-      "color": "purple",
+      "color": "green",
       "position": [
         -0.9,
         -2.15,
@@ -393,7 +393,7 @@
     },
     {
       "id": "oB1",
-      "color": "orange",
+      "color": "blue",
       "position": [
         0.9,
         -2.15,
@@ -412,7 +412,7 @@
     },
     {
       "id": "oE0",
-      "color": "green",
+      "color": "purple",
       "position": [
         2.65,
         0,
@@ -431,7 +431,7 @@
     },
     {
       "id": "oW0",
-      "color": "green",
+      "color": "blue",
       "position": [
         -2.65,
         0,
@@ -450,7 +450,7 @@
     },
     {
       "id": "oE1",
-      "color": "green",
+      "color": "blue",
       "position": [
         2.65,
         0,
@@ -469,7 +469,7 @@
     },
     {
       "id": "oW1",
-      "color": "yellow",
+      "color": "green",
       "position": [
         -2.65,
         0,
@@ -507,7 +507,7 @@
     },
     {
       "id": "oS0",
-      "color": "purple",
+      "color": "blue",
       "position": [
         -0.9,
         0,
@@ -526,7 +526,7 @@
     },
     {
       "id": "oN1",
-      "color": "yellow",
+      "color": "orange",
       "position": [
         0.9,
         0,
@@ -545,7 +545,7 @@
     },
     {
       "id": "oS1",
-      "color": "purple",
+      "color": "red",
       "position": [
         0.9,
         0,
@@ -564,11 +564,11 @@
     },
     {
       "id": "sp0",
-      "color": "red",
+      "color": "purple",
       "position": [
         0,
         2.8,
-        -2.0
+        -2
       ],
       "dir": [
         0,
@@ -583,7 +583,7 @@
     },
     {
       "id": "sp1",
-      "color": "red",
+      "color": "yellow",
       "position": [
         0,
         2.8,
@@ -606,7 +606,7 @@
       "position": [
         0,
         2.8,
-        2.0
+        2
       ],
       "dir": [
         0,
