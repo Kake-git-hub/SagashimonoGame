@@ -267,3 +267,171 @@
     overflow-y: auto;
   }
 }
+
+/* --- フェーズ 1: 読み込み・状態・設定 --- */
+.mmm-secondary-button {
+  padding: 12px 18px;
+  font-size: 1.05rem;
+  font-weight: bold;
+  border: 2px solid #ff6b9d;
+  border-radius: 14px;
+  background: white;
+  color: #e91e63;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.mmm-secondary-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.mmm-status[data-status='loading'] {
+  background: rgba(233, 30, 99, 0.75);
+}
+
+.mmm-status[data-status='ok'] {
+  background: rgba(46, 125, 50, 0.75);
+}
+
+.mmm-loading {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(70%, 320px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 2;
+}
+
+.mmm-progress {
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+
+.mmm-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b9d, #ffafcc);
+  transition: width 0.2s linear;
+}
+
+.mmm-stats {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #b2ff59;
+  font-size: 0.75rem;
+  font-family: ui-monospace, Menlo, monospace;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.mmm-panel-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mmm-chip-button {
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.14);
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* せってい のシート */
+.mmm-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 20;
+}
+
+.mmm-sheet {
+  width: 100%;
+  max-width: 520px;
+  max-height: 80dvh;
+  overflow-y: auto;
+  background: white;
+  color: #333;
+  border-radius: 20px 20px 0 0;
+  padding: 10px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mmm-sheet-handle {
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: #ddd;
+  margin: 0 auto 6px;
+}
+
+.mmm-sheet-title {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+}
+
+.mmm-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 1rem;
+}
+
+.mmm-setting-row input[type='checkbox'] {
+  width: 24px;
+  height: 24px;
+  accent-color: #e91e63;
+}
+
+.mmm-segment {
+  display: flex;
+  border: 2px solid #ff6b9d;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.mmm-segment button {
+  padding: 6px 14px;
+  border: none;
+  background: white;
+  color: #e91e63;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.mmm-segment button.mmm-segment-on {
+  background: #e91e63;
+  color: white;
+}
+
+.mmm-sheet-note {
+  margin: 4px 0 10px;
+  font-size: 0.85rem;
+  color: #777;
+}

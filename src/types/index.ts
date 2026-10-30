@@ -210,7 +210,7 @@ export const GAME_INFO: Record<GameId, GameInfo> = {
     description: 'カメラにうつったかおに、おけしょうをしてみよう！',
     emoji: '💄',
     gradient: 'linear-gradient(135deg, #ffafcc 0%, #ff6b9d 100%)',
-    available: false,
+    available: true,
   },
 };
 

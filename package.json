@@ -14,6 +14,7 @@
     "gen:neji": "vitest run --config scripts/neji/vitest.config.ts"
   },
   "dependencies": {
+    "@mediapipe/tasks-vision": "^1.2.0",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.1",
     "canvas-confetti": "^1.9.3",

@@ -7,13 +7,14 @@ interface Props {
   status: CameraStatus;
   error: CameraErrorKind | null;
   onStart: () => void;
+  onPickPhoto: () => void;
   onExit: () => void;
 }
 
 /**
  * はじめに: カメラを使うことと、映像を外に出さないことを説明してから許可を求める
  */
-export function IntroScreen({ status, error, onStart, onExit }: Props) {
+export function IntroScreen({ status, error, onStart, onPickPhoto, onExit }: Props) {
   const ready = useTapGuard();
   const starting = status === 'starting';
 
@@ -48,6 +49,9 @@ export function IntroScreen({ status, error, onStart, onExit }: Props) {
             aria-busy={starting}
           >
             {starting ? S.camera.starting : status === 'error' ? S.camera.retry : `📷 ${S.intro.start}`}
+          </button>
+          <button className="mmm-secondary-button" onClick={onPickPhoto} disabled={!ready || starting}>
+            🖼️ {S.photo.pick}
           </button>
         </div>
       </div>

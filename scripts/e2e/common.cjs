@@ -19,7 +19,11 @@ async function launch(viewport = { width: 390, height: 844 }, options = {}) {
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', e => errors.push(`pageerror: ${e.message}`));
-  page.on('console', m => { if (m.type() === 'error') errors.push(`console.error: ${m.text()}`); });
+  // MediaPipe は情報ログを console.error に出すので、それは失敗扱いにしない
+  const IGNORED_CONSOLE = [/^INFO: Created TensorFlow Lite/];
+  page.on('console', m => {
+    if (m.type() === 'error' && !IGNORED_CONSOLE.some(re => re.test(m.text()))) errors.push(`console.error: ${m.text()}`);
+  });
   return { browser, context, page, errors };
 }
 

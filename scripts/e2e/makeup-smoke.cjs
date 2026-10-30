@@ -9,7 +9,7 @@ const { launch, gotoHome, report, OUT } = require('./common.cjs');
     await page.waitForSelector('text=カメラを つかう');
     await page.screenshot({ path: `${OUT}/${label}-makeup-intro.png` });
     // 出てすぐはボタンが押せない（連打対策）
-    await page.waitForFunction(() => !document.querySelector('.mmm-primary-button').disabled);
+    await page.waitForSelector('.mmm-primary-button:not([disabled])');
     await page.click('text=カメラを つかう');
     await page.waitForSelector('.mmm-video');
     await page.waitForFunction(() => {

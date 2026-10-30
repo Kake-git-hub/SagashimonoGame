@@ -31,10 +31,38 @@ export const S = {
     retry: 'もういちど',
     interrupted: 'カメラが とまったよ。もういちど つなぐね...',
   },
+  // 顔の状態（状態欄）
+  face: {
+    ok: 'かおが みえているよ ✓',
+    none: 'かおを うつしてね',
+    far: 'もうすこし ちかづいてね',
+    close: 'すこし はなれてね',
+    dark: 'もうすこし あかるいところで',
+    turned: 'まっすぐ むいてね',
+  },
+  loading: {
+    downloading: 'かおを みつける データを ダウンロードちゅう',
+    starting: 'かおを みつける じゅんびちゅう...',
+    error: 'かおを みつける データを よみこめませんでした。ネットに つないで もういちど ためしてね。',
+    retry: 'もういちど',
+  },
+  settings: {
+    title: 'せってい',
+    mirrored: 'かがみのように うつす',
+    showLandmarks: 'かおの てんを みせる',
+    showStats: 'はやさを みせる',
+    delegate: 'かおを みつける やりかた',
+    delegateNote: 'うまく うごかないときは CPU に してみてね',
+    close: 'とじる',
+  },
+  photo: {
+    pick: 'しゃしんで ためす',
+    change: 'しゃしんを かえる',
+    useCamera: 'カメラに する',
+  },
   mirror: {
     settings: 'せってい',
-    waitingFace: 'かおを うつしてね',
-    cameraOk: 'カメラ OK',
     comingSoon: 'おけしょうの きのうは じゅんびちゅう',
+    skipping: 'まびき',
   },
 } as const;

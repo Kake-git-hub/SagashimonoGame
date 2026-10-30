@@ -26,3 +26,6 @@ npm-debug.log*
 
 # E2E screenshots
 scripts/e2e/out/
+
+# E2E のテスト用素材（スクリプトがダウンロード / 生成する）
+scripts/e2e/assets/

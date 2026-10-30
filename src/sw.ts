@@ -42,3 +42,13 @@ registerRoute(
     plugins: [new ExpirationPlugin({ maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 60 })],
   }),
 );
+
+// マジックメイクミラーの顔認識（wasm 約 14MB とモデル約 4MB）は事前キャッシュに入れず、
+// 初めて開いたときにダウンロードして保存する。以後はオフラインでも動く
+registerRoute(
+  ({ url }) => url.pathname.endsWith('.wasm') || url.pathname.endsWith('.task'),
+  new CacheFirst({
+    cacheName: 'makeup-model',
+    plugins: [new ExpirationPlugin({ maxEntries: 6 })],
+  }),
+);
