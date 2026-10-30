@@ -148,6 +148,25 @@ async function showLandmarks(page) {
     await page.waitForSelector('button[aria-label="チークだけの てじゅん"]');
     console.log('guide flow: ok');
 
+    // ていあん: しんだん → かおの かたち などが出る → この いろで ためす → ためす に切り替わり色が入る
+    await page.click('.mmm-mode:has-text("ていあん")');
+    await page.waitForSelector('button:has-text("しんだん する"):not([disabled])');
+    await page.click('button:has-text("しんだん する")');
+    await page.waitForSelector('.mmm-suggest[data-face-shape]');
+    const suggestion = await page.evaluate(() => {
+      const sg = window.__makeupDebug.suggestion;
+      return { faceShape: sg.faceShape, eyeShape: sg.eyeShape, eyeSize: sg.eyeSize, skinTone: sg.skinTone, skinBrightness: sg.skinBrightness, recipeId: sg.recipeId,
+        metrics: Object.fromEntries(Object.entries(sg.metrics).map(([k, v]) => [k, Math.round(v * 1000) / 1000])) };
+    });
+    console.log('suggestion:', JSON.stringify(suggestion));
+    if (suggestion.faceShape !== 'oval') errors.push(`expected oval face for the sample, got ${suggestion.faceShape}`);
+    if (suggestion.skinTone === 'unknown') errors.push('skin tone should be measurable on the sample');
+    await page.screenshot({ path: `${OUT}/phone-makeup-suggest.png` });
+    await page.click('button:has-text("この いろで ためす")');
+    await page.waitForFunction(() => window.__makeupDebug.mode === 'try' && Object.keys(window.__makeupDebug.look).length >= 5 && window.__makeupDebug.makeupDrawn === true, null, { timeout: 10000 });
+    console.log('suggest flow: ok');
+    await page.click('button:has-text("ぜんぶ けす")');
+
     if (process.env.E2E_WRITE_FIXTURE === '1') {
       const frame = await page.evaluate(() => {
         const f = window.__makeupDebug.frame;

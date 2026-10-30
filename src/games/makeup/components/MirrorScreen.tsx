@@ -5,6 +5,8 @@ import { CameraHandle } from '../hooks/useCamera';
 import { useFaceTracker } from '../hooks/useFaceTracker';
 import { LayerId, LookState, lookReducer } from '../logic/layers';
 import { Recipe, recipeLook, RecipeSummary } from '../logic/guide';
+import { suggest, Suggestion } from '../logic/suggest';
+import { sampleSkin } from './skinSample';
 import { usePoseCheck } from '../hooks/usePoseCheck';
 import { fetchPalettes, fetchRecipe, fetchRecipeIndex, PaletteMap } from '../services/contentService';
 import { canvasToBlob, shareOrDownload, stillFilename } from '../services/share';
@@ -15,6 +17,7 @@ import { MakeupPainter } from './makeupPainter';
 import { SettingsSheet } from './SettingsSheet';
 import { TryPanel } from './TryPanel';
 import { GuidePanel } from './GuidePanel';
+import { SuggestPanel } from './SuggestPanel';
 
 type Mode = 'try' | 'guide' | 'suggest';
 
@@ -56,6 +59,8 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   const [stepIndex, setStepIndex] = useState(0);
   const [resultShown, setResultShown] = useState(false);
   const lookBackupRef = useRef<LookState | null>(null);
+  // ていあん
+  const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   const isPhoto = source.kind === 'photo';
 
   const handleFrameSize = useCallback((w: number, h: number) => {
@@ -126,6 +131,27 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
     lookBackupRef.current = null;
   }, []);
 
+  // しんだん: いまの顔の点と頬の色から
+  const handleDiagnose = useCallback(() => {
+    const frame = tracker.frameRef.current;
+    const src = getSource();
+    if (!frame || !src) return;
+    const skin = sampleSkin(src, frame, frameSize.w, frameSize.h);
+    setSuggestion(suggest(frame.landmarks, frameSize.w, frameSize.h, skin));
+  }, [tracker, getSource, frameSize]);
+
+  const handleOpenRecipe = useCallback((id: string) => {
+    setMode('guide');
+    handleSelectRecipe(id);
+  }, [handleSelectRecipe]);
+
+  const handleApplySuggestedLook = useCallback((next: LookState) => {
+    dispatch({ type: 'replace', look: next });
+    setResultShown(false);
+    lookBackupRef.current = null;
+    setMode('try');
+  }, []);
+
   const currentStep = mode === 'guide' && recipe && stepIndex < recipe.steps.length ? recipe.steps[stepIndex] : null;
   const poseOk = usePoseCheck(tracker, currentStep?.pose);
 
@@ -133,8 +159,8 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   useEffect(() => { onLookChange(look); }, [look, onLookChange]);
 
   // 自動テスト用: ?makeupdebug=1 のとき最新の結果を window に出す
-  const latestRef = useRef({ status, loadState, stats, frameSize, look, currentStep, poseOk });
-  latestRef.current = { status, loadState, stats, frameSize, look, currentStep, poseOk };
+  const latestRef = useRef({ status, loadState, stats, frameSize, look, currentStep, poseOk, suggestion, mode });
+  latestRef.current = { status, loadState, stats, frameSize, look, currentStep, poseOk, suggestion, mode };
   useEffect(() => {
     if (!debug) return;
     const w = window as unknown as { __makeupDebug?: unknown };
@@ -148,6 +174,8 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
       get makeupDrawn() { return painterRef.current?.lastDrew ?? false; },
       get guideStep() { return latestRef.current.currentStep?.id ?? null; },
       get poseOk() { return latestRef.current.poseOk; },
+      get suggestion() { return latestRef.current.suggestion; },
+      get mode() { return latestRef.current.mode; },
       applyLook(next: LookState) { dispatch({ type: 'replace', look: next }); },
     };
     return () => { delete w.__makeupDebug; };
@@ -284,7 +312,14 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
               onToggleResult={handleToggleResult}
             />
           ) : (
-            <div className="mmm-panel-placeholder">{S.modes[mode]}は {S.mirror.comingSoon}</div>
+            <SuggestPanel
+              suggestion={suggestion}
+              faceVisible={faceVisible}
+              recipes={recipes}
+              onDiagnose={handleDiagnose}
+              onOpenRecipe={handleOpenRecipe}
+              onApplyLook={handleApplySuggestedLook}
+            />
           )}
 
           <div className="mmm-panel-row">

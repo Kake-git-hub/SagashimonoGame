@@ -766,3 +766,72 @@
   font-size: 1.4rem;
   text-align: center;
 }
+
+/* --- フェーズ 4: ていあん --- */
+.mmm-suggest {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mmm-suggest-intro {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+}
+
+.mmm-suggest-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.mmm-suggest-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.mmm-suggest-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mmm-suggest-card-wide {
+  grid-column: 1 / -1;
+}
+
+.mmm-suggest-label {
+  font-size: 0.75rem;
+  color: #ffafcc;
+  font-weight: bold;
+}
+
+.mmm-suggest-value {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.mmm-suggest-tip {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.mmm-suggest-swatches {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.mmm-suggest-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+}
