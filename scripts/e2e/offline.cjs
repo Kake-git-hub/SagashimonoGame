@@ -1,6 +1,8 @@
 // オフライン: 一度ホームを開いただけで、サーバーが無くても全部遊べるか
 // - Playwright の context.setOffline は Service Worker の通信を止めないので、
 //   自前の静的サーバーで dist を配り、それを閉じて本当のオフラインにする
+// - マジックメイクミラーの顔認識（wasm とモデル）は事前キャッシュに入れていないので、
+//   オンラインのうちに一度だけ開いて（偽カメラ）ダウンロードさせ、オフラインでも動くことを確認する
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -12,6 +14,7 @@ const BASE = `http://localhost:${PORT}/SagashimonoGame/`;
 const TYPES = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
   '.webp': 'image/webp', '.jpg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml',
+  '.wasm': 'application/wasm', '.task': 'application/octet-stream',
 };
 
 const server = http.createServer((req, res) => {
@@ -31,12 +34,25 @@ const brokenImages = page => page.$$eval('img', imgs => imgs.filter(i => !i.comp
 
 (async () => {
   await new Promise(resolve => server.listen(PORT, resolve));
-  const { browser, page, errors } = await launch();
+  const { browser, page, errors } = await launch({ width: 390, height: 844 }, { fakeCamera: true });
   let ok = true;
 
   // オンラインではホームを開くだけ（さがしもの・ネジはずしは開かない）
-  await gotoHome(page, BASE);
+  await gotoHome(page, `${BASE}?makeupdebug=1`);
   await page.waitForFunction(() => navigator.serviceWorker && navigator.serviceWorker.controller !== null, null, { timeout: 20000 });
+
+  // マジックメイクミラーだけは一度開いて、顔認識のデータをダウンロードさせる
+  const openMirror = async () => {
+    await page.click('text=マジックメイクミラー');
+    await page.waitForSelector('.mmm-primary-button:not([disabled])', { timeout: 15000 });
+    await page.click('text=カメラを つかう');
+    await page.waitForFunction(() => window.__makeupDebug && window.__makeupDebug.loadState.phase === 'ready', null, { timeout: 90000 });
+  };
+  await openMirror();
+  console.log('makeup model downloaded (online)');
+  await page.click('button[aria-label="もどる"]');
+  await page.click('button[aria-label="ホームへもどる"]');
+  await page.waitForSelector('text=あそぶゲームをえらんでね');
 
   server.close();
   server.closeAllConnections();
@@ -69,6 +85,13 @@ const brokenImages = page => page.$$eval('img', imgs => imgs.filter(i => !i.comp
   await page.waitForTimeout(1000);
   await page.screenshot({ path: `${OUT}/offline-neji.png` });
   console.log('offline neji OK');
+
+  await page.goto(`${BASE}?makeupdebug=1`);
+  await page.waitForSelector('text=あそぶゲームをえらんでね', { timeout: 15000 });
+  await openMirror();
+  const delegate = await page.evaluate(() => window.__makeupDebug.stats.delegate);
+  console.log('offline makeup OK (face model from cache, delegate', delegate + ')');
+  await page.screenshot({ path: `${OUT}/offline-makeup.png` });
 
   await browser.close();
   // オフラインになってからの読み込み失敗はここで判定済みなので、console.error は数えない

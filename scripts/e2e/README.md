@@ -12,8 +12,15 @@ bash scripts/e2e/run.sh stage-shots     # 全ステージの初期表示をス�
 bash scripts/e2e/run.sh treasure-shots  # 全発掘ステージの土を外して、たからものが見える状態を撮る
 bash scripts/e2e/run.sh pwa-update      # 旧ビルド起動 → 新ビルド公開 → 自動更新 → オフライン起動
 bash scripts/e2e/run.sh home-smoke      # ホーム / さがしもの一覧 / ゲーム画面 の表示
-bash scripts/e2e/run.sh offline         # ホームを開いただけでサーバーを止め、さがしもの（絵も）とネジはずしが遊べるか
+bash scripts/e2e/run.sh offline         # ホームを開いた直後にマジックメイクミラーを一度開いてからサーバーを止め、さがしもの（絵も）・ネジはずし・マジックメイクミラーが遊べるか
+bash scripts/e2e/run.sh makeup-smoke    # マジックメイクミラー: 偽カメラ（合成映像）で はじめに → ミラー → もどる（カメラのトラックが止まるか）
+bash scripts/e2e/run.sh makeup-face     # マジックメイクミラー: 顔写真の偽カメラと写真モードで 478 点 → ためす（6 レイヤー・ほぞん）→ おしえて（ナチュラル）→ ていあん
 ```
+
+マジックメイクミラーの偽カメラは `common.cjs` の `launch(viewport, { fakeCamera: true | '<y4m のパス>' })`（Chromium の `--use-fake-device-for-media-stream`、許可は自動）。
+`makeup-face.cjs` は MediaPipe のサンプルの顔写真を `scripts/e2e/assets/`（git 管理外）にダウンロードし、ffmpeg で 4:3 の y4m にして流す。ffmpeg が無ければカメラの部分を飛ばして写真モードだけ確認する。
+`E2E_WRITE_FIXTURE=1` を付けると、写真モードの点群を `src/games/makeup/logic/fixtures/portrait-frame.json` に書き直す（領域の単体テストが使う）。
+`?makeupdebug=1` で公開される `window.__makeupDebug`（点群・状態・FPS・look・ガイドのステップ・しんだん結果・`applyLook`）を使う。
 
 初回起動はプロフィール作成画面（なんさい？）が出るので、`common.cjs` の `gotoHome` が 6 さいで作ってからホームへ進む（6 さいはおきばが +1 される）。
 クイズは正解が分からないので、`neji-dig.cjs` の `answerQuiz` は選択肢を順に試す。

@@ -10,6 +10,7 @@
 |---|---|---|
 | 🔍 さがしものゲーム | 「ミッケ」風のもの探しゲーム | 公開中 |
 | 🔩 ネジはずし | 3D の図形に刺さった色付きネジを外して同じ色のボックスに集めるパズル | 公開中（[計画書](docs/ネジはずしゲーム計画.md)） |
+| 💄 マジックメイクミラー | インカメラに映した顔に、顔認識でおけしょうを重ねたり、塗る場所と向きを矢印で案内したりする鏡 | 試作中（[計画書](docs/お化粧アプリ計画.md)） |
 
 URL: https://kake-git-hub.github.io/SagashimonoGame/
 
@@ -18,6 +19,7 @@ URL: https://kake-git-hub.github.io/SagashimonoGame/
 - React 19 + TypeScript
 - Vite
 - three.js + @react-three/fiber + @react-three/drei（ネジはずしの 3D 表示）
+- MediaPipe Face Landmarker（`@mediapipe/tasks-vision`。マジックメイクミラーの顔認識。端末内で動き、映像は外に出ない）
 - canvas-confetti（紙吹雪演出）
 - vitest（ロジックの単体テストとステージ検証）
 - PWA（vite-plugin-pwa + Workbox。オフライン起動と自動アップデート）
@@ -59,6 +61,11 @@ src/
       components/           3D シーン・HUD・ステージ一覧・結果画面
       hooks/                ゲーム状態と HUD 演出のフック
       services/             ステージ取得・進捗保存
+    makeup/                 マジックメイクミラー
+      logic/                顔の領域・レイヤー・ガイド・ていあん・平滑化（DOM に依存しない。フィクスチャで単体テスト）
+      components/           カメラ / 写真の置き場・メイク描画・ガイド描画・各パネル
+      hooks/                カメラ・顔認識ループ・表情の判定
+      services/             MediaPipe の読み込み・内容データの取得・保存・共有
   components/               さがしものゲームの画面部品
   services/                 データ取得・保存（localStorage / IndexedDB / GitHub API）
   hooks/                    共通フック
@@ -67,6 +74,7 @@ src/
 public/
   puzzles/                  さがしものゲームのパズルデータ
   neji/                     ネジはずしのステージデータ
+  makeup/                   マジックメイクミラーの顔認識モデル・色のパレット・手順のレシピ
 ```
 
 ---
@@ -172,10 +180,62 @@ JSON を手で書くときも `npm run gen:neji` を通すと、同じ色が隣�
 - 色は `red / blue / green / yellow / purple / orange`
 - ネジの軸同士が交差したり、頭が他のパーツに食い込んだりしていると検証でエラーになる
 
+## 💄 マジックメイクミラー
+
+インカメラに映した自分の顔に、顔認識（MediaPipe Face Landmarker、478 点）をもとにおけしょうを重ねたり、どこにどう塗るかを案内したりする「かしこい鏡」です。本来は単体のアプリにしたいものを、あそびひろばの中で試作しています（[計画書](docs/お化粧アプリ計画.md)、[開発ガイド](docs/お化粧アプリ開発ガイド.md)）。
+
+### あそびかた
+
+1. ホームで「マジックメイクミラー」を選び、「カメラを つかう」を押してカメラを許可します（カメラが使えないときや PC では「しゃしんで ためす」で写真を選べます）
+2. はじめて開くときは顔を見つけるためのデータ（約 19MB）をダウンロードします。2 回目からはオフラインでも動きます
+3. 画面の上の状態欄が「かおが みえているよ」になったら、下のタブで 3 つの使い方を選びます
+   - **ためす**: パーツ（リップ・チーク・アイシャドウ・アイライン・まゆ・ハイライト・ベース・コンシーラー）→ 色 → つよさ を選ぶと、顔に重ねて表示されます。「くらべる」を押している間は元の顔、「ほぞん」で写真に残せます（共有シート / ダウンロード）
+   - **おしえて**: 手順（ナチュラル / おでかけ / リップだけ / チークだけ）を選ぶと、ステップごとに塗る場所が光り、塗る向きが矢印で流れます。顔が動いても追従します。チークでは「にっこり」すると位置が決まります。「できあがりを みる」で完成形を重ねられます
+   - **ていあん**: 「しんだん する」で顔のかたち・めのかたち・はだの色みを見て、合いそうな色と手順をすすめます（あくまで目安です）
+4. 右上の ⚙️ で鏡像の切り替え、顔の点の表示、速さの表示、GPU / CPU の切り替えができます
+
+うつした顔はこの端末の中だけで使い、どこにも送りません。「ほぞん」を押したときだけ写真として書き出します。
+
+### 色と手順の追加方法
+
+- 色: `public/makeup/palettes.json` にパーツごとの `{ "name": "コーラル", "color": "#f0806a" }` を足します
+- 手順: `public/makeup/recipes/<id>.json` を作り、`public/makeup/recipes/index.json` に `{ "id", "name", "emoji", "description", "stepCount" }` を足します。`npm test` が参照切れとステップ数を検証します
+
+#### レシピ JSON フォーマット
+
+```json
+{
+  "id": "natural",
+  "name": "ナチュラル",
+  "emoji": "🌿",
+  "description": "まいにちの かんたんメイク",
+  "steps": [
+    {
+      "id": "blush",
+      "part": "blush",
+      "title": "チーク",
+      "text": "にっこり すると たかくなる ところから、こめかみへ むかって ふんわり",
+      "pose": "smile",
+      "regions": ["cheekR", "cheekL"],
+      "strokes": [{ "from": "cheekCenterR", "to": "templeR" }, { "from": "cheekCenterL", "to": "templeL" }],
+      "marks": [{ "type": "dot", "anchor": "cheekCenterR" }],
+      "look": { "layer": "blush", "color": "#f3a5a5", "opacity": 0.55 }
+    }
+  ]
+}
+```
+
+- `part`: `lip` / `blush` / `eyeshadow` / `eyeliner` / `brow` / `highlight` / `base` / `concealer` / `mascara` / `finish`（絵文字と、ためす のレイヤーに対応）
+- `pose`: `front`（省略時）/ `smile`（にっこり）/ `closeEyes`（目を閉じる）。できているかを表情から判定して文言を切り替えます
+- `regions`: 光らせる領域の名前。`strokes`: 矢印が流れる線（`along` で既定の線をなぞる。`reverse: true` で逆向き。または `from` / `to` で点を結ぶ）。`marks`: 目印（`vline` は縦線、`dot` は点）
+- 使える名前は `src/games/makeup/logic/regions.ts` の `REGION_NAMES` / `PATH_NAMES` / `POINT_NAMES`。左右は自分から見た左右（`R` が自分の右）
+- `look`: 「できあがりを みる」で ためす に流し込む色
+
 ## PWA（オフライン起動と自動アップデート）
 
 - Service Worker は `src/sw.ts`（Workbox）で、ビルド時に `dist/sw.js` と `dist/manifest.json` が生成されます。`public/` に手書きの `sw.js` や `manifest.json` は置きません（manifest の内容は `vite.config.ts` で編集）
 - JS / CSS / HTML / アイコン / パズル定義 / ステージ定義 / さがしものゲームの絵（webp）はインストール時に事前キャッシュされ、一度ひらけばオフラインでも全部遊べます。絵は内容が変わらなければ新しいビルドでも再ダウンロードされません
+- 例外はマジックメイクミラーの顔認識（wasm 約 14MB とモデル約 4MB）で、事前キャッシュには入れず、はじめて開いたときにダウンロードして保存します（以後はオフラインでも動きます）。他のゲームしか遊ばない端末に大きなファイルを落とさないためです
 - 新しいビルドが公開されると自動で更新します（`src/services/pwaUpdateService.ts`）
   - 確認するタイミング: 起動時、アプリが前面に戻ったとき、1 時間ごと
   - 新バージョンが見つかると、ゲームの途中を邪魔しないよう **ホーム画面にいるとき** に「こうしんしています…」と表示して切り替えます（ゲーム中ならホームに戻ったときに切り替わります）

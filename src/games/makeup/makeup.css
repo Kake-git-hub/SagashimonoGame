@@ -231,10 +231,13 @@
   background: rgba(183, 28, 28, 0.8);
 }
 
-/* 下部の操作パネル */
+/* 下部の操作パネル（高くなりすぎたら中でスクロールして、顔が見える高さを残す） */
 .mmm-panel {
   flex-shrink: 0;
   min-height: 120px;
+  max-height: 52dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
   background: #16213e;
   display: flex;
@@ -262,6 +265,7 @@
   .mmm-panel {
     flex: 2;
     min-height: 0;
+    max-height: none;
     max-width: 420px;
     padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px)) 14px;
     overflow-y: auto;
