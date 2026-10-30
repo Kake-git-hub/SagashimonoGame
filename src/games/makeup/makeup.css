@@ -2,6 +2,8 @@
 
 /* --- はじめに --- */
 .mmm-intro {
+  /* dvh が使えないブラウザでは親（#root）の 100% にする */
+  height: 100%;
   height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -131,6 +133,7 @@
 
 /* --- ミラー画面 --- */
 .mmm-screen {
+  height: 100%;
   height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -184,7 +187,7 @@
 /* 映像と重ねる canvas の置き場 */
 .mmm-stage {
   position: relative;
-  flex: 1;
+  flex: 1 1 0;
   min-height: 0;
   background: #000;
   overflow: hidden;

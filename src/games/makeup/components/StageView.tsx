@@ -61,7 +61,17 @@ export function StageView({ source, mirrored, videoRef, imageRef, onFrameSize, c
       {photoUrl ? (
         <img ref={imageRef} className="mmm-video" src={photoUrl} alt="" />
       ) : (
-        <video ref={videoRef} className="mmm-video" playsInline muted autoPlay />
+        <video
+          ref={videoRef}
+          className="mmm-video"
+          playsInline
+          muted
+          autoPlay
+          disablePictureInPicture
+          controls={false}
+          // 一部の Android ブラウザが動画を勝手に全画面にしないように
+          {...{ 'webkit-playsinline': 'true', 'x5-playsinline': 'true', controlsList: 'nofullscreen nodownload' }}
+        />
       )}
       {children}
     </div>

@@ -21,6 +21,16 @@ import { SuggestPanel } from './SuggestPanel';
 
 type Mode = 'try' | 'guide' | 'suggest';
 
+// 画面の大きさ・表示モード・ブラウザ（実機で不具合を切り分けるとき用）
+function describeEnvironment(): string {
+  if (typeof window === 'undefined') return '';
+  const standalone = window.matchMedia('(display-mode: standalone)').matches ? 'PWA' : 'ブラウザ';
+  const m = navigator.userAgent.match(/(SamsungBrowser|EdgA|OPR|Firefox|FxiOS|CriOS|Chrome|Version)\/(\d+)/);
+  const browser = m ? `${m[1] === 'Version' ? 'Safari' : m[1]} ${m[2]}` : '?';
+  const dvh = typeof CSS !== 'undefined' && CSS.supports?.('height', '100dvh') ? '' : ' / dvh なし';
+  return `${window.innerWidth}×${window.innerHeight} / ${standalone} / ${browser}${dvh}`;
+}
+
 interface Props {
   source: StageSource;
   camera: CameraHandle;
@@ -199,6 +209,9 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   const mirrored = settings.mirrored && !isPhoto;
   const faceVisible = loadState.phase === 'ready' && status !== 'none';
 
+  // 実機での切り分け用（はやさを みせる のときだけ表示）: 画面の大きさ・表示モード・ブラウザ
+  const envInfo = settings.showStats ? describeEnvironment() : '';
+
   // ほぞん: いま見えている絵を共有 / ダウンロード
   const handleSave = useCallback(async () => {
     const painter = painterRef.current;
@@ -268,6 +281,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
           {settings.showStats && (
             <div className="mmm-stats">
               {stats.fps} fps / {stats.inferenceMs} ms / {stats.delegate ?? '-'}{stats.skipping ? ` / ${S.mirror.skipping}` : ''}
+              <br />{frameSize.w}×{frameSize.h} / {envInfo}
             </div>
           )}
         </StageView>
