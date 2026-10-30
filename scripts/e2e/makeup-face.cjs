@@ -91,6 +91,34 @@ async function showLandmarks(page) {
     if (info.count !== 478) errors.push(`photo: expected 478 landmarks, got ${info.count}`);
     await showLandmarks(page);
     await page.screenshot({ path: `${OUT}/phone-makeup-face-photo.png` });
+
+    // ためす: リップ・チーク・アイシャドウ・アイライン・まゆ・ハイライト を選ぶ → 描画される → ほぞん → ぜんぶ けす
+    await page.click('button[aria-label="せってい"]');
+    await page.click('.mmm-setting-row:has-text("かおの てんを みせる") input');
+    await page.click('text=とじる');
+    for (const [part, color] of [['リップ', 'ローズ'], ['チーク', 'ピーチ'], ['アイシャドウ', 'ブラウン'], ['アイライン', 'ブラック'], ['まゆ', 'ナチュラルブラウン'], ['ハイライト', 'パール']]) {
+      await page.click(`.mmm-part:has-text("${part}")`);
+      await page.click(`.mmm-swatch[aria-label="${color}"]`);
+    }
+    await page.waitForFunction(() => window.__makeupDebug.makeupDrawn === true, null, { timeout: 10000 });
+    const look = await page.evaluate(() => window.__makeupDebug.look);
+    console.log('look:', JSON.stringify(look));
+    if (Object.keys(look).length !== 6) errors.push(`expected 6 layers, got ${Object.keys(look).length}`);
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${OUT}/phone-makeup-look-photo.png` });
+    await page.click('.mmm-part:has-text("リップ")');
+    await page.screenshot({ path: `${OUT}/phone-makeup-look-photo-lip.png` });
+    const [download] = await Promise.all([
+      page.waitForEvent('download', { timeout: 15000 }),
+      page.click('button:has-text("ほぞん")'),
+    ]);
+    console.log('download:', download.suggestedFilename());
+    if (!/^makeup-\d{8}-\d{6}\.jpg$/.test(download.suggestedFilename())) errors.push(`unexpected filename ${download.suggestedFilename()}`);
+    await download.saveAs(`${OUT}/phone-makeup-saved.jpg`);
+    await page.click('button:has-text("ぜんぶ けす")');
+    await page.waitForFunction(() => Object.keys(window.__makeupDebug.look).length === 0 && window.__makeupDebug.makeupDrawn === false, null, { timeout: 5000 });
+    console.log('cleared: ok');
+
     if (process.env.E2E_WRITE_FIXTURE === '1') {
       const frame = await page.evaluate(() => {
         const f = window.__makeupDebug.frame;

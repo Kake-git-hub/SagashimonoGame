@@ -48,3 +48,4 @@ export const DEFAULT_SETTINGS: MakeupSettings = {
 
 // 保存キー（localStorage）
 export const SETTINGS_KEY = 'makeup_settings';
+export const LAST_LOOK_KEY = 'makeup_last_look';

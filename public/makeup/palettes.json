@@ -1,0 +1,60 @@
+{
+  "lip": [
+    { "name": "コーラル", "color": "#f0806a" },
+    { "name": "ローズ", "color": "#d9617f" },
+    { "name": "レッド", "color": "#d32f45" },
+    { "name": "ピンク", "color": "#f48fb1" },
+    { "name": "オレンジ", "color": "#f28c4a" },
+    { "name": "ベリー", "color": "#9c3d6b" },
+    { "name": "ヌード", "color": "#d9a08a" },
+    { "name": "プラム", "color": "#7b2d5c" }
+  ],
+  "blush": [
+    { "name": "ピーチ", "color": "#f3a5a5" },
+    { "name": "コーラル", "color": "#f59a7b" },
+    { "name": "ローズ", "color": "#e58aa8" },
+    { "name": "ピンク", "color": "#f7b8d0" },
+    { "name": "アプリコット", "color": "#f7b580" },
+    { "name": "ラベンダー", "color": "#d7a9e3" }
+  ],
+  "eyeshadow": [
+    { "name": "ベージュ", "color": "#d9b79a" },
+    { "name": "ブラウン", "color": "#8a5a44" },
+    { "name": "ピンク", "color": "#e8a7b8" },
+    { "name": "ゴールド", "color": "#d8b56a" },
+    { "name": "パープル", "color": "#9b7bb8" },
+    { "name": "カーキ", "color": "#8b8f5a" },
+    { "name": "ブルー", "color": "#6f8fc9" },
+    { "name": "グレー", "color": "#8f8f9a" }
+  ],
+  "eyeliner": [
+    { "name": "ブラック", "color": "#1a1a1a" },
+    { "name": "ダークブラウン", "color": "#4a2e24" },
+    { "name": "ネイビー", "color": "#243a6b" },
+    { "name": "バーガンディ", "color": "#6b2437" }
+  ],
+  "brow": [
+    { "name": "ナチュラルブラウン", "color": "#6b4a3a" },
+    { "name": "ダークブラウン", "color": "#4a3328" },
+    { "name": "アッシュ", "color": "#7a6e66" },
+    { "name": "ライトブラウン", "color": "#9a7556" }
+  ],
+  "highlight": [
+    { "name": "パール", "color": "#fff3e0" },
+    { "name": "シャンパン", "color": "#f9e7c4" },
+    { "name": "ピンクパール", "color": "#ffe4ec" },
+    { "name": "ゴールド", "color": "#f6dfa3" }
+  ],
+  "base": [
+    { "name": "ライト", "color": "#f6e2d4" },
+    { "name": "ナチュラル", "color": "#eacdb6" },
+    { "name": "オークル", "color": "#d9b494" },
+    { "name": "ダーク", "color": "#b98a68" }
+  ],
+  "concealer": [
+    { "name": "ライト", "color": "#f8e6d8" },
+    { "name": "ナチュラル", "color": "#edd2bc" },
+    { "name": "オークル", "color": "#dcb99b" },
+    { "name": "ピーチ", "color": "#f3c9b4" }
+  ]
+}

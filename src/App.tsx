@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { GameId } from './types';
 import { migrateFromLocalStorage } from './services/storageService';
-import { getCurrentProfile, getProfiles, Profile } from './services/profileService';
+import { getCurrentProfile, getProfiles, Profile, profileStorageKey } from './services/profileService';
 import { HomeScreen } from './screens/HomeScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import { ParentSettingsScreen } from './screens/ParentSettingsScreen';
@@ -103,7 +103,7 @@ function App() {
     case 'makeup':
       content = (
         <Suspense fallback={<LoadingScreen />}>
-          <MakeupApp onExit={goHome} />
+          <MakeupApp onExit={goHome} storageKey={profileStorageKey} />
         </Suspense>
       );
       break;

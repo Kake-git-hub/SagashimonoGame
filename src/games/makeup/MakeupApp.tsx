@@ -4,12 +4,15 @@ import { IntroScreen } from './components/IntroScreen';
 import { MirrorScreen } from './components/MirrorScreen';
 import { StageSource } from './components/StageView';
 import { MakeupSettings } from './types';
-import { getMakeupSettings, saveMakeupSettings } from './services/makeupStorageService';
+import { LookState } from './logic/layers';
+import { getLastLook, getMakeupSettings, saveLastLook, saveMakeupSettings } from './services/makeupStorageService';
 import './makeup.css';
 
 interface Props {
   // ホーム画面（ゲーム選択）へ戻る
   onExit: () => void;
+  // 保存キーをプロフィールごとに分けるための関数（あそびひろばの profileStorageKey）。無ければそのまま
+  storageKey?: (base: string) => string;
 }
 
 type Screen = 'intro' | 'mirror';
@@ -26,8 +29,10 @@ function readDebugParams(): { debug: boolean; photo: string | null } {
  * はじめに（説明・カメラの許可）→ ミラー画面 の切り替えと、カメラ / 写真の切り替え、設定の保存を担当する。
  * あそびひろばに依存するのは onExit だけにして、後で単体アプリに切り出せるようにしておく
  */
-export default function MakeupApp({ onExit }: Props) {
+export default function MakeupApp({ onExit, storageKey }: Props) {
   const debugParams = useMemo(readDebugParams, []);
+  const keyOf = useMemo(() => storageKey ?? ((base: string) => base), [storageKey]);
+  const initialLook = useMemo(() => getLastLook(keyOf), [keyOf]);
   const [screen, setScreen] = useState<Screen>(debugParams.photo ? 'mirror' : 'intro');
   const [photoUrl, setPhotoUrl] = useState<string | null>(debugParams.photo);
   const [settings, setSettings] = useState<MakeupSettings>(getMakeupSettings);
@@ -38,6 +43,14 @@ export default function MakeupApp({ onExit }: Props) {
     setSettings(next);
     saveMakeupSettings(next);
   }, []);
+
+  // 選んだ色は少し待ってから保存する（スライダーを動かすたびに書かない）
+  const saveTimer = useRef(0);
+  const handleLookChange = useCallback((look: LookState) => {
+    window.clearTimeout(saveTimer.current);
+    saveTimer.current = window.setTimeout(() => saveLastLook(look, keyOf), 300);
+  }, [keyOf]);
+  useEffect(() => () => window.clearTimeout(saveTimer.current), []);
 
   const handleStart = useCallback(async () => {
     const ok = await camera.start();
@@ -92,7 +105,9 @@ export default function MakeupApp({ onExit }: Props) {
           source={source}
           camera={camera}
           settings={settings}
+          initialLook={initialLook}
           debug={debugParams.debug}
+          onLookChange={handleLookChange}
           onSettingsChange={updateSettings}
           onPickPhoto={pickPhoto}
           onUseCamera={useCameraAgain}

@@ -435,3 +435,202 @@
   font-size: 0.85rem;
   color: #777;
 }
+
+/* --- フェーズ 2: ためす --- */
+.mmm-makeup {
+  /* メイクがあるときは映像ごと描くので、下の video を完全に覆う */
+  background: transparent;
+}
+
+.mmm-modes {
+  display: flex;
+  gap: 6px;
+  padding: 2px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mmm-mode {
+  flex: 1;
+  padding: 8px 4px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.95rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.mmm-mode[aria-selected='true'] {
+  background: #ff6b9d;
+  color: white;
+}
+
+.mmm-try {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mmm-parts {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2px 0;
+}
+
+.mmm-parts::-webkit-scrollbar {
+  display: none;
+}
+
+.mmm-part {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 64px;
+  padding: 6px 8px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.mmm-part-on {
+  border-color: #ff6b9d;
+  background: rgba(255, 107, 157, 0.2);
+  color: white;
+}
+
+.mmm-part-emoji {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.mmm-part-label {
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.mmm-part-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid white;
+}
+
+.mmm-swatches {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 4px 2px;
+  align-items: center;
+  min-height: 44px;
+}
+
+.mmm-swatches::-webkit-scrollbar {
+  display: none;
+}
+
+.mmm-swatch {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.mmm-swatch-on {
+  border-color: white;
+  transform: scale(1.12);
+}
+
+.mmm-swatch-none {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.mmm-swatch-note {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+}
+
+.mmm-strength {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.mmm-strength input[type='range'] {
+  flex: 1;
+  accent-color: #ff6b9d;
+  height: 28px;
+}
+
+.mmm-strength-value {
+  min-width: 3.2em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.mmm-chip-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.mmm-chip-primary {
+  background: #ff6b9d;
+}
+
+.mmm-panel-hint {
+  margin: 0;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+}
+
+.mmm-panel {
+  min-height: 0;
+}
+
+.mmm-panel-placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  min-height: 80px;
+}
+
+@media (orientation: landscape) and (min-width: 700px) {
+  .mmm-parts {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  .mmm-swatches {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+}

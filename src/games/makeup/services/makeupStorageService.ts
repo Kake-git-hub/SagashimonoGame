@@ -1,5 +1,6 @@
-import { DEFAULT_SETTINGS, SETTINGS_KEY } from '../constants';
+import { DEFAULT_SETTINGS, LAST_LOOK_KEY, SETTINGS_KEY } from '../constants';
 import { MakeupSettings } from '../types';
+import { LookState, sanitizeLook } from '../logic/layers';
 
 /**
  * 設定の保存（localStorage、接頭辞 makeup_）
@@ -25,6 +26,26 @@ export function getMakeupSettings(): MakeupSettings {
 export function saveMakeupSettings(settings: MakeupSettings): void {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    // 保存できなくても動作は続ける
+  }
+}
+
+/**
+ * 最後に ためす で使っていた色とつよさ（プロフィールごと）
+ */
+export function getLastLook(keyOf: (base: string) => string): LookState {
+  try {
+    const raw = localStorage.getItem(keyOf(LAST_LOOK_KEY));
+    return raw ? sanitizeLook(JSON.parse(raw)) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveLastLook(look: LookState, keyOf: (base: string) => string): void {
+  try {
+    localStorage.setItem(keyOf(LAST_LOOK_KEY), JSON.stringify(look));
   } catch {
     // 保存できなくても動作は続ける
   }
