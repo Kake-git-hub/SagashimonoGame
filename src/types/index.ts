@@ -175,7 +175,7 @@ export type ScreenMode = 'list' | 'game' | 'editor';
 // === プラットフォーム（あそびひろば）共通 ===
 
 // 収録ゲームの ID
-export type GameId = 'sagashimono' | 'neji';
+export type GameId = 'sagashimono' | 'neji' | 'makeup';
 
 // ホーム画面に表示するゲーム情報
 export interface GameInfo {
@@ -203,6 +203,14 @@ export const GAME_INFO: Record<GameId, GameInfo> = {
     emoji: '🔩',
     gradient: 'linear-gradient(135deg, #ffb703 0%, #fb8500 100%)',
     available: true,
+  },
+  makeup: {
+    id: 'makeup',
+    name: 'マジックメイクミラー',
+    description: 'カメラにうつったかおに、おけしょうをしてみよう！',
+    emoji: '💄',
+    gradient: 'linear-gradient(135deg, #ffafcc 0%, #ff6b9d 100%)',
+    available: false,
   },
 };
 

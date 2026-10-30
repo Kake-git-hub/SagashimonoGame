@@ -23,7 +23,7 @@ export default defineConfig({
         lang: 'ja',
         name: 'あそびひろば',
         short_name: 'あそびひろば',
-        description: 'あそびひろば - さがしものゲームとネジはずしゲームであそぼう！',
+        description: 'あそびひろば - さがしものゲーム・ネジはずし・マジックメイクミラーであそぼう！',
         start_url: BASE,
         scope: BASE,
         display: 'standalone',

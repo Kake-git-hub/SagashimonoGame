@@ -5,9 +5,17 @@ const OUT = process.env.E2E_OUT || `${__dirname}/out`;
 const BASE = `http://localhost:${PORT}/SagashimonoGame/`;
 const DEBUG_URL = `${BASE}?nejidebug=1`;
 
-async function launch(viewport = { width: 390, height: 844 }) {
-  const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
-  const context = await browser.newContext({ viewport, deviceScaleFactor: 1 });
+// options.fakeCamera: 偽のカメラ（Chromium の合成映像、または y4m ファイルの映像）を使い、許可も自動で出す
+async function launch(viewport = { width: 390, height: 844 }, options = {}) {
+  const args = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
+  const contextOptions = { viewport, deviceScaleFactor: 1 };
+  if (options.fakeCamera) {
+    args.push('--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream');
+    if (typeof options.fakeCamera === 'string') args.push(`--use-file-for-fake-video-capture=${options.fakeCamera}`);
+    contextOptions.permissions = ['camera'];
+  }
+  const browser = await chromium.launch({ args });
+  const context = await browser.newContext(contextOptions);
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', e => errors.push(`pageerror: ${e.message}`));

@@ -12,6 +12,8 @@ import './App.css';
 
 // ネジはずしは 3D ライブラリを含むので、選ばれたときだけ読み込む
 const NejiApp = lazy(() => import('./games/neji/NejiApp'));
+// マジックメイクミラーはカメラと顔認識のライブラリを含むので、選ばれたときだけ読み込む
+const MakeupApp = lazy(() => import('./games/makeup/MakeupApp'));
 
 // アプリ全体の画面: プロフィール選択 / ホーム（ゲーム選択）/ おうちのひと設定 / いずれかのゲーム
 type AppScreen = 'profile' | 'home' | 'parent' | GameId;
@@ -94,6 +96,14 @@ function App() {
       content = (
         <Suspense fallback={<LoadingScreen />}>
           <NejiApp onExit={goHome} />
+        </Suspense>
+      );
+      break;
+
+    case 'makeup':
+      content = (
+        <Suspense fallback={<LoadingScreen />}>
+          <MakeupApp onExit={goHome} />
         </Suspense>
       );
       break;
