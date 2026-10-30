@@ -1,0 +1,28 @@
+{
+  "id": "lip-only",
+  "name": "リップだけ",
+  "emoji": "💋",
+  "description": "くちびるを きれいに ぬる れんしゅう",
+  "steps": [
+    {
+      "id": "prep", "part": "lip", "title": "したじゅんび",
+      "text": "リップクリームで くちびるを しっとり させてから はじめよう",
+      "regions": ["lipsOuter"],
+      "strokes": [{ "from": "lipCornerR", "to": "lipCornerL" }]
+    },
+    {
+      "id": "outline", "part": "lip", "title": "りんかく",
+      "text": "くちかどから やまに むかって、りんかくを ゆっくり なぞるよ。したくちびるも おなじ",
+      "regions": ["lipsOuter"],
+      "strokes": [{ "along": "lipTopR" }, { "along": "lipTopL" }, { "along": "lipBottomR" }, { "along": "lipBottomL" }],
+      "look": { "layer": "lip", "color": "#f0806a", "opacity": 0.4 }
+    },
+    {
+      "id": "fill", "part": "lip", "title": "まんなかを ぬる",
+      "text": "まんなかを ぬって、くちびるを「ん〜ぱっ」と あわせて なじませよう",
+      "regions": ["lipsOuter"],
+      "strokes": [{ "from": "lipTop", "to": "lipBottom" }, { "from": "lipCornerR", "to": "lipCenter" }, { "from": "lipCornerL", "to": "lipCenter" }],
+      "look": { "layer": "lip", "color": "#f0806a", "opacity": 0.65 }
+    }
+  ]
+}

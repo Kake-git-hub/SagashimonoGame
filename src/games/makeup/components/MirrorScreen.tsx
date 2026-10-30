@@ -4,7 +4,9 @@ import { MakeupSettings } from '../types';
 import { CameraHandle } from '../hooks/useCamera';
 import { useFaceTracker } from '../hooks/useFaceTracker';
 import { LayerId, LookState, lookReducer } from '../logic/layers';
-import { fetchPalettes, PaletteMap } from '../services/contentService';
+import { Recipe, recipeLook, RecipeSummary } from '../logic/guide';
+import { usePoseCheck } from '../hooks/usePoseCheck';
+import { fetchPalettes, fetchRecipe, fetchRecipeIndex, PaletteMap } from '../services/contentService';
 import { canvasToBlob, shareOrDownload, stillFilename } from '../services/share';
 import { StageSource, StageView } from './StageView';
 import { GuideCanvas } from './GuideCanvas';
@@ -12,6 +14,7 @@ import { MakeupCanvas } from './MakeupCanvas';
 import { MakeupPainter } from './makeupPainter';
 import { SettingsSheet } from './SettingsSheet';
 import { TryPanel } from './TryPanel';
+import { GuidePanel } from './GuidePanel';
 
 type Mode = 'try' | 'guide' | 'suggest';
 
@@ -45,6 +48,14 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   const [paletteError, setPaletteError] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveNote, setSaveNote] = useState<string | null>(null);
+  // おしえて
+  const [recipes, setRecipes] = useState<RecipeSummary[] | null>(null);
+  const [recipesError, setRecipesError] = useState(false);
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [loadingRecipe, setLoadingRecipe] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [resultShown, setResultShown] = useState(false);
+  const lookBackupRef = useRef<LookState | null>(null);
   const isPhoto = source.kind === 'photo';
 
   const handleFrameSize = useCallback((w: number, h: number) => {
@@ -64,12 +75,66 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
     return () => { cancelled = true; };
   }, []);
 
+  // てじゅんの一覧
+  useEffect(() => {
+    let cancelled = false;
+    fetchRecipeIndex()
+      .then(list => { if (!cancelled) setRecipes(list); })
+      .catch(err => { console.error('recipes', err); if (!cancelled) setRecipesError(true); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleSelectRecipe = useCallback(async (id: string) => {
+    setLoadingRecipe(true);
+    try {
+      const loaded = await fetchRecipe(id);
+      setRecipe(loaded);
+      setStepIndex(0);
+      setResultShown(false);
+    } catch (err) {
+      console.error('recipe', err);
+      setRecipesError(true);
+    } finally {
+      setLoadingRecipe(false);
+    }
+  }, []);
+
+  const handleStep = useCallback((delta: number) => {
+    setStepIndex(i => Math.max(0, Math.min((recipe?.steps.length ?? 0), i + delta)));
+  }, [recipe]);
+
+  const handleRestart = useCallback(() => { setStepIndex(0); }, []);
+
+  // できあがりを みる: レシピの色を ためす のレイヤーに流し込む。もどす で元の色に戻す
+  const handleToggleResult = useCallback(() => {
+    if (!recipe) return;
+    if (resultShown) {
+      dispatch({ type: 'replace', look: lookBackupRef.current ?? {} });
+      lookBackupRef.current = null;
+      setResultShown(false);
+    } else {
+      lookBackupRef.current = look;
+      dispatch({ type: 'replace', look: recipeLook(recipe) });
+      setResultShown(true);
+    }
+  }, [recipe, resultShown, look]);
+
+  const handleLeaveRecipe = useCallback(() => {
+    setRecipe(null);
+    setStepIndex(0);
+    setResultShown(false);
+    lookBackupRef.current = null;
+  }, []);
+
+  const currentStep = mode === 'guide' && recipe && stepIndex < recipe.steps.length ? recipe.steps[stepIndex] : null;
+  const poseOk = usePoseCheck(tracker, currentStep?.pose);
+
   // 選んだ色は次回のために覚えておく
   useEffect(() => { onLookChange(look); }, [look, onLookChange]);
 
   // 自動テスト用: ?makeupdebug=1 のとき最新の結果を window に出す
-  const latestRef = useRef({ status, loadState, stats, frameSize, look });
-  latestRef.current = { status, loadState, stats, frameSize, look };
+  const latestRef = useRef({ status, loadState, stats, frameSize, look, currentStep, poseOk });
+  latestRef.current = { status, loadState, stats, frameSize, look, currentStep, poseOk };
   useEffect(() => {
     if (!debug) return;
     const w = window as unknown as { __makeupDebug?: unknown };
@@ -81,6 +146,8 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
       get frameSize() { return latestRef.current.frameSize; },
       get look() { return latestRef.current.look; },
       get makeupDrawn() { return painterRef.current?.lastDrew ?? false; },
+      get guideStep() { return latestRef.current.currentStep?.id ?? null; },
+      get poseOk() { return latestRef.current.poseOk; },
       applyLook(next: LookState) { dispatch({ type: 'replace', look: next }); },
     };
     return () => { delete w.__makeupDebug; };
@@ -152,6 +219,8 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
             showLandmarks={settings.showLandmarks}
             showNumbers={debug && settings.showLandmarks}
             mirrored={mirrored}
+            step={currentStep}
+            opacity={settings.guideOpacity}
           />
           <div className="mmm-status" role="status" data-status={statusKind} data-face={loadState.phase === 'ready' ? status : 'loading'}>
             {statusText}
@@ -197,6 +266,22 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
               dispatch={dispatch}
               onCompare={setComparing}
               onSave={handleSave}
+            />
+          ) : mode === 'guide' ? (
+            <GuidePanel
+              recipes={recipes}
+              recipesError={recipesError}
+              recipe={recipe}
+              loadingRecipe={loadingRecipe}
+              stepIndex={stepIndex}
+              poseOk={poseOk}
+              faceVisible={faceVisible}
+              resultShown={resultShown}
+              onSelectRecipe={handleSelectRecipe}
+              onStep={handleStep}
+              onRestart={handleRestart}
+              onLeaveRecipe={handleLeaveRecipe}
+              onToggleResult={handleToggleResult}
             />
           ) : (
             <div className="mmm-panel-placeholder">{S.modes[mode]}は {S.mirror.comingSoon}</div>

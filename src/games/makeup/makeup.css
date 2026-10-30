@@ -634,3 +634,135 @@
     overflow: visible;
   }
 }
+
+/* --- フェーズ 3: おしえて --- */
+.mmm-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mmm-guide-pick {
+  margin: 0;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.mmm-recipes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.mmm-recipe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: none;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.mmm-recipe-emoji {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.mmm-recipe-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mmm-recipe-name {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.mmm-recipe-desc {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+}
+
+.mmm-recipe-count {
+  font-size: 0.72rem;
+  color: #ffafcc;
+}
+
+.mmm-guide-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.mmm-guide-count {
+  font-size: 0.8rem;
+  color: #ffafcc;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.mmm-guide-title {
+  font-size: 1.15rem;
+  font-weight: bold;
+}
+
+.mmm-guide-text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.mmm-guide-pose {
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.95rem;
+}
+
+.mmm-guide-pose-ok {
+  background: rgba(46, 125, 50, 0.45);
+}
+
+.mmm-guide-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.mmm-nav-button {
+  flex: 1;
+  padding: 12px 10px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 14px;
+  background: transparent;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.mmm-nav-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.mmm-nav-primary {
+  border-color: #ff6b9d;
+  background: #ff6b9d;
+}
+
+.mmm-guide-done {
+  margin: 0;
+  font-size: 1.4rem;
+  text-align: center;
+}

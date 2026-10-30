@@ -1,0 +1,23 @@
+{
+  "id": "blush-only",
+  "name": "チークだけ",
+  "emoji": "🌸",
+  "description": "チークの ばしょと ぼかしかた",
+  "steps": [
+    {
+      "id": "find", "part": "blush", "title": "ばしょを さがす",
+      "text": "にっこり わらってみて。ほおの いちばん たかい ところが チークの はじまりだよ",
+      "pose": "smile",
+      "regions": ["cheekR", "cheekL"],
+      "marks": [{ "type": "dot", "anchor": "cheekCenterR" }, { "type": "dot", "anchor": "cheekCenterL" }],
+      "strokes": [{ "from": "cheekCenterR", "to": "templeR" }, { "from": "cheekCenterL", "to": "templeL" }]
+    },
+    {
+      "id": "blend", "part": "blush", "title": "ぼかす",
+      "text": "ブラシで くるくる。こめかみに むかって うすく なるように ぼかそう",
+      "regions": ["cheekR", "cheekL"],
+      "strokes": [{ "from": "cheekCenterR", "to": "templeR" }, { "from": "cheekCenterL", "to": "templeL" }],
+      "look": { "layer": "blush", "color": "#f3a5a5", "opacity": 0.55 }
+    }
+  ]
+}

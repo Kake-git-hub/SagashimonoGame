@@ -119,6 +119,35 @@ async function showLandmarks(page) {
     await page.waitForFunction(() => Object.keys(window.__makeupDebug.look).length === 0 && window.__makeupDebug.makeupDrawn === false, null, { timeout: 5000 });
     console.log('cleared: ok');
 
+    // おしえて: ナチュラル を選んで チーク のステップまで進める（にっこりの判定、矢印の表示）→ できあがりを みる → さいごまで
+    await page.click('.mmm-mode:has-text("おしえて")');
+    await page.waitForSelector('button[aria-label="ナチュラルの てじゅん"]');
+    await page.screenshot({ path: `${OUT}/phone-makeup-guide-list.png` });
+    await page.click('button[aria-label="ナチュラルの てじゅん"]');
+    await page.waitForSelector('text=ステップ 1 / 10');
+    await page.waitForTimeout(700);
+    await page.screenshot({ path: `${OUT}/phone-makeup-guide-base.png` });
+    for (let i = 0; i < 6; i++) await page.click('button:has-text("つぎへ")');
+    await page.waitForSelector('.mmm-guide[data-step="blush"]');
+    await page.waitForTimeout(700);
+    const guide = await page.evaluate(() => ({ step: window.__makeupDebug.guideStep, poseOk: window.__makeupDebug.poseOk }));
+    console.log('guide:', JSON.stringify(guide));
+    if (guide.step !== 'blush') errors.push(`expected blush step, got ${guide.step}`);
+    if (!guide.poseOk) errors.push('smile should be detected on the sample portrait');
+    await page.screenshot({ path: `${OUT}/phone-makeup-guide-blush.png` });
+    await page.click('button:has-text("できあがりを みる")');
+    await page.waitForFunction(() => window.__makeupDebug.makeupDrawn === true && Object.keys(window.__makeupDebug.look).length >= 5, null, { timeout: 10000 });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: `${OUT}/phone-makeup-guide-result.png` });
+    await page.click('button:has-text("もとに もどす")');
+    await page.waitForFunction(() => Object.keys(window.__makeupDebug.look).length === 0, null, { timeout: 5000 });
+    for (let i = 0; i < 3; i++) await page.click('button:has-text("つぎへ")');
+    await page.click('button:has-text("できあがり！")');
+    await page.waitForSelector('text=とっても すてき');
+    await page.click('button:has-text("ほかの てじゅん")');
+    await page.waitForSelector('button[aria-label="チークだけの てじゅん"]');
+    console.log('guide flow: ok');
+
     if (process.env.E2E_WRITE_FIXTURE === '1') {
       const frame = await page.evaluate(() => {
         const f = window.__makeupDebug.frame;

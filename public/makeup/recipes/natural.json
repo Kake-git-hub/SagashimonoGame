@@ -1,0 +1,77 @@
+{
+  "id": "natural",
+  "name": "ナチュラル",
+  "emoji": "🌿",
+  "description": "まいにちの かんたんメイク。ぜんぶの ステップを じゅんばんに",
+  "steps": [
+    {
+      "id": "base", "part": "base", "title": "ベース",
+      "text": "ほおの うちがわから そとへ、うすく のばすよ。すこしずつ たしてね",
+      "regions": ["faceOval"],
+      "strokes": [{ "from": "cheekInnerR", "to": "cheekR" }, { "from": "cheekInnerL", "to": "cheekL" }, { "from": "noseTop", "to": "foreheadCenter" }, { "from": "lipBottom", "to": "chin" }],
+      "look": { "layer": "base", "color": "#eacdb6", "opacity": 0.3 }
+    },
+    {
+      "id": "concealer", "part": "concealer", "title": "コンシーラー",
+      "text": "めの したに ちょんちょんと おいて、ゆびで やさしく ぽんぽん",
+      "regions": ["underEyeR", "underEyeL"],
+      "strokes": [{ "from": "underEyeInnerR", "to": "underEyeOuterR" }, { "from": "underEyeInnerL", "to": "underEyeOuterL" }],
+      "look": { "layer": "concealer", "color": "#edd2bc", "opacity": 0.4 }
+    },
+    {
+      "id": "brow", "part": "brow", "title": "まゆ",
+      "text": "まゆがしらから まゆじりへ。まゆやまは くろめの そとがわの うえだよ",
+      "regions": ["browR", "browL"],
+      "strokes": [{ "along": "browTopR" }, { "along": "browTopL" }],
+      "marks": [{ "type": "vline", "anchor": "irisOuterR" }, { "type": "vline", "anchor": "irisOuterL" }],
+      "look": { "layer": "brow", "color": "#6b4a3a", "opacity": 0.5 }
+    },
+    {
+      "id": "eyeshadow", "part": "eyeshadow", "title": "アイシャドウ",
+      "text": "まぶた ぜんたいに うすいいろ。めがしらから めじりへ、めじりがわを すこし こく",
+      "regions": ["shadowR", "shadowL"],
+      "strokes": [{ "along": "upperLidR", "reverse": true }, { "along": "upperLidL", "reverse": true }],
+      "look": { "layer": "eyeshadow", "color": "#d9b79a", "opacity": 0.5 }
+    },
+    {
+      "id": "eyeliner", "part": "eyeliner", "title": "アイライン",
+      "text": "まつげの きわを、めがしらから めじりへ。めじりで すこしだけ のばすよ",
+      "regions": ["linerR", "linerL"],
+      "strokes": [{ "along": "upperLidR", "reverse": true }, { "along": "upperLidL", "reverse": true }],
+      "look": { "layer": "eyeliner", "color": "#4a2e24", "opacity": 0.7 }
+    },
+    {
+      "id": "mascara", "part": "mascara", "title": "マスカラ",
+      "text": "まつげの ねもとから うえへ、ジグザグに うごかしながら",
+      "regions": ["upperLidR", "upperLidL"],
+      "strokes": [{ "from": "lidCenterR", "to": "lashUpR" }, { "from": "lidCenterL", "to": "lashUpL" }]
+    },
+    {
+      "id": "blush", "part": "blush", "title": "チーク",
+      "text": "にっこり すると たかくなる ところから、こめかみへ むかって ふんわり",
+      "pose": "smile",
+      "regions": ["cheekR", "cheekL"],
+      "strokes": [{ "from": "cheekCenterR", "to": "templeR" }, { "from": "cheekCenterL", "to": "templeL" }],
+      "look": { "layer": "blush", "color": "#f3a5a5", "opacity": 0.55 }
+    },
+    {
+      "id": "highlight", "part": "highlight", "title": "ハイライト",
+      "text": "はなすじ、ほおぼねの うえ、あごに すこしだけ。つけすぎ ちゅうい",
+      "regions": ["noseBridge", "cheekboneR", "cheekboneL", "chinHighlight"],
+      "strokes": [{ "from": "noseTop", "to": "noseTip" }],
+      "look": { "layer": "highlight", "color": "#fff3e0", "opacity": 0.45 }
+    },
+    {
+      "id": "lip", "part": "lip", "title": "リップ",
+      "text": "くちかどから やまへ りんかくを なぞってから、まんなかを ぬるよ",
+      "regions": ["lipsOuter"],
+      "strokes": [{ "along": "lipTopR" }, { "along": "lipTopL" }, { "along": "lipBottomR" }, { "along": "lipBottomL" }],
+      "look": { "layer": "lip", "color": "#f0806a", "opacity": 0.6 }
+    },
+    {
+      "id": "finish", "part": "finish", "title": "できあがり",
+      "text": "ぜんたいを みてみよう。こすぎたら ティッシュで やさしく おさえてね",
+      "regions": ["faceOval"]
+    }
+  ]
+}

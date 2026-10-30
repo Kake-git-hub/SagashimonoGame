@@ -1,0 +1,6 @@
+[
+  { "id": "natural", "name": "ナチュラル", "emoji": "🌿", "description": "まいにちの かんたんメイク。ぜんぶの ステップを じゅんばんに", "stepCount": 10 },
+  { "id": "odekake", "name": "おでかけ", "emoji": "🎀", "description": "すこし はなやかに。めもとと くちびるを しっかり", "stepCount": 10 },
+  { "id": "lip-only", "name": "リップだけ", "emoji": "💋", "description": "くちびるを きれいに ぬる れんしゅう", "stepCount": 3 },
+  { "id": "blush-only", "name": "チークだけ", "emoji": "🌸", "description": "チークの ばしょと ぼかしかた", "stepCount": 2 }
+]

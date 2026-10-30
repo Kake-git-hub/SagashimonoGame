@@ -1,18 +1,10 @@
 import { S } from '../strings';
+import { PART_EMOJI } from '../constants';
 import { LAYER_SPEC, LayerId, LookAction, LookState } from '../logic/layers';
 import { PaletteMap } from '../services/contentService';
 
-// パーツタブの順番と絵文字
-const PART_TABS: { id: LayerId; emoji: string }[] = [
-  { id: 'lip', emoji: '💋' },
-  { id: 'blush', emoji: '🌸' },
-  { id: 'eyeshadow', emoji: '👁️' },
-  { id: 'eyeliner', emoji: '✒️' },
-  { id: 'brow', emoji: '✏️' },
-  { id: 'highlight', emoji: '✨' },
-  { id: 'base', emoji: '🧴' },
-  { id: 'concealer', emoji: '🩹' },
-];
+// パーツタブの順番
+const PART_TABS: LayerId[] = ['lip', 'blush', 'eyeshadow', 'eyeliner', 'brow', 'highlight', 'base', 'concealer'];
 
 interface Props {
   palettes: PaletteMap | null;
@@ -40,7 +32,7 @@ export function TryPanel({ palettes, paletteError, look, part, faceVisible, savi
   return (
     <div className="mmm-try">
       <div className="mmm-parts" role="tablist" aria-label={S.try.parts}>
-        {PART_TABS.map(({ id, emoji }) => (
+        {PART_TABS.map(id => (
           <button
             key={id}
             role="tab"
@@ -48,7 +40,7 @@ export function TryPanel({ palettes, paletteError, look, part, faceVisible, savi
             className={`mmm-part${part === id ? ' mmm-part-on' : ''}${look[id] ? ' mmm-part-used' : ''}`}
             onClick={() => onPart(id)}
           >
-            <span className="mmm-part-emoji" aria-hidden="true">{emoji}</span>
+            <span className="mmm-part-emoji" aria-hidden="true">{PART_EMOJI[id]}</span>
             <span className="mmm-part-label">{S.parts[id]}</span>
             {look[id] && <span className="mmm-part-dot" style={{ background: look[id]!.color }} aria-hidden="true" />}
           </button>

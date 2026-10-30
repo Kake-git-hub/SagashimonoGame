@@ -1,0 +1,79 @@
+{
+  "id": "odekake",
+  "name": "おでかけ",
+  "emoji": "🎀",
+  "description": "すこし はなやかに。めもとと くちびるを しっかり",
+  "steps": [
+    {
+      "id": "base", "part": "base", "title": "ベース",
+      "text": "ほおの うちがわから そとへ うすく。おでこと あごも わすれずに",
+      "regions": ["faceOval"],
+      "strokes": [{ "from": "cheekInnerR", "to": "cheekR" }, { "from": "cheekInnerL", "to": "cheekL" }, { "from": "noseTop", "to": "foreheadCenter" }, { "from": "lipBottom", "to": "chin" }],
+      "look": { "layer": "base", "color": "#eacdb6", "opacity": 0.35 }
+    },
+    {
+      "id": "concealer", "part": "concealer", "title": "コンシーラー",
+      "text": "めの したの くすみを かくすよ。ぽんぽんと なじませて",
+      "regions": ["underEyeR", "underEyeL"],
+      "strokes": [{ "from": "underEyeInnerR", "to": "underEyeOuterR" }, { "from": "underEyeInnerL", "to": "underEyeOuterL" }],
+      "look": { "layer": "concealer", "color": "#edd2bc", "opacity": 0.45 }
+    },
+    {
+      "id": "brow", "part": "brow", "title": "まゆ",
+      "text": "まゆがしらは うすく、まゆじりに むかって すこし こく。まゆやまは くろめの そとがわの うえ",
+      "regions": ["browR", "browL"],
+      "strokes": [{ "along": "browTopR" }, { "along": "browTopL" }],
+      "marks": [{ "type": "vline", "anchor": "irisOuterR" }, { "type": "vline", "anchor": "irisOuterL" }],
+      "look": { "layer": "brow", "color": "#6b4a3a", "opacity": 0.55 }
+    },
+    {
+      "id": "eyeshadow-1", "part": "eyeshadow", "title": "アイシャドウ ①",
+      "text": "まぶた ぜんたいに ゴールドを ふんわり。めがしらから めじりへ",
+      "regions": ["shadowR", "shadowL"],
+      "strokes": [{ "along": "upperLidR", "reverse": true }, { "along": "upperLidL", "reverse": true }],
+      "look": { "layer": "eyeshadow", "color": "#d8b56a", "opacity": 0.5 }
+    },
+    {
+      "id": "eyeshadow-2", "part": "eyeshadow", "title": "アイシャドウ ②",
+      "text": "めじりがわの はんぶんに ブラウンを かさねて、さかいめを ぼかすよ",
+      "regions": ["shadowOuterR", "shadowOuterL"],
+      "strokes": [{ "from": "lidCenterR", "to": "eyeOuterR" }, { "from": "lidCenterL", "to": "eyeOuterL" }],
+      "look": { "layer": "eyeshadow", "color": "#8a5a44", "opacity": 0.55 }
+    },
+    {
+      "id": "eyeliner", "part": "eyeliner", "title": "アイライン",
+      "text": "まつげの きわを めがしらから めじりへ。めじりは ななめうえに すこし はねあげて",
+      "regions": ["linerR", "linerL"],
+      "strokes": [{ "along": "upperLidR", "reverse": true }, { "along": "upperLidL", "reverse": true }],
+      "look": { "layer": "eyeliner", "color": "#1a1a1a", "opacity": 0.85 }
+    },
+    {
+      "id": "mascara", "part": "mascara", "title": "マスカラ",
+      "text": "ねもとから うえへ ジグザグ。かわいたら もういちど かさねると こく なるよ",
+      "regions": ["upperLidR", "upperLidL"],
+      "strokes": [{ "from": "lidCenterR", "to": "lashUpR" }, { "from": "lidCenterL", "to": "lashUpL" }]
+    },
+    {
+      "id": "blush", "part": "blush", "title": "チーク",
+      "text": "にっこりして たかくなった ところから こめかみへ。ローズいろを ふんわり",
+      "pose": "smile",
+      "regions": ["cheekR", "cheekL"],
+      "strokes": [{ "from": "cheekCenterR", "to": "templeR" }, { "from": "cheekCenterL", "to": "templeL" }],
+      "look": { "layer": "blush", "color": "#e58aa8", "opacity": 0.6 }
+    },
+    {
+      "id": "highlight", "part": "highlight", "title": "ハイライト",
+      "text": "はなすじ、ほおぼねの うえ、おでこ、あごに。ひかりが あたる ところだけ",
+      "regions": ["noseBridge", "cheekboneR", "cheekboneL", "chinHighlight", "foreheadHighlight"],
+      "strokes": [{ "from": "noseTop", "to": "noseTip" }, { "from": "cheekboneR", "to": "templeR" }, { "from": "cheekboneL", "to": "templeL" }],
+      "look": { "layer": "highlight", "color": "#f9e7c4", "opacity": 0.55 }
+    },
+    {
+      "id": "lip", "part": "lip", "title": "リップ",
+      "text": "りんかくを ていねいに なぞってから、まんなかを しっかり ぬるよ",
+      "regions": ["lipsOuter"],
+      "strokes": [{ "along": "lipTopR" }, { "along": "lipTopL" }, { "along": "lipBottomR" }, { "along": "lipBottomL" }],
+      "look": { "layer": "lip", "color": "#d32f45", "opacity": 0.7 }
+    }
+  ]
+}
