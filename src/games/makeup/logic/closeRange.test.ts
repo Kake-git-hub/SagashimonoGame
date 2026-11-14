@@ -24,7 +24,10 @@ describe('nextCloseRange', () => {
     expect(s.padded).toBe(true);
     s = nextCloseRange(s, makeFace(0.6), 1, 33);
     expect(s.padded).toBe(true);
+    // 切り替えた直後は、離れても しばらく切り替え直さない
     s = nextCloseRange(s, makeFace(0.4), 1, 66);
+    expect(s.padded).toBe(true);
+    s = nextCloseRange(s, makeFace(0.4), 1, CLOSE_RANGE.holdMs + 1);
     expect(s.padded).toBe(false);
   });
 
@@ -52,7 +55,7 @@ describe('nextCloseRange', () => {
     expect(s.padded).toBe(false);
     // 見つかったら、入れ替えの時計は止まる
     s = nextCloseRange(s, makeFace(0.4), 1, 5000);
-    expect(s).toEqual({ padded: false, lostSince: null, switchedAt: 0 });
+    expect(s).toEqual({ padded: false, lostSince: null, switchedAt: 0, holdUntil: 0 });
   });
 });
 

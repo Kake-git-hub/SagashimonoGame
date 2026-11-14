@@ -105,8 +105,12 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   useEffect(() => () => {
     window.clearTimeout(outlineTimer.current);
     window.clearTimeout(noteTimer.current);
+    lookBackupRef.current?.paint.forEach(canvas => { canvas.width = 0; canvas.height = 0; });
+    lookBackupRef.current = null;
     paint.dispose();
   }, [paint]);
+  // モードを切り替えたら、くらべる の押しっぱなしを解く（押したまま切り替えると、離したことが伝わらない）
+  useEffect(() => { setComparing(false); }, [mode]);
 
   const showNote = useCallback((text: string) => {
     setNote(text);
@@ -151,7 +155,17 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
     return () => { cancelled = true; };
   }, []);
 
+  // できあがり を見せている間に別の所へ行くときは、じぶんで塗ってあったものに戻す
+  const restoreBackup = useCallback(() => {
+    const backup = lookBackupRef.current;
+    if (!backup) return;
+    dispatch({ type: 'replace', look: backup.look });
+    paint.restore(backup.paint);
+    lookBackupRef.current = null;
+  }, [paint]);
+
   const handleSelectRecipe = useCallback(async (id: string) => {
+    restoreBackup();
     setLoadingRecipe(true);
     try {
       const loaded = await fetchRecipe(id);
@@ -164,7 +178,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
     } finally {
       setLoadingRecipe(false);
     }
-  }, []);
+  }, [restoreBackup]);
 
   const handleStep = useCallback((delta: number) => {
     setStepIndex(i => Math.max(0, Math.min((recipe?.steps.length ?? 0), i + delta)));
@@ -193,11 +207,11 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   }, [recipe, resultShown, look, paint, dropBackup]);
 
   const handleLeaveRecipe = useCallback(() => {
+    restoreBackup();
     setRecipe(null);
     setStepIndex(0);
     setResultShown(false);
-    dropBackup();
-  }, [dropBackup]);
+  }, [restoreBackup]);
 
   // しんだん: いまの顔の点と頬の色から
   const handleDiagnose = useCallback(() => {

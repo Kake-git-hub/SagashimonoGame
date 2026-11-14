@@ -214,6 +214,8 @@ export function GuideCanvas({ tracker, width, height, showLandmarks, showNumbers
     let lastStep: RecipeStep | null = null;
     let drawing: GuideDrawing | null = null;
     let wasEmpty = false;
+    // 前の effect が隠したままになっていないように
+    canvas.style.visibility = 'visible';
 
     const tick = () => {
       raf = requestAnimationFrame(tick);

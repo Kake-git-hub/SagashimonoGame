@@ -24,16 +24,19 @@ export const CLOSE_RANGE = {
   // 顔が見つからないとき: この時間（ms）ごとに、余白あり / なし を入れ替えて探す
   searchAfterMs: 400,
   searchSwitchMs: 700,
+  // 切り替えた直後の結果は当てにならないことがあるので、この時間（ms）は切り替え直さない
+  holdMs: 500,
 } as const;
 
 export interface CloseRangeState {
   padded: boolean;
   lostSince: number | null;  // 顔が見つからなくなった時刻
   switchedAt: number;        // 見つからない間に最後に入れ替えた時刻
+  holdUntil: number;         // この時刻までは、顔の大きさでは切り替えない
 }
 
 export function initialCloseRange(): CloseRangeState {
-  return { padded: false, lostSince: null, switchedAt: 0 };
+  return { padded: false, lostSince: null, switchedAt: 0, holdUntil: 0 };
 }
 
 /**
@@ -47,10 +50,11 @@ export function nextCloseRange(state: CloseRangeState, landmarks: readonly Point
     const lostSince = state.lostSince ?? now;
     const since = Math.max(lostSince + t.searchAfterMs - t.searchSwitchMs, state.switchedAt);
     if (now - lostSince >= t.searchAfterMs && now - since >= t.searchSwitchMs) {
-      return { padded: !state.padded, lostSince, switchedAt: now };
+      return { ...state, padded: !state.padded, lostSince, switchedAt: now };
     }
     return { ...state, lostSince };
   }
+  if (now < state.holdUntil) return { ...state, lostSince: null, switchedAt: 0 };
   const width = faceWidthRatio(landmarks as Point3[], aspect);
   const b = faceBounds(landmarks as Point3[]);
   let padded = state.padded;
@@ -59,7 +63,7 @@ export function nextCloseRange(state: CloseRangeState, landmarks: readonly Point
   } else if (width < t.leaveWidthRatio && b.minX > t.leaveEdge && b.minY > t.leaveEdge && b.maxX < 1 - t.leaveEdge && b.maxY < 1 - t.leaveEdge) {
     padded = false;
   }
-  return { padded, lostSince: null, switchedAt: 0 };
+  return { padded, lostSince: null, switchedAt: 0, holdUntil: padded !== state.padded ? now + t.holdMs : state.holdUntil };
 }
 
 // 余白つきの絵で見つけた点を、元の映像の座標に戻す（映像の外にはみ出した点は 0〜1 の外になる）

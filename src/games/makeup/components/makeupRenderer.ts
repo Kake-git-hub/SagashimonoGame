@@ -138,6 +138,8 @@ export class MakeupRenderer {
   private gl: WebGLRenderingContext;
   private res: Resources | null = null;
   private layerTex = new Map<LayerId, { tex: WebGLTexture; version: number }>();
+  // 写真（動かない絵）は、替わったときだけ GPU へ送る
+  private stillKey = '';
   private positions = new Float32Array(MESH_POINT_COUNT * 2);
   private edgeSource: HTMLCanvasElement;
   // 直前の render で映像とメイクを描いたか（保存のとき、この canvas を使えるか）
@@ -159,13 +161,15 @@ export class MakeupRenderer {
     }) as WebGLRenderingContext | null;
     if (!gl) throw new Error('webgl unavailable');
     this.gl = gl;
-    this.init();
+    // コンテキストが失われている間は何も作れない。戻ってきたとき（webglcontextrestored）に init() が呼ばれる
+    if (!gl.isContextLost()) this.init();
   }
 
   // GPU 側のものを作る。コンテキストが失われて戻ったときにも呼ぶ
   init(): void {
     const gl = this.gl;
     this.layerTex.clear();
+    this.stillKey = '';
     const quadProgram = link(gl, QUAD_VS, QUAD_FS);
     const meshProgram = link(gl, MESH_VS, MESH_FS);
 
@@ -209,6 +213,7 @@ export class MakeupRenderer {
   contextLost(): void {
     this.res = null;
     this.layerTex.clear();
+    this.stillKey = '';
     this.lastDrew = false;
   }
 
@@ -247,8 +252,13 @@ export class MakeupRenderer {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, res.videoTex);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
+    // 動画は毎回送る。写真は替わったときだけ送る（同じ絵を何度も送らない）
+    const stillKey = source instanceof HTMLImageElement ? `${source.currentSrc || source.src}|${source.naturalWidth}x${source.naturalHeight}` : '';
     try {
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+      if (!stillKey || stillKey !== this.stillKey) {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+        this.stillKey = stillKey;
+      }
     } catch {
       // まだ映像が読めない（準備中・別オリジンなど）
       if (this.lastDrew) this.clear();

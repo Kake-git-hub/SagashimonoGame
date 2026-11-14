@@ -116,6 +116,15 @@ function makeTip(hardness: number): Surface {
 interface PaintLayer extends Surface {
   version: number;   // 描き変わるたびに増える（テクスチャの送り直しの判定）
   painted: boolean;  // 何か塗ってあるか（けしゴムで全部消しても true のまま。けす で false）
+  // 塗ってある範囲（px）。けしゴムが、関係ないレイヤーを GPU へ送り直さないために持つ
+  box: { x0: number; y0: number; x1: number; y1: number } | null;
+}
+
+function growBox(layer: PaintLayer, x: number, y: number, w: number, h: number) {
+  const b = layer.box;
+  layer.box = b
+    ? { x0: Math.min(b.x0, x), y0: Math.min(b.y0, y), x1: Math.max(b.x1, x + w), y1: Math.max(b.y1, y + h) }
+    : { x0: x, y0: y, x1: x + w, y1: y + h };
 }
 
 export type PaintSnapshot = Map<LayerId, HTMLCanvasElement>;
@@ -157,7 +166,7 @@ export class FacePaint {
   private layer(id: LayerId): PaintLayer {
     let l = this.layers.get(id);
     if (!l) {
-      l = { ...makeSurface(PAINT_SIZE, PAINT_SIZE), version: 0, painted: false };
+      l = { ...makeSurface(PAINT_SIZE, PAINT_SIZE), version: 0, painted: false, box: null };
       this.layers.set(id, l);
     }
     return l;
@@ -245,7 +254,8 @@ export class FacePaint {
     if (target === null) {
       sctx.restore();
       for (const layer of this.layers.values()) {
-        if (!layer.painted) continue;
+        const b = layer.box;
+        if (!layer.painted || !b || b.x1 <= bx || b.x0 >= bx + bw || b.y1 <= by || b.y0 >= by + bh) continue;
         layer.ctx.globalCompositeOperation = 'destination-out';
         layer.ctx.drawImage(scratch.canvas, bx, by, bw, bh, bx, by, bw, bh);
         layer.ctx.globalCompositeOperation = 'source-over';
@@ -266,6 +276,7 @@ export class FacePaint {
 
     const layer = this.layer(target);
     layer.ctx.drawImage(scratch.canvas, bx, by, bw, bh, bx, by, bw, bh);
+    growBox(layer, bx, by, bw, bh);
     const first = !layer.painted;
     layer.painted = true;
     this.changed(layer, first);
@@ -282,6 +293,7 @@ export class FacePaint {
     ctx.fillRect(0, 0, PAINT_SIZE, PAINT_SIZE);
     ctx.globalCompositeOperation = 'source-over';
     layer.painted = true;
+    layer.box = { x0: 0, y0: 0, x1: PAINT_SIZE, y1: PAINT_SIZE };
     this.changed(layer, notify);
   }
 
@@ -300,6 +312,7 @@ export class FacePaint {
     if (!layer || !layer.painted) return;
     layer.ctx.clearRect(0, 0, PAINT_SIZE, PAINT_SIZE);
     layer.painted = false;
+    layer.box = null;
     this.changed(layer, notify);
   }
 
@@ -325,6 +338,7 @@ export class FacePaint {
       const layer = this.layer(id);
       layer.ctx.drawImage(canvas, 0, 0);
       layer.painted = true;
+      layer.box = { x0: 0, y0: 0, x1: PAINT_SIZE, y1: PAINT_SIZE };
       layer.version++;
       // 写しはもう要らないのでメモリを返す
       canvas.width = 0;

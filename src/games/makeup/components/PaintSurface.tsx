@@ -29,6 +29,9 @@ interface Props {
   onStrokeEnd?: (hit: boolean) => void;
 }
 
+// なぞっている指がこれだけ動かなければ、別の指に替えてよい（ms）
+const STALE_POINTER_MS = 600;
+
 /**
  * 顔をなぞって塗るための、映像の上に重ねる透明な面
  * 指（またはマウス）の位置を、その瞬間の顔の点から「顔のどこか（UV）」に直してスタンプを押す。
@@ -47,6 +50,7 @@ export function PaintSurface({ tracker, paint, tool, mirrored, frameWidth, frame
     let activePointer: number | null = null;
     let last: FaceUV | null = null;
     let hit = false;
+    let lastEventAt = 0;
 
     const locate = (e: PointerEvent): FaceUV | null => {
       const frame = frameRef.current;
@@ -76,7 +80,14 @@ export function PaintSurface({ tracker, paint, tool, mirrored, frameWidth, frame
     };
 
     const onDown = (e: PointerEvent) => {
-      if (activePointer !== null || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (activePointer !== null) {
+        // 先に触れている指が、顔をなぞっていない（iPad を持つ親指・置いた手のひら）か、しばらく動いていない
+        // （指を離したのを取りこぼした）なら、新しい指に替える。そうでなければ、なぞっている指を優先する
+        if (hit && performance.now() - lastEventAt < STALE_POINTER_MS) return;
+        latest.current.onStrokeEnd?.(hit);
+      }
+      lastEventAt = performance.now();
       activePointer = e.pointerId;
       last = null;
       hit = false;
@@ -88,6 +99,7 @@ export function PaintSurface({ tracker, paint, tool, mirrored, frameWidth, frame
     const onMove = (e: PointerEvent) => {
       if (e.pointerId !== activePointer) return;
       e.preventDefault();
+      lastEventAt = performance.now();
       // 指が速いときは、1 回のイベントにまとめられた途中の位置も使う
       const events = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : [];
       if (events.length > 0) events.forEach(apply);

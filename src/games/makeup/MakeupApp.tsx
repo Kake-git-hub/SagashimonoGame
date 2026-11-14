@@ -5,6 +5,7 @@ import { MirrorScreen } from './components/MirrorScreen';
 import { StageSource } from './components/StageView';
 import { MakeupSettings } from './types';
 import { LookState } from './logic/layers';
+import { loadPhotoUrl } from './services/photo';
 import { getLastLook, getMakeupSettings, saveLastLook, saveMakeupSettings } from './services/makeupStorageService';
 import './makeup.css';
 
@@ -37,6 +38,11 @@ export default function MakeupApp({ onExit, storageKey }: Props) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(debugParams.photo);
   const [settings, setSettings] = useState<MakeupSettings>(getMakeupSettings);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
   const camera = useCamera();
 
   const updateSettings = useCallback((next: MakeupSettings) => {
@@ -69,11 +75,16 @@ export default function MakeupApp({ onExit, storageKey }: Props) {
 
   // 写真を選ぶ（カメラの代わりに使う。PC での開発やカメラが使えないときにも）
   const pickPhoto = useCallback(() => fileInputRef.current?.click(), []);
-  const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    const url = URL.createObjectURL(file);
+    // 大きな写真は縮めてから使う（そのままだと描画のメモリが大きくなりすぎる）
+    const url = await loadPhotoUrl(file);
+    if (!mountedRef.current) {
+      URL.revokeObjectURL(url);
+      return;
+    }
     setPhotoUrl(prev => {
       if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
       return url;

@@ -146,12 +146,17 @@ export function MakeupCanvas({ tracker, paint, look, hidden, width, height, getS
     // width / height が変わると canvas の中身が消えるので、描画も作り直す
   }, [frameRef, paint, getSource, viewRef, width, height]);
 
-  // 画面を離れるとき: WebGL のコンテキストをすぐ手放す（iOS は同時に持てる数が少なく、放っておくと溜まる）
+  // 画面を離れるとき: WebGL のコンテキストを手放す（iOS は同時に持てる数が少なく、放っておくと溜まる）。
+  // 少し待ってから行い、すぐ付け直されたとき（開発時の StrictMode）は取りやめる
+  const releaseTimer = useRef(0);
   useEffect(() => {
     const canvas = canvasRef.current;
+    window.clearTimeout(releaseTimer.current);
     return () => {
-      const gl = canvas?.getContext('webgl');
-      gl?.getExtension('WEBGL_lose_context')?.loseContext();
+      releaseTimer.current = window.setTimeout(() => {
+        const gl = canvas?.getContext('webgl');
+        gl?.getExtension('WEBGL_lose_context')?.loseContext();
+      }, 0);
     };
   }, []);
 
