@@ -15,9 +15,10 @@ export class CameraError extends Error {
   }
 }
 
-// 高い解像度から順に試し、端末が応じられない（OverconstrainedError）ときは条件を緩める
+// 4:3 で頼む: インカメラのセンサーは 4:3 なので、16:9（上下を切り落とす）より広く写り、近づいても顔が枠から出にくい。
+// 端末が応じられない（OverconstrainedError）ときは条件を緩める
 const CONSTRAINT_ATTEMPTS: MediaStreamConstraints[] = [
-  { video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+  { video: { facingMode: 'user', width: { ideal: 960 }, height: { ideal: 720 } }, audio: false },
   { video: { facingMode: 'user' }, audio: false },
   { video: true, audio: false },
 ];

@@ -1,8 +1,10 @@
 /**
  * ためす（バーチャルメイク）のレイヤー状態
- * 描画はこの状態と顔の領域（regions.ts）を読むだけにして、ここはテストできる純粋なロジックに保つ
+ * LookState は「パーツごとに選んでいる色と つよさ」。実際に塗った絵は components/facePaint.ts が持つ
+ * （色を選んだだけでは顔に付かず、なぞった所に付く。できあがりを みる などは型どおりに自動で塗る）。
+ * ここはテストできる純粋なロジックに保つ
  */
-import { FaceRegions, Shape } from './regions';
+import { FaceRegions, GuideRegionName, Shape } from './regions';
 
 export type LayerId = 'base' | 'concealer' | 'blush' | 'eyeshadow' | 'eyeliner' | 'brow' | 'highlight' | 'lip';
 
@@ -20,7 +22,7 @@ export type BlendMode = 'multiply' | 'screen' | 'normal';
 
 export interface LayerSpec {
   blend: BlendMode;
-  blur: number;           // ぼかしの半径（顔の幅に対する割合）
+  blur: number;           // 型（自動で塗る・はみださない の形）のぼかしの半径（顔の幅に対する割合）
   defaultOpacity: number; // 色を選んだときの「つよさ」
   tint: number;           // multiply のあとに普通合成で色を乗せる割合（発色を補う）
   maxAlpha: number;       // つよさ 100% のときの実際の不透明度
@@ -63,6 +65,18 @@ export function shapesForLayer(layer: LayerId, r: FaceRegions): Shape[] {
       return [{ kind: 'polygon', points: r.lipsOuter, holes: [r.lipsInner] }];
   }
 }
+
+// パーツごとの「ここに塗る」領域の名前（はみださない のときに画面へ出す目安の線）
+export const LAYER_REGIONS: Record<LayerId, GuideRegionName[]> = {
+  base: ['faceOval'],
+  concealer: ['underEyeR', 'underEyeL'],
+  blush: ['cheekR', 'cheekL'],
+  eyeshadow: ['shadowR', 'shadowL'],
+  eyeliner: ['linerR', 'linerL'],
+  brow: ['browR', 'browL'],
+  highlight: ['noseBridge', 'cheekboneR', 'cheekboneL', 'chinHighlight', 'foreheadHighlight'],
+  lip: ['lipsOuter'],
+};
 
 // 状態の更新
 export type LookAction =

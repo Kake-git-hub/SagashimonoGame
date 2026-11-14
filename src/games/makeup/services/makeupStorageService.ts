@@ -17,6 +17,7 @@ export function getMakeupSettings(): MakeupSettings {
       showLandmarks: !!parsed.showLandmarks,
       showStats: !!parsed.showStats,
       guideOpacity: typeof parsed.guideOpacity === 'number' ? Math.max(0.2, Math.min(1, parsed.guideOpacity)) : DEFAULT_SETTINGS.guideOpacity,
+      paintAssist: typeof parsed.paintAssist === 'boolean' ? parsed.paintAssist : DEFAULT_SETTINGS.paintAssist,
     };
   } catch {
     return { ...DEFAULT_SETTINGS };
@@ -32,7 +33,8 @@ export function saveMakeupSettings(settings: MakeupSettings): void {
 }
 
 /**
- * 最後に ためす で使っていた色とつよさ（プロフィールごと）
+ * 最後に ためす で選んでいた色とつよさ（プロフィールごと）。
+ * 覚えるのは「筆の色」だけで、塗った絵は覚えない（開くたびに すっぴんから始まる）
  */
 export function getLastLook(keyOf: (base: string) => string): LookState {
   try {

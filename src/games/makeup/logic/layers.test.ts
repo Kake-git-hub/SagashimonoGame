@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { activeLayers, LAYER_SPEC, lookReducer, sanitizeLook } from './layers';
+import { activeLayers, LAYER_ORDER, LAYER_REGIONS, LAYER_SPEC, lookReducer, sanitizeLook } from './layers';
+import { REGION_NAMES } from './regions';
 
 describe('lookReducer', () => {
   it('色を選ぶと既定のつよさで追加され、つよさだけ変えられる', () => {
@@ -33,5 +34,14 @@ describe('sanitizeLook', () => {
     expect(sanitizeLook({ lip: { color: 'red', opacity: 0.5 } })).toEqual({});
     expect(sanitizeLook({ lip: { color: '#AABBCC' }, bogus: { color: '#000000', opacity: 1 } }))
       .toEqual({ lip: { color: '#AABBCC', opacity: LAYER_SPEC.lip.defaultOpacity } });
+  });
+});
+
+describe('LAYER_REGIONS', () => {
+  it('どのパーツにも、塗れる所の目安（領域の名前）がある', () => {
+    for (const id of LAYER_ORDER) {
+      expect(LAYER_REGIONS[id].length).toBeGreaterThan(0);
+      for (const name of LAYER_REGIONS[id]) expect(REGION_NAMES).toContain(name);
+    }
   });
 });

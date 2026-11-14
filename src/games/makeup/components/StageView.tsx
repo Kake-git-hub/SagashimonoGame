@@ -9,6 +9,8 @@ interface Props {
   mirrored: boolean;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   imageRef: React.RefObject<HTMLImageElement | null>;
+  // 置き場の要素（画面の位置の計算と、映像をずらす CSS 変数の置き場所に使う）
+  stageRef?: React.RefObject<HTMLDivElement | null>;
   // 映像（または写真）の実サイズが分かった / 変わったとき
   onFrameSize?: (width: number, height: number) => void;
   // 映像の上に重ねるもの（メイク描画・ガイド描画の canvas、状態表示）
@@ -19,7 +21,7 @@ interface Props {
  * カメラ映像（または写真）と、その上に重ねる canvas の置き場
  * 鏡像は CSS の transform で行い、重ねる canvas にも同じ変換が掛かるので座標はそのまま使える
  */
-export function StageView({ source, mirrored, videoRef, imageRef, onFrameSize, children }: Props) {
+export function StageView({ source, mirrored, videoRef, imageRef, stageRef, onFrameSize, children }: Props) {
   const stream = source.kind === 'camera' ? source.stream : null;
   const photoUrl = source.kind === 'photo' ? source.url : null;
 
@@ -57,7 +59,7 @@ export function StageView({ source, mirrored, videoRef, imageRef, onFrameSize, c
   }, [imageRef, onFrameSize, photoUrl]);
 
   return (
-    <div className={`mmm-stage${mirrored ? ' mmm-mirrored' : ''}`}>
+    <div ref={stageRef} className={`mmm-stage${mirrored ? ' mmm-mirrored' : ''}`}>
       {photoUrl ? (
         <img ref={imageRef} className="mmm-video" src={photoUrl} alt="" />
       ) : (

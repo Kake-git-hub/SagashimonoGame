@@ -13,6 +13,7 @@ import simdWasmUrl from '@mediapipe/tasks-vision/vision_wasm_internal.wasm?url';
 import nosimdLoaderUrl from '@mediapipe/tasks-vision/vision_wasm_nosimd_internal.js?url';
 import nosimdWasmUrl from '@mediapipe/tasks-vision/vision_wasm_nosimd_internal.wasm?url';
 import { Delegate, FaceFrame } from '../types';
+import { FACE_CONFIDENCE } from '../constants';
 
 export const MODEL_URL = `${import.meta.env.BASE_URL}makeup/models/face_landmarker.task`;
 
@@ -106,6 +107,9 @@ export async function loadFaceTracker(delegate: Delegate, callbacks: LoadCallbac
     baseOptions: { modelAssetBuffer: cachedModel!, delegate: d },
     runningMode: 'VIDEO',
     numFaces: 1,
+    minFaceDetectionConfidence: FACE_CONFIDENCE,
+    minFacePresenceConfidence: FACE_CONFIDENCE,
+    minTrackingConfidence: FACE_CONFIDENCE,
     outputFaceBlendshapes: true,
     outputFacialTransformationMatrixes: false,
   });

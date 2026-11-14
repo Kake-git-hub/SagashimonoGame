@@ -41,4 +41,5 @@ export interface MakeupSettings {
   showLandmarks: boolean;
   showStats: boolean;
   guideOpacity: number; // 0〜1
+  paintAssist: boolean; // はみださない（なぞった所を、パーツの型で切り抜いて塗る）
 }

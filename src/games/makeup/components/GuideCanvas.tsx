@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { FaceFrame } from '../types';
 import { FaceTrackerHandle } from '../hooks/useFaceTracker';
 import { buildGuideDrawing, GuideDrawing, RecipeStep } from '../logic/guide';
-import { faceRegions, Pt, Shape } from '../logic/regions';
+import { faceRegions, GuideRegionName, Pt, regionShape, Shape } from '../logic/regions';
 
 interface Props {
   tracker: FaceTrackerHandle;
@@ -13,6 +13,8 @@ interface Props {
   mirrored: boolean;      // 鏡像表示中は文字を裏返して描く（canvas ごと反転されるので読めるようになる）
   step: RecipeStep | null;  // おしえて の今のステップ。無ければガイドは描かない
   opacity: number;          // ガイドの濃さ（0〜1）
+  // ためす の「ここに ぬれるよ」の目安: 領域の縁だけを点線で描く（塗った色が見えるよう、中は塗らない）
+  outline?: GuideRegionName[] | null;
 }
 
 const PINK = '255, 107, 157';
@@ -159,14 +161,48 @@ function drawGuide(ctx: CanvasRenderingContext2D, d: GuideDrawing, now: number, 
   ctx.restore();
 }
 
+// 領域の縁だけを、流れる白い点線で描く
+function drawOutline(ctx: CanvasRenderingContext2D, shapes: Shape[], faceWidth: number, now: number) {
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.setLineDash([faceWidth * 0.03, faceWidth * 0.025]);
+  ctx.lineDashOffset = -(now / 40) % (faceWidth * 0.055);
+  for (const shape of shapes) {
+    // 線（アイラインなど）は中心線ではなく、太さぶんの輪郭を描く
+    if (shape.kind === 'stroke') {
+      const w = Math.max(...shape.widths, faceWidth * 0.02);
+      ctx.beginPath();
+      const pts = shape.points;
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.lineWidth = w;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.setLineDash([]);
+      ctx.stroke();
+      ctx.setLineDash([faceWidth * 0.03, faceWidth * 0.025]);
+      continue;
+    }
+    pathShape(ctx, shape);
+    ctx.lineWidth = faceWidth * 0.012;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+    ctx.stroke();
+    ctx.lineWidth = faceWidth * 0.007;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 /**
  * ガイド描画（顔の上に重ねる canvas）
  * おしえて のステップ（領域・矢印・目印）と、デバッグ用の点群を描く。顔が動いても毎フレーム追従する
  */
-export function GuideCanvas({ tracker, width, height, showLandmarks, showNumbers, mirrored, step, opacity }: Props) {
+export function GuideCanvas({ tracker, width, height, showLandmarks, showNumbers, mirrored, step, opacity, outline = null }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const propsRef = useRef({ showLandmarks, showNumbers, mirrored, step, opacity });
-  propsRef.current = { showLandmarks, showNumbers, mirrored, step, opacity };
+  const { frameRef } = tracker;
+  const propsRef = useRef({ showLandmarks, showNumbers, mirrored, step, opacity, outline });
+  propsRef.current = { showLandmarks, showNumbers, mirrored, step, opacity, outline };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -182,15 +218,20 @@ export function GuideCanvas({ tracker, width, height, showLandmarks, showNumbers
     const tick = () => {
       raf = requestAnimationFrame(tick);
       if (document.hidden) return;
-      const { showLandmarks, showNumbers, mirrored, step, opacity } = propsRef.current;
-      const frame = tracker.frameRef.current;
+      const { showLandmarks, showNumbers, mirrored, step, opacity, outline } = propsRef.current;
+      const frame = frameRef.current;
       const w = canvas.width, h = canvas.height;
-      const empty = !frame || (!showLandmarks && !step);
+      const empty = !frame || (!showLandmarks && !step && !outline);
       if (empty) {
-        if (!wasEmpty) ctx.clearRect(0, 0, w, h);
+        if (!wasEmpty) {
+          ctx.clearRect(0, 0, w, h);
+          // 消したあと何も描かないと、古い絵が画面に残ることがある（ヘッドレス Chromium で確認）ので、要素ごと隠す
+          canvas.style.visibility = 'hidden';
+        }
         wasEmpty = true;
         return;
       }
+      if (wasEmpty) canvas.style.visibility = 'visible';
       wasEmpty = false;
       ctx.clearRect(0, 0, w, h);
 
@@ -201,6 +242,9 @@ export function GuideCanvas({ tracker, width, height, showLandmarks, showNumbers
           lastStep = step;
         }
         drawGuide(ctx, drawing, performance.now(), opacity);
+      } else if (outline) {
+        const regions = faceRegions(frame.landmarks, w, h);
+        drawOutline(ctx, outline.map(name => regionShape(regions, name)), regions.faceWidth, performance.now());
       }
 
       if (showLandmarks) {
@@ -228,7 +272,7 @@ export function GuideCanvas({ tracker, width, height, showLandmarks, showNumbers
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [tracker, width, height]);
+  }, [frameRef, width, height]);
 
   return <canvas ref={canvasRef} className="mmm-overlay" width={width} height={height} aria-hidden="true" />;
 }

@@ -3,7 +3,10 @@ import { S } from '../strings';
 import { MakeupSettings } from '../types';
 import { CameraHandle } from '../hooks/useCamera';
 import { useFaceTracker } from '../hooks/useFaceTracker';
-import { LayerId, LookState, lookReducer } from '../logic/layers';
+import { useAutoPan } from '../hooks/useAutoPan';
+import { LAYER_REGIONS, LayerId, LookState, lookReducer } from '../logic/layers';
+import { BrushSize } from '../logic/brush';
+import { clientToFrame, frameToClient } from '../logic/viewport';
 import { Recipe, recipeLook, RecipeSummary } from '../logic/guide';
 import { suggest, Suggestion } from '../logic/suggest';
 import { sampleSkin } from './skinSample';
@@ -12,8 +15,9 @@ import { fetchPalettes, fetchRecipe, fetchRecipeIndex, PaletteMap } from '../ser
 import { canvasToBlob, shareOrDownload, stillFilename } from '../services/share';
 import { StageSource, StageView } from './StageView';
 import { GuideCanvas } from './GuideCanvas';
-import { MakeupCanvas } from './MakeupCanvas';
-import { MakeupPainter } from './makeupPainter';
+import { MakeupCanvas, MakeupView } from './MakeupCanvas';
+import { FacePaint, PaintSnapshot } from './facePaint';
+import { PaintSurface, PaintTool } from './PaintSurface';
 import { SettingsSheet } from './SettingsSheet';
 import { TryPanel } from './TryPanel';
 import { GuidePanel } from './GuidePanel';
@@ -44,14 +48,30 @@ interface Props {
   onBack: () => void;
 }
 
+// 「ここに ぬれるよ」の点線を出しておく時間（ms）: パーツを選んだあと / なぞり終わったあと
+const OUTLINE_AFTER_SELECT_MS = 3500;
+const OUTLINE_AFTER_STROKE_MS = 1200;
+// 一時的な文言（ほぞんしたよ / かおの うえを なぞってね）を出しておく時間（ms）
+const NOTE_MS = 3000;
+
 /**
  * ミラー画面: ヘッダー + 映像（鏡像）+ メイク描画 + ガイド描画 + 状態 + 下部パネル（ためす / おしえて / ていあん）
+ * ためす では、パレットで色を選び、映像の顔を指でなぞった所にメイクが付く
  */
 export function MirrorScreen({ source, camera, settings, initialLook, debug, onLookChange, onSettingsChange, onPickPhoto, onUseCamera, onBack }: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
-  const painterRef = useRef<MakeupPainter | null>(null);
-  const [frameSize, setFrameSize] = useState({ w: 1280, h: 720 });
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const viewRef = useRef<MakeupView | null>(null);
+  // 塗った絵（React の state ではなく canvas で持つ。なぞるたびに再描画しないため）
+  const paint = useMemo(() => new FacePaint(), []);
+  const [painted, setPainted] = useState<LayerId[]>([]);
+  const [erasing, setErasing] = useState(false);
+  const [brushSize, setBrushSize] = useState<BrushSize>('m');
+  const [outlineOn, setOutlineOn] = useState(false);
+  const outlineTimer = useRef(0);
+  const noteTimer = useRef(0);
+  const [frameSize, setFrameSize] = useState({ w: 960, h: 720 });
   const [showSettings, setShowSettings] = useState(false);
   const [mode, setMode] = useState<Mode>('try');
   const [part, setPart] = useState<LayerId>('lip');
@@ -60,7 +80,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   const [palettes, setPalettes] = useState<PaletteMap | null>(null);
   const [paletteError, setPaletteError] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saveNote, setSaveNote] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
   // おしえて
   const [recipes, setRecipes] = useState<RecipeSummary[] | null>(null);
   const [recipesError, setRecipesError] = useState(false);
@@ -68,7 +88,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   const [loadingRecipe, setLoadingRecipe] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [resultShown, setResultShown] = useState(false);
-  const lookBackupRef = useRef<LookState | null>(null);
+  const lookBackupRef = useRef<{ look: LookState; paint: PaintSnapshot } | null>(null);
   // ていあん
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   const isPhoto = source.kind === 'photo';
@@ -77,9 +97,41 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
     setFrameSize(prev => (prev.w === w && prev.h === h ? prev : { w, h }));
   }, []);
 
+  // 塗ってあるパーツの一覧（タブの印と、くらべる / ぜんぶ けす が押せるかに使う）
+  useEffect(() => {
+    setPainted(paint.paintedLayers());
+    return paint.subscribe(() => setPainted(paint.paintedLayers()));
+  }, [paint]);
+  useEffect(() => () => {
+    window.clearTimeout(outlineTimer.current);
+    window.clearTimeout(noteTimer.current);
+    paint.dispose();
+  }, [paint]);
+
+  const showNote = useCallback((text: string) => {
+    setNote(text);
+    window.clearTimeout(noteTimer.current);
+    noteTimer.current = window.setTimeout(() => setNote(null), NOTE_MS);
+  }, []);
+
+  // 「ここに ぬれるよ」の点線をしばらく出す
+  const flashOutline = useCallback((ms: number) => {
+    setOutlineOn(true);
+    window.clearTimeout(outlineTimer.current);
+    outlineTimer.current = window.setTimeout(() => setOutlineOn(false), ms);
+  }, []);
+
+  const dropBackup = useCallback(() => {
+    // 取っておいた写しの canvas のメモリを返す
+    lookBackupRef.current?.paint.forEach(canvas => { canvas.width = 0; canvas.height = 0; });
+    lookBackupRef.current = null;
+  }, []);
+
   const getSource = useCallback(() => (isPhoto ? imageRef.current : videoRef.current), [isPhoto]);
   const tracker = useFaceTracker({ enabled: true, delegate: settings.delegate, getSource });
   const { loadState, status, stats } = tracker;
+  // 枠からはみ出した映像のうち、顔のある側を見せる
+  const panRef = useAutoPan(tracker, stageRef, frameSize.w, frameSize.h);
 
   // 色のパレット
   useEffect(() => {
@@ -120,26 +172,32 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
 
   const handleRestart = useCallback(() => { setStepIndex(0); }, []);
 
-  // できあがりを みる: レシピの色を ためす のレイヤーに流し込む。もどす で元の色に戻す
+  // できあがりを みる: レシピの色を、パーツの型どおりに自動で塗る。もどす で、塗ってあったものに戻す
   const handleToggleResult = useCallback(() => {
     if (!recipe) return;
     if (resultShown) {
-      dispatch({ type: 'replace', look: lookBackupRef.current ?? {} });
+      const backup = lookBackupRef.current;
+      dispatch({ type: 'replace', look: backup?.look ?? {} });
+      if (backup) paint.restore(backup.paint);
+      else paint.clearAll();
       lookBackupRef.current = null;
       setResultShown(false);
     } else {
-      lookBackupRef.current = look;
-      dispatch({ type: 'replace', look: recipeLook(recipe) });
+      dropBackup();
+      lookBackupRef.current = { look, paint: paint.snapshot() };
+      const next = recipeLook(recipe);
+      dispatch({ type: 'replace', look: next });
+      paint.fillLook(next);
       setResultShown(true);
     }
-  }, [recipe, resultShown, look]);
+  }, [recipe, resultShown, look, paint, dropBackup]);
 
   const handleLeaveRecipe = useCallback(() => {
     setRecipe(null);
     setStepIndex(0);
     setResultShown(false);
-    lookBackupRef.current = null;
-  }, []);
+    dropBackup();
+  }, [dropBackup]);
 
   // しんだん: いまの顔の点と頬の色から
   const handleDiagnose = useCallback(() => {
@@ -155,12 +213,59 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
     handleSelectRecipe(id);
   }, [handleSelectRecipe]);
 
+  // この いろで ためす: ていあん の色を、パーツの型どおりに自動で塗る
   const handleApplySuggestedLook = useCallback((next: LookState) => {
     dispatch({ type: 'replace', look: next });
+    paint.fillLook(next);
     setResultShown(false);
-    lookBackupRef.current = null;
+    dropBackup();
     setMode('try');
-  }, []);
+  }, [paint, dropBackup]);
+
+  // --- ためす: なぞって塗る ---
+  const assist = settings.paintAssist;
+  // いまの筆の色: 選んであればその色、まだなら そのパーツの最初の色
+  const toolColor = look[part]?.color ?? palettes?.[part]?.[0]?.color ?? null;
+  const tool = useMemo<PaintTool>(() => ({ layer: part, color: toolColor, erasing, size: brushSize, assist }), [part, toolColor, erasing, brushSize, assist]);
+
+  // 「はみださない」の型は最初に使うときに作る（少し時間がかかる）ので、パーツを選んだ時点で作っておき、
+  // 最初のひと塗りで引っかからないようにする
+  useEffect(() => {
+    if (!assist || mode !== 'try') return;
+    const timer = window.setTimeout(() => paint.mask(part), 150);
+    return () => window.clearTimeout(timer);
+  }, [paint, part, assist, mode]);
+
+  const handlePart = useCallback((next: LayerId) => {
+    setPart(next);
+    setErasing(false);
+    flashOutline(OUTLINE_AFTER_SELECT_MS);
+  }, [flashOutline]);
+
+  const handleAssist = useCallback((next: boolean) => {
+    onSettingsChange({ ...settings, paintAssist: next });
+    if (next) flashOutline(OUTLINE_AFTER_SELECT_MS);
+  }, [settings, onSettingsChange, flashOutline]);
+
+  const handleStrokeStart = useCallback(() => {
+    // なぞっている間は点線を出したままにする
+    window.clearTimeout(outlineTimer.current);
+    setOutlineOn(true);
+    // 塗り始めたら「できあがり」の表示ではなくなる（もどす で消えないように）
+    setResultShown(false);
+    dropBackup();
+  }, [dropBackup]);
+
+  const handleStrokeEnd = useCallback((hit: boolean) => {
+    flashOutline(OUTLINE_AFTER_STROKE_MS);
+    if (!hit) showNote(tracker.frameRef.current ? S.try.missHint : S.try.needFace);
+  }, [flashOutline, showNote, tracker]);
+
+  const handleClearAll = useCallback(() => {
+    paint.clearAll();
+    setResultShown(false);
+    dropBackup();
+  }, [paint, dropBackup]);
 
   const currentStep = mode === 'guide' && recipe && stepIndex < recipe.steps.length ? recipe.steps[stepIndex] : null;
   const poseOk = usePoseCheck(tracker, currentStep?.pose);
@@ -169,8 +274,11 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   useEffect(() => { onLookChange(look); }, [look, onLookChange]);
 
   // 自動テスト用: ?makeupdebug=1 のとき最新の結果を window に出す
-  const latestRef = useRef({ status, loadState, stats, frameSize, look, currentStep, poseOk, suggestion, mode });
-  latestRef.current = { status, loadState, stats, frameSize, look, currentStep, poseOk, suggestion, mode };
+  const mirrored = settings.mirrored && !isPhoto;
+  // ためす で「はみださない」のとき、選んだパーツの塗れる所を点線で見せる
+  const paintOutline = mode === 'try' && assist && !erasing && outlineOn ? LAYER_REGIONS[part] : null;
+  const latestRef = useRef({ status, loadState, stats, frameSize, look, currentStep, poseOk, suggestion, mode, mirrored, paintOutline });
+  latestRef.current = { status, loadState, stats, frameSize, look, currentStep, poseOk, suggestion, mode, mirrored, paintOutline };
   useEffect(() => {
     if (!debug) return;
     const w = window as unknown as { __makeupDebug?: unknown };
@@ -181,15 +289,47 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
       get stats() { return latestRef.current.stats; },
       get frameSize() { return latestRef.current.frameSize; },
       get look() { return latestRef.current.look; },
-      get makeupDrawn() { return painterRef.current?.lastDrew ?? false; },
+      get makeupDrawn() { return viewRef.current?.lastDrew ?? false; },
+      get painted() { return paint.paintedLayers(); },
+      get outline() { return latestRef.current.paintOutline; },
+      get pan() { return panRef.current; },
+      // 顔の点（番号）が画面のどこにあるか（自動テストが顔の上をなぞるのに使う）
+      facePoint(index: number) {
+        const frame = tracker.frameRef.current;
+        const el = stageRef.current;
+        if (!frame || !el) return null;
+        const { frameSize, mirrored } = latestRef.current;
+        const p = frame.landmarks[index];
+        return frameToClient(el.getBoundingClientRect(), frameSize.w, frameSize.h, mirrored, p.x, p.y, panRef.current);
+      },
       get guideStep() { return latestRef.current.currentStep?.id ?? null; },
       get poseOk() { return latestRef.current.poseOk; },
       get suggestion() { return latestRef.current.suggestion; },
       get mode() { return latestRef.current.mode; },
-      applyLook(next: LookState) { dispatch({ type: 'replace', look: next }); },
+      // 画面のその位置のあたりに、いま見えている色（映像 + メイク）。自動テストが「なぞった所に色が付いたか」を確かめるのに使う
+      pixelAt(clientX: number, clientY: number) {
+        const el = stageRef.current;
+        const canvas = viewRef.current?.capture(false);
+        if (!el || !canvas) return null;
+        const { frameSize, mirrored } = latestRef.current;
+        const p = clientToFrame(el.getBoundingClientRect(), frameSize.w, frameSize.h, mirrored, clientX, clientY, panRef.current);
+        // 顔の点は 1px ほど揺れるので、まわり 7×7 の平均にする
+        const N = 7;
+        const d = canvas.getContext('2d')?.getImageData(Math.round(p.x * canvas.width) - 3, Math.round(p.y * canvas.height) - 3, N, N).data;
+        canvas.width = 0;
+        canvas.height = 0;
+        if (!d) return null;
+        const sum = [0, 0, 0];
+        for (let i = 0; i < d.length; i += 4) { sum[0] += d[i]; sum[1] += d[i + 1]; sum[2] += d[i + 2]; }
+        return sum.map(v => Math.round(v / (N * N)));
+      },
+      applyLook(next: LookState) {
+        dispatch({ type: 'replace', look: next });
+        paint.fillLook(next);
+      },
     };
     return () => { delete w.__makeupDebug; };
-  }, [debug, tracker]);
+  }, [debug, tracker, paint, panRef]);
 
   // 状態欄の文言
   const statusText = useMemo(() => {
@@ -206,33 +346,39 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   }, [loadState, isPhoto, camera.status, camera.error, status]);
   const statusKind = loadState.phase === 'error' || (!isPhoto && camera.status === 'error') ? 'error' : loadState.phase !== 'ready' ? 'loading' : status;
 
-  const mirrored = settings.mirrored && !isPhoto;
   const faceVisible = loadState.phase === 'ready' && status !== 'none';
+
+  // 顔が見えるようになったら、「ここに ぬれるよ」の点線を出して、なぞる場所を知らせる
+  useEffect(() => {
+    if (faceVisible) flashOutline(OUTLINE_AFTER_SELECT_MS);
+  }, [faceVisible, flashOutline]);
 
   // 実機での切り分け用（はやさを みせる のときだけ表示）: 画面の大きさ・表示モード・ブラウザ
   const envInfo = settings.showStats ? describeEnvironment() : '';
 
   // ほぞん: いま見えている絵を共有 / ダウンロード
   const handleSave = useCallback(async () => {
-    const painter = painterRef.current;
-    const src = getSource();
-    if (!painter || !src || saving) return;
+    const view = viewRef.current;
+    if (!view || saving) return;
     setSaving(true);
-    setSaveNote(null);
+    setNote(null);
     try {
-      const canvas = painter.capture(src, mirrored);
+      const canvas = view.capture(mirrored);
+      if (!canvas) throw new Error('nothing to capture');
       const blob = await canvasToBlob(canvas);
+      // 写しはもう要らないのでメモリを返す
+      canvas.width = 0;
+      canvas.height = 0;
       const result = await shareOrDownload(blob, stillFilename());
-      if (result === 'shared') setSaveNote(S.try.shared);
-      else if (result === 'downloaded') setSaveNote(S.try.saved);
+      if (result === 'shared') showNote(S.try.shared);
+      else if (result === 'downloaded') showNote(S.try.saved);
     } catch (err) {
       console.error('save failed', err);
-      setSaveNote(S.try.saveFailed);
+      showNote(S.try.saveFailed);
     } finally {
       setSaving(false);
-      window.setTimeout(() => setSaveNote(null), 3000);
     }
-  }, [getSource, mirrored, saving]);
+  }, [mirrored, saving, showNote]);
 
   return (
     <div className="mmm-screen">
@@ -243,15 +389,16 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
       </header>
 
       <div className="mmm-body">
-        <StageView source={source} mirrored={mirrored} videoRef={videoRef} imageRef={imageRef} onFrameSize={handleFrameSize}>
+        <StageView source={source} mirrored={mirrored} videoRef={videoRef} imageRef={imageRef} stageRef={stageRef} onFrameSize={handleFrameSize}>
           <MakeupCanvas
             tracker={tracker}
+            paint={paint}
             look={look}
             hidden={comparing}
             width={frameSize.w}
             height={frameSize.h}
             getSource={getSource}
-            painterRef={painterRef}
+            viewRef={viewRef}
           />
           <GuideCanvas
             tracker={tracker}
@@ -262,7 +409,21 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
             mirrored={mirrored}
             step={currentStep}
             opacity={settings.guideOpacity}
+            outline={paintOutline}
           />
+          {mode === 'try' && (
+            <PaintSurface
+              tracker={tracker}
+              paint={paint}
+              tool={tool}
+              mirrored={mirrored}
+              frameWidth={frameSize.w}
+              frameHeight={frameSize.h}
+              panRef={panRef}
+              onStrokeStart={handleStrokeStart}
+              onStrokeEnd={handleStrokeEnd}
+            />
+          )}
           <div className="mmm-status" role="status" data-status={statusKind} data-face={loadState.phase === 'ready' ? status : 'loading'}>
             {statusText}
           </div>
@@ -280,7 +441,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
           )}
           {settings.showStats && (
             <div className="mmm-stats">
-              {stats.fps} fps / {stats.inferenceMs} ms / {stats.delegate ?? '-'}{stats.skipping ? ` / ${S.mirror.skipping}` : ''}
+              {stats.fps} fps / {stats.inferenceMs} ms / {stats.delegate ?? '-'}{stats.skipping ? ` / ${S.mirror.skipping}` : ''}{stats.padded ? ` / ${S.mirror.padded}` : ''}
               <br />{frameSize.w}×{frameSize.h} / {envInfo}
             </div>
           )}
@@ -301,12 +462,21 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
               paletteError={paletteError}
               look={look}
               part={part}
+              color={toolColor}
+              painted={painted}
+              erasing={erasing}
+              brushSize={brushSize}
+              assist={assist}
               faceVisible={faceVisible}
               saving={saving}
-              saveNote={saveNote}
-              onPart={setPart}
+              note={note}
+              onPart={handlePart}
+              onErasing={setErasing}
+              onBrushSize={setBrushSize}
+              onAssist={handleAssist}
               dispatch={dispatch}
               onCompare={setComparing}
+              onClearAll={handleClearAll}
               onSave={handleSave}
             />
           ) : mode === 'guide' ? (

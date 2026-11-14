@@ -6,7 +6,8 @@ import { FaceTrackerHandle } from './useFaceTracker';
  * ステップが求める表情（にっこり / 目を閉じる）ができているか。表示用に 150ms ごとに更新する
  */
 export function usePoseCheck(tracker: FaceTrackerHandle, pose: GuidePose | undefined): boolean {
-  const [ok, setOk] = useState(() => poseSatisfied(pose, tracker.frameRef.current?.blendshapes ?? null));
+  const { frameRef, subscribe } = tracker;
+  const [ok, setOk] = useState(() => poseSatisfied(pose, frameRef.current?.blendshapes ?? null));
 
   useEffect(() => {
     if (!pose || pose === 'front') {
@@ -22,9 +23,9 @@ export function usePoseCheck(tracker: FaceTrackerHandle, pose: GuidePose | undef
       setOk(prev => (prev === next ? prev : next));
     };
     last = -1000;
-    update(tracker.frameRef.current);
-    return tracker.subscribe(update);
-  }, [tracker, pose]);
+    update(frameRef.current);
+    return subscribe(update);
+  }, [frameRef, subscribe, pose]);
 
   return ok;
 }

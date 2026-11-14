@@ -1,15 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaceFrame, FaceStatus, Delegate, TrackerLoadState } from '../types';
 import { FaceTracker, FrameSource, loadFaceTracker } from '../services/faceTracker';
 import { FrameHolder, smoothLandmarks } from '../logic/smoothing';
 import { classifyStatus, faceBounds } from '../logic/pose';
-import { SLOW_INFERENCE_MS, SMOOTHING_ALPHA, STATUS_THRESHOLDS } from '../constants';
+import { initialCloseRange, nextCloseRange, paddedLayout, unpadLandmarks } from '../logic/closeRange';
+import {
+  INFERENCE_REST_MAX_MS, INFERENCE_REST_RATIO, PHOTO_INFERENCE_INTERVAL_MS, SLOW_INFERENCE_MS, SMOOTHING_ALPHA, STATUS_THRESHOLDS,
+} from '../constants';
 
 export interface TrackerStats {
   fps: number;           // 推論した回数 / 秒
   inferenceMs: number;   // 直近の平均推論時間
   delegate: Delegate | null;
-  skipping: boolean;     // フレームを間引いているか
+  skipping: boolean;     // 推論が遅く、フレームを間引いているか
+  padded: boolean;       // 近いとき用の「余白つき」で認識しているか
 }
 
 export interface FaceTrackerHandle {
@@ -30,6 +34,9 @@ interface Options {
   getSource: () => FrameSource | null;
 }
 
+// 映像の時刻（currentTime）が変わらなくても、これだけ経ったら推論する（ms）
+const STALE_VIDEO_TIME_MS = 120;
+
 function sourceReady(el: FrameSource): boolean {
   if (el instanceof HTMLVideoElement) return el.readyState >= 2 && el.videoWidth > 0;
   if (el instanceof HTMLImageElement) return el.complete && el.naturalWidth > 0;
@@ -44,14 +51,16 @@ function sourceSize(el: FrameSource): { w: number; h: number } {
 
 /**
  * 顔認識のループ
- * - 読み込み（進捗つき）→ requestAnimationFrame ごとに推論 → 平滑化 → 状態判定
- * - 推論が遅いときはフレームを間引く。顔が見つからない間も少しのあいだ直前の結果を使う
+ * - 読み込み（進捗つき）→ 映像のコマが変わるたびに推論 → 平滑化 → 状態判定
+ * - 推論は同期処理なので、かかった時間に応じて次の推論までの休みを入れ、画面の操作が詰まらないようにする
+ * - 近づいて顔が映像いっぱいになったら、余白を足した絵で認識する（logic/closeRange.ts）
+ * - 顔が見つからない間も少しのあいだ直前の結果を使う
  * - 明るさは 0.5 秒ごとに顔のあたりを小さな canvas に写して測る
  */
 export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceTrackerHandle {
   const [loadState, setLoadState] = useState<TrackerLoadState>({ phase: 'idle' });
   const [status, setStatus] = useState<FaceStatus>('none');
-  const [stats, setStats] = useState<TrackerStats>({ fps: 0, inferenceMs: 0, delegate: null, skipping: false });
+  const [stats, setStats] = useState<TrackerStats>({ fps: 0, inferenceMs: 0, delegate: null, skipping: false, padded: false });
   const [reloadCount, setReloadCount] = useState(0);
   const trackerRef = useRef<FaceTracker | null>(null);
   const frameRef = useRef<FaceFrame | null>(null);
@@ -100,7 +109,11 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
     let stopped = false;
     let prevLandmarks: FaceFrame['landmarks'] | null = null;
     const holder = new FrameHolder<FaceFrame>(STATUS_THRESHOLDS.holdLastMs);
-    let skipNext = false;
+    let nextAllowedAt = 0;
+    let lastVideoTime = -1;
+    let lastSource: FrameSource | null = null;
+    let lastDetectAt = 0;
+    let closeRange = initialCloseRange();
     let avgMs = 0;
     let count = 0;
     let windowStart = performance.now();
@@ -117,8 +130,10 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
       const { w, h } = sourceSize(el);
       let sx = 0, sy = 0, sw = w, sh = h;
       if (frame) {
+        // 近いときは顔が映像からはみ出すので、映像の中に収める
         const b = faceBounds(frame.landmarks);
-        sx = b.minX * w; sy = b.minY * h; sw = Math.max(1, (b.maxX - b.minX) * w); sh = Math.max(1, (b.maxY - b.minY) * h);
+        const x0 = Math.max(0, b.minX), y0 = Math.max(0, b.minY), x1 = Math.min(1, b.maxX), y1 = Math.min(1, b.maxY);
+        sx = x0 * w; sy = y0 * h; sw = Math.max(1, (x1 - x0) * w); sh = Math.max(1, (y1 - y0) * h);
       }
       try {
         lumaCtx.drawImage(el, sx, sy, sw, sh, 0, 0, 32, 32);
@@ -131,26 +146,69 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
       }
     };
 
+    // 近いとき用: 映像のまわりに黒い余白を足した絵（1 枚だけ作って使い回す）
+    const padCanvas = document.createElement('canvas');
+    const padCtx = padCanvas.getContext('2d', { alpha: false });
+    const drawPadded = (el: FrameSource): HTMLCanvasElement | null => {
+      if (!padCtx) return null;
+      const { w, h } = sourceSize(el);
+      const layout = paddedLayout(w, h);
+      if (padCanvas.width !== layout.width || padCanvas.height !== layout.height) {
+        padCanvas.width = layout.width;
+        padCanvas.height = layout.height;
+        padCtx.fillStyle = '#000';
+        padCtx.fillRect(0, 0, layout.width, layout.height);
+      }
+      try {
+        padCtx.drawImage(el, layout.x, layout.y, layout.contentW, layout.contentH);
+      } catch {
+        return null;
+      }
+      return padCanvas;
+    };
+
     const tick = () => {
       if (stopped) return;
       raf = requestAnimationFrame(tick);
       const tracker = trackerRef.current;
       const el = getSourceRef.current();
       if (!tracker || !el || !sourceReady(el) || document.hidden) return;
-      if (skipNext) { skipNext = false; return; }
 
       const now = performance.now();
+      if (now < nextAllowedAt) return;
+      // 同じコマを何度も推論しない（120Hz の画面では、カメラの 1 コマの間に何度も呼ばれる）
+      if (el !== lastSource) {
+        lastSource = el;
+        lastVideoTime = -1;
+        lastDetectAt = 0;
+      }
+      if (el instanceof HTMLVideoElement) {
+        // 映像の時刻が進まないブラウザでも止まらないよう、しばらく変わらなければ推論する
+        if (el.currentTime === lastVideoTime && now - lastDetectAt < STALE_VIDEO_TIME_MS) return;
+        lastVideoTime = el.currentTime;
+      } else if (now - lastDetectAt < PHOTO_INFERENCE_INTERVAL_MS) {
+        return;
+      }
+      lastDetectAt = now;
+
+      const padded = closeRange.padded ? drawPadded(el) : null;
       let detected: FaceFrame | null = null;
       try {
-        detected = tracker.detect(el, now);
+        detected = tracker.detect(padded ?? el, now);
       } catch (err) {
         console.warn('detect failed', err);
         return;
       }
-      const ms = performance.now() - now;
+      const ended = performance.now();
+      const ms = ended - now;
       avgMs = avgMs === 0 ? ms : avgMs * 0.9 + ms * 0.1;
-      skipNext = avgMs > SLOW_INFERENCE_MS;
+      nextAllowedAt = ended + Math.min(INFERENCE_REST_MAX_MS, avgMs * INFERENCE_REST_RATIO);
       count++;
+
+      const { w, h } = sourceSize(el);
+      if (detected && padded) detected = { ...detected, landmarks: unpadLandmarks(detected.landmarks) };
+      // 次のコマを余白つきで認識するか（平滑化の前の、今のコマの結果で決める）
+      closeRange = nextCloseRange(closeRange, detected?.landmarks ?? null, w / h, now);
 
       if (detected) {
         detected = { ...detected, landmarks: smoothLandmarks(prevLandmarks, detected.landmarks, SMOOTHING_ALPHA) };
@@ -166,7 +224,6 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
         lastLumaAt = now;
         measureLuma(el, frame);
       }
-      const { w, h } = sourceSize(el);
       const next = classifyStatus({ landmarks: frame?.landmarks ?? null, aspect: w / h, luma });
       if (next !== lastStatus) {
         lastStatus = next;
@@ -174,7 +231,7 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
       }
       if (now - windowStart >= 1000) {
         const fps = (count * 1000) / (now - windowStart);
-        setStats(s => ({ ...s, fps: Math.round(fps), inferenceMs: Math.round(avgMs), skipping: skipNext }));
+        setStats(s => ({ ...s, fps: Math.round(fps), inferenceMs: Math.round(avgMs), skipping: avgMs > SLOW_INFERENCE_MS, padded: closeRange.padded }));
         count = 0;
         windowStart = now;
       }
@@ -183,6 +240,11 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
     return () => {
       stopped = true;
       cancelAnimationFrame(raf);
+      // canvas のメモリをすぐ返す
+      padCanvas.width = 0;
+      padCanvas.height = 0;
+      lumaCanvas.width = 0;
+      lumaCanvas.height = 0;
     };
   }, [enabled, loadState.phase]);
 
@@ -194,5 +256,6 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
     listenersRef.current.forEach(l => l(null));
   }, [enabled]);
 
-  return { loadState, status, stats, frameRef, subscribe, reload };
+  // 同じ中身なら同じオブジェクトを返す（これを依存に持つ描画側の effect が、再描画のたびに作り直されないように）
+  return useMemo(() => ({ loadState, status, stats, frameRef, subscribe, reload }), [loadState, status, stats, subscribe, reload]);
 }

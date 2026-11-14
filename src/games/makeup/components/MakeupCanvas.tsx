@@ -1,65 +1,159 @@
 import { useEffect, useRef } from 'react';
-import { LookState } from '../logic/layers';
+import { LAYER_SPEC, LookState } from '../logic/layers';
 import { FaceTrackerHandle } from '../hooks/useFaceTracker';
 import { FrameSource } from '../services/faceTracker';
-import { MakeupPainter } from './makeupPainter';
+import { FaceFrame } from '../types';
+import { FacePaint } from './facePaint';
+import { MakeupRenderer, RenderLayer } from './makeupRenderer';
+
+// 親（ミラー画面）が保存やテストに使う窓口
+export interface MakeupView {
+  // いま見えている絵（鏡像なら左右反転）を新しい canvas に描く
+  capture(mirrored: boolean): HTMLCanvasElement | null;
+  // 直前に映像とメイクを描いたか
+  readonly lastDrew: boolean;
+}
 
 interface Props {
   tracker: FaceTrackerHandle;
-  look: LookState;
+  paint: FacePaint;
+  look: LookState;          // パーツごとの つよさ を読む
   hidden: boolean;          // くらべる を押している間は描かない
   width: number;
   height: number;
   getSource: () => FrameSource | null;
-  painterRef: React.MutableRefObject<MakeupPainter | null>;  // 保存のときに親が使う
+  viewRef: React.MutableRefObject<MakeupView | null>;
+}
+
+function sourceReady(el: FrameSource): boolean {
+  if (el instanceof HTMLVideoElement) return el.readyState >= 2 && el.videoWidth > 0;
+  if (el instanceof HTMLImageElement) return el.complete && el.naturalWidth > 0;
+  return el.width > 0;
 }
 
 /**
- * ためす の描画 canvas。映像の上に重なり、メイクがあるときだけ映像ごと描く
+ * メイクの描画 canvas。映像の上に重なり、塗ったものがあるときだけ映像ごと描く。
+ * 描き直すのは「映像のコマ・顔の点・塗った絵・つよさ」のどれかが変わったときだけ（120Hz の画面で無駄に描かない）
  */
-export function MakeupCanvas({ tracker, look, hidden, width, height, getSource, painterRef }: Props) {
+export function MakeupCanvas({ tracker, paint, look, hidden, width, height, getSource, viewRef }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // tracker そのものは状態（はやさ など）が変わるたびに新しくなるので、変わらない frameRef だけを依存にする
+  const { frameRef } = tracker;
   const lookRef = useRef(look);
   const hiddenRef = useRef(hidden);
   lookRef.current = look;
   hiddenRef.current = hidden;
 
-  // painter の用意とサイズ合わせ
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    let painter = painterRef.current;
-    if (!painter || painter.output !== canvas) {
-      painter = new MakeupPainter(canvas);
-      painterRef.current = painter;
+    let renderer: MakeupRenderer | null = null;
+    try {
+      renderer = new MakeupRenderer(canvas, paint.edgeFeather());
+    } catch (err) {
+      // WebGL が使えない端末: メイクは出せないが、映像と保存はそのまま使える
+      console.warn('makeup renderer unavailable', err);
     }
-    painter.resize(width, height);
-    painter.updateMasks(tracker.frameRef.current, lookRef.current);
-  }, [width, height, painterRef, tracker]);
 
-  // 顔の点が来るたびにマスクを作り直す。色やつよさが変わったときも直前の点で作り直す
-  useEffect(() => {
-    const painter = painterRef.current;
-    if (!painter) return;
-    painter.updateMasks(tracker.frameRef.current, look);
-    return tracker.subscribe(frame => painter.updateMasks(frame, lookRef.current));
-  }, [tracker, look, painterRef]);
+    const layersNow = (): RenderLayer[] => paint.paintedLayers().map(id => {
+      const spec = LAYER_SPEC[id];
+      const opacity = lookRef.current[id]?.opacity ?? spec.defaultOpacity;
+      return {
+        id,
+        canvas: paint.layerCanvas(id)!,
+        version: paint.layerVersion(id),
+        alpha: Math.max(0, Math.min(1, opacity)) * spec.maxAlpha,
+        blend: spec.blend,
+        tint: spec.tint,
+      };
+    });
 
-  // 毎フレーム描く
-  useEffect(() => {
+    const draw = (): boolean => {
+      if (!renderer) return false;
+      const source = getSource();
+      const frame = frameRef.current;
+      return renderer.render(source && sourceReady(source) ? source : null, frame?.landmarks ?? null, layersNow(), hiddenRef.current);
+    };
+
+    viewRef.current = {
+      capture(mirrored) {
+        const source = getSource();
+        if (!source || !sourceReady(source)) return null;
+        const out = document.createElement('canvas');
+        out.width = width;
+        out.height = height;
+        const ctx = out.getContext('2d');
+        if (!ctx) return null;
+        if (mirrored) {
+          ctx.translate(width, 0);
+          ctx.scale(-1, 1);
+        }
+        // WebGL の canvas は描いた直後でないと読めないので、ここで描き直してから写す
+        if (draw() && renderer) ctx.drawImage(renderer.output, 0, 0, width, height);
+        else ctx.drawImage(source, 0, 0, width, height);
+        return out;
+      },
+      get lastDrew() { return renderer?.lastDrew ?? false; },
+    };
+
+    // コンテキストが失われたとき（裏に回った・メモリが足りない）: 戻ったら作り直す
+    const onLost = (e: Event) => {
+      e.preventDefault();
+      renderer?.contextLost();
+    };
+    const onRestored = () => {
+      try {
+        renderer?.init();
+      } catch (err) {
+        console.warn('makeup renderer restore failed', err);
+      }
+      lastKey = '';
+    };
+    canvas.addEventListener('webglcontextlost', onLost);
+    canvas.addEventListener('webglcontextrestored', onRestored);
+
     let raf = 0;
+    let lastKey = '';
+    let lastFrame: FaceFrame | null = null;
+    let lastLook: LookState | null = null;
+    let lastDrawAt = 0;
     const tick = () => {
       raf = requestAnimationFrame(tick);
-      const painter = painterRef.current;
-      if (!painter || document.hidden) return;
-      painter.render(getSource(), lookRef.current, hiddenRef.current);
+      if (!renderer || document.hidden) return;
+      const source = getSource();
+      const frame = frameRef.current;
+      const time = source instanceof HTMLVideoElement ? source.currentTime : 0;
+      const key = `${time}|${paint.version}|${hiddenRef.current ? 1 : 0}`;
+      const now = performance.now();
+      // カメラの映像は、時刻が進まないブラウザでも止まって見えないよう、ときどきは描き直す
+      const stale = source instanceof HTMLVideoElement && renderer.lastDrew && now - lastDrawAt > 100;
+      if (key === lastKey && frame === lastFrame && lookRef.current === lastLook && !stale) return;
+      lastDrawAt = now;
+      lastKey = key;
+      lastFrame = frame;
+      lastLook = lookRef.current;
+      draw();
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [getSource, painterRef]);
 
-  // 画面を離れたら捨てる
-  useEffect(() => () => { painterRef.current = null; }, [painterRef]);
+    return () => {
+      cancelAnimationFrame(raf);
+      canvas.removeEventListener('webglcontextlost', onLost);
+      canvas.removeEventListener('webglcontextrestored', onRestored);
+      viewRef.current = null;
+      renderer?.dispose();
+    };
+    // width / height が変わると canvas の中身が消えるので、描画も作り直す
+  }, [frameRef, paint, getSource, viewRef, width, height]);
+
+  // 画面を離れるとき: WebGL のコンテキストをすぐ手放す（iOS は同時に持てる数が少なく、放っておくと溜まる）
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    return () => {
+      const gl = canvas?.getContext('webgl');
+      gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    };
+  }, []);
 
   return <canvas ref={canvasRef} className="mmm-overlay mmm-makeup" width={width} height={height} aria-hidden="true" />;
 }

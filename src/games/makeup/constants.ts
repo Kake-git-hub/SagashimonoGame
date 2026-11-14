@@ -21,8 +21,9 @@ export const LANDMARK_COUNT = 478;
 // 状態判定の閾値
 export const STATUS_THRESHOLDS = {
   // 顔の横幅（映像の短い辺に対する割合）。これより小さいと「とおい」、大きいと「ちかい」
+  // 画面をなぞって塗るので近づくのは普通のこと。「はなれてね」は、認識が切れる手前（約 2 倍）に近づいたときだけ出す
   farWidthRatio: 0.2,
-  closeWidthRatio: 0.8,
+  closeWidthRatio: 1.6,
   // 顔の向き（度）。これを超えると「まっすぐ むいてね」
   turnedYawDeg: 22,
   turnedPitchDeg: 22,
@@ -35,8 +36,19 @@ export const STATUS_THRESHOLDS = {
 // 平滑化（指数移動平均）の係数。1 に近いほど新しい値をそのまま使う
 export const SMOOTHING_ALPHA = 0.5;
 
-// 推論がこれより遅いときはフレームを間引く（ms）
+// 推論がこれより遅いときは「まびき」と表示する（ms）
 export const SLOW_INFERENCE_MS = 50;
+
+// 推論は同期処理で、その間は画面の操作が止まる。推論にかかった時間 × この割合だけ次の推論を待って、操作に時間を空ける
+export const INFERENCE_REST_RATIO = 0.5;
+export const INFERENCE_REST_MAX_MS = 150;
+
+// 写真は動かないので、推論はこの間隔でゆっくり回す（ms）
+export const PHOTO_INFERENCE_INTERVAL_MS = 250;
+
+// 顔を見つける / 追い続ける ときの信頼度のしきい値（MediaPipe の既定は 0.5）。
+// 近づいて顔の一部が切れても追い続けられるよう低めにする
+export const FACE_CONFIDENCE = 0.3;
 
 export const DEFAULT_SETTINGS: MakeupSettings = {
   mirrored: true,
@@ -44,6 +56,7 @@ export const DEFAULT_SETTINGS: MakeupSettings = {
   showLandmarks: false,
   showStats: false,
   guideOpacity: 0.8,
+  paintAssist: true,
 };
 
 // 保存キー（localStorage）

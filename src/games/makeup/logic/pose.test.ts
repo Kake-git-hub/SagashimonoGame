@@ -61,7 +61,9 @@ describe('classifyStatus', () => {
   it('小さすぎると far、大きすぎると close', () => {
     expect(faceWidthRatio(makeFace({ width: 0.1 }))).toBeCloseTo(0.1);
     expect(classifyStatus({ landmarks: makeFace({ width: 0.1 }), aspect, luma: 200 })).toBe('far');
-    expect(classifyStatus({ landmarks: makeFace({ width: 0.9 }), aspect, luma: 200 })).toBe('close');
+    // 画面をなぞって塗るので、顔が映像いっぱいでも ok。認識が切れる手前まで近づいたら close
+    expect(classifyStatus({ landmarks: makeFace({ width: 0.9 }), aspect, luma: 200 })).toBe('ok');
+    expect(classifyStatus({ landmarks: makeFace({ width: 1.8 }), aspect, luma: 200 })).toBe('close');
   });
 
   it('横長の映像では短い辺を基準にする（横幅の 15% でも高さの 27% なら ok）', () => {

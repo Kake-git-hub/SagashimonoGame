@@ -10,7 +10,7 @@
 |---|---|---|
 | さがしものゲーム | `src/games/sagashimono/` + `src/components/` + `src/services/` | 「ミッケ」風のもの探し。パズルエディタと GitHub へのアップロード機能あり |
 | ネジはずし | `src/games/neji/` | 3D 図形のネジをタップで外し、色ごとのボックスに集めるパズル。詳細は `docs/ネジはずし開発ガイド.md` |
-| マジックメイクミラー | `src/games/makeup/` + `public/makeup/` | インカメラの顔に顔認識（MediaPipe、478 点）でおけしょうを重ね（ためす）、塗る場所と向きを矢印で案内し（おしえて）、顔型から提案する（ていあん）。本来は単体アプリにしたいものの試作。詳細は `docs/お化粧アプリ開発ガイド.md` |
+| マジックメイクミラー | `src/games/makeup/` + `public/makeup/` | インカメラの顔を指でなぞっておけしょうを塗り（ためす。顔認識（MediaPipe、478 点）の顔メッシュに貼るので、塗った所が顔に付いてくる）、塗る場所と向きを矢印で案内し（おしえて）、顔型から提案する（ていあん）。本来は単体アプリにしたいものの試作。詳細は `docs/お化粧アプリ開発ガイド.md` |
 
 共通部分: `src/App.tsx`（プロフィール選択/ホーム/おうちのひと設定/各ゲームの薄いルーター）、`src/screens/HomeScreen.tsx`、`src/services/pwaUpdateService.ts`（PWA 自動更新）、`src/sw.ts`（Service Worker）。
 
@@ -38,7 +38,7 @@ bash scripts/e2e/run.sh neji-dig     # 発掘ステージ・クイズ・おた�
 bash scripts/e2e/run.sh geo-shots    # 展開図・ピラミッド・漢字ステージ（ブロックの確認とスクリーンショット）
 bash scripts/e2e/run.sh offline      # サーバーを止めて、さがしもの（絵も）・ネジはずし・マジックメイクミラーがオフラインで遊べるか
 bash scripts/e2e/run.sh makeup-smoke # 偽カメラで マジックメイクミラーの はじめに → ミラー → もどる（カメラが止まるか）
-bash scripts/e2e/run.sh makeup-face  # 顔写真で顔認識 → ためす → おしえて → ていあん の流れ（写真は初回にダウンロード、ffmpeg が要る）
+bash scripts/e2e/run.sh makeup-face  # 顔写真で顔認識 → なぞって塗る（鏡像・近づいた映像・けしゴム）→ おしえて → ていあん の流れ（写真は初回にダウンロード、ffmpeg が要る）
 ```
 
 push 前に `npm run build` / `npm run lint` / `npm test` を通す。CI（`.github/workflows/deploy.yml`）も同じ順で実行し、`main` に push されると GitHub Pages へデプロイされる。
@@ -60,6 +60,8 @@ push 前に `npm run build` / `npm run lint` / `npm test` を通す。CI（`.git
 - オフラインで全部遊べる状態を保つ: ゲームが読み込むファイル（JS/CSS/JSON/さがしものの絵 webp など）は `vite.config.ts` の `injectManifest.globPatterns` で事前キャッシュに入れる。新しい種類のファイルを足したら `bash scripts/e2e/run.sh offline` で確認する。例外はマジックメイクミラーの顔認識（wasm 約 14MB とモデル約 4MB）で、`src/sw.ts` の実行時キャッシュ（`makeup-model`）に「初めて開いたとき」に入れる（初回だけオンラインが要る）
 - マジックメイクミラーの映像・顔の点・写真は端末の外に出さない（通信は wasm とモデルのダウンロードだけ）。写真はアプリ内に保存せず、「ほぞん」で共有シート / ダウンロードに渡すだけ。カメラは「もどる」・ホームへ戻る・裏に回ったときに必ず止める（`useCamera`）
 - マジックメイクミラーの文言も子ども向けのひらがな中心（メイク用語はカタカナ）。文言は `src/games/makeup/strings.ts` に集めてある。`src/games/makeup/` の中からプラットフォームのコード（`profileService` など）を import しない（`MakeupApp` の props で受け取る。後で単体アプリに切り出すため）
+- マジックメイクミラーの描画は、canvas・テクスチャを最初に 1 回だけ作って使い回す。毎フレーム `document.createElement('canvas')` しない（iPad でメモリが尽きて落ちた原因）。canvas の `filter` は Safari で使えないので頼らない。描画やなぞる操作を変えたら `bash scripts/e2e/run.sh makeup-face` を通す（canvas を作り続けていないことも確かめる）
+- マジックメイクミラーの推論（顔認識）は同期処理で画面の操作を止める。映像のコマが変わったときだけ回し、推論のあとに休みを入れる仕組み（`useFaceTracker`）を外さない
 - レシピ（`public/makeup/recipes/`）や領域の番号を変えたら `npm test`（`recipes.test.ts` / `regions.test.ts`）を通す。顔の点の番号は `logic/regions.ts` にだけ書く
 - ホーム画面など軽い画面から three.js に依存するモジュールを import しない（`src/games/neji/logic/geometry.ts` 等）。ネジはずしは `React.lazy` で別チャンクにしてある
 - ネジはずしのステージ JSON を追加・変更したら `npm run validate:neji` を通す。検証を弱めてごまかさない（解けないステージを配布しないための仕組み）。底面（`dir: [0,-1,0]`）にもネジを置き、外側のパーツを外さないと取れないネジ（ふた・上の段・前の画）を多めに入れる
