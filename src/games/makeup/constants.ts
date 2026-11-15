@@ -53,6 +53,7 @@ export const FACE_CONFIDENCE = 0.3;
 export const DEFAULT_SETTINGS: MakeupSettings = {
   mirrored: true,
   delegate: 'GPU',
+  delegateChosen: false,
   showLandmarks: false,
   showStats: false,
   guideOpacity: 0.8,

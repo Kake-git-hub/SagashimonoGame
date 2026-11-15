@@ -1,6 +1,7 @@
 import { S } from '../strings';
 import { MakeupSettings } from '../types';
 import { TrackerStats } from '../hooks/useFaceTracker';
+import { forgetGpuFailure } from '../services/gpuGuard';
 
 interface Props {
   settings: MakeupSettings;
@@ -40,7 +41,11 @@ export function SettingsSheet({ settings, stats, isPhoto, onChange, onOpenDebug,
                 role="radio"
                 aria-checked={settings.delegate === d}
                 className={settings.delegate === d ? 'mmm-segment-on' : ''}
-                onClick={() => onChange({ ...settings, delegate: d })}
+                onClick={() => {
+                  // GPU を選び直したら、前に固まった記録を忘れて、もう一度ためせるようにする
+                  if (d === 'GPU') forgetGpuFailure();
+                  onChange({ ...settings, delegate: d, delegateChosen: true });
+                }}
               >
                 {d}
               </button>

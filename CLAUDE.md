@@ -62,6 +62,7 @@ push 前に `npm run build` / `npm run lint` / `npm test` を通す。CI（`.git
 - マジックメイクミラーの映像・顔の点・写真は端末の外に出さない（通信は wasm とモデルのダウンロードだけ）。写真はアプリ内に保存せず、「ほぞん」で共有シート / ダウンロードに渡すだけ。カメラは「もどる」・ホームへ戻る・裏に回ったときに必ず止める（`useCamera`）
 - マジックメイクミラーの文言も子ども向けのひらがな中心（メイク用語はカタカナ）。文言は `src/games/makeup/strings.ts` に集めてある。`src/games/makeup/` の中からプラットフォームのコード（`profileService` など）を import しない（`MakeupApp` の props で受け取る。後で単体アプリに切り出すため）
 - マジックメイクミラーの描画は、canvas・テクスチャを最初に 1 回だけ作って使い回す。毎フレーム `document.createElement('canvas')` しない（iPad でメモリが尽きて落ちた原因）。canvas の `filter` は Safari で使えないので頼らない。描画やなぞる操作を変えたら `bash scripts/e2e/run.sh makeup-face` を通す（canvas を作り続けていないことも確かめる）
+- マジックメイクミラーの顔認識は、iPhone / iPad では CPU を既定にする（GPU だと最初の推論で固まって落ちる iPad がある。`services/gpuGuard.ts`）。既定を GPU に戻さない
 - マジックメイクミラーの推論（顔認識）は同期処理で画面の操作を止める。映像のコマが変わったときだけ回し、推論のあとに休みを入れる仕組み（`useFaceTracker`）を外さない
 - 実機のデバッグログを読むとき: `git fetch origin debug-logs && git ls-tree --name-only origin/debug-logs debug-logs/ | tail -5` で新しいものを探し、`git show origin/debug-logs:debug-logs/<名前>.txt` で読む
 - 実機で落ちる・固まる不具合は、推測で直す前にデバッグログで場所を確かめる。重い処理（読み込み・初期化・最初の 1 回）の **前と後** に記録を入れておくと、処理の中で落ちたときに「まえ」で記録が終わる。マジックメイクミラーの中からは `services/diagnostics.ts` の `diag()` を使う（保存先は `MakeupApp` の `onDebugLog` で受け取る）。毎フレームは書かない（定期的な状態は `replaceKey` で 1 行を上書きする）。映像・顔の点は記録しない

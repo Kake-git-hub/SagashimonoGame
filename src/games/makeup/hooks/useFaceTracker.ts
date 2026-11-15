@@ -4,6 +4,7 @@ import { FaceTracker, FrameSource, loadFaceTracker } from '../services/faceTrack
 import { FrameHolder, smoothLandmarks } from '../logic/smoothing';
 import { classifyStatus, faceBounds } from '../logic/pose';
 import { diag } from '../services/diagnostics';
+import { clearGpuPending } from '../services/gpuGuard';
 import { initialCloseRange, nextCloseRange, paddedLayout, unpadLandmarks } from '../logic/closeRange';
 import {
   INFERENCE_REST_MAX_MS, INFERENCE_REST_RATIO, PHOTO_INFERENCE_INTERVAL_MS, SLOW_INFERENCE_MS, SMOOTHING_ALPHA, STATUS_THRESHOLDS,
@@ -102,6 +103,8 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
       });
     return () => {
       cancelled = true;
+      // 推論まで行かずに画面を離れたときは、落ちたわけではないので印を消す
+      clearGpuPending();
       trackerRef.current?.close();
       trackerRef.current = null;
       frameRef.current = null;
@@ -216,6 +219,8 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
       const ended = performance.now();
       const ms = ended - now;
       if (early) diag(`すいろん ${detectCount + 1} かいめ: おわり`, { ms: Math.round(ms), face: !!detected });
+      // 最初の推論が無事に終わった: GPU でも固まらない端末
+      if (detectCount === 0) clearGpuPending();
       detectCount++;
       avgMs = avgMs === 0 ? ms : avgMs * 0.9 + ms * 0.1;
       nextAllowedAt = ended + Math.min(INFERENCE_REST_MAX_MS, avgMs * INFERENCE_REST_RATIO);

@@ -56,7 +56,7 @@ export const S = {
     showLandmarks: 'かおの てんを みせる',
     showStats: 'はやさを みせる',
     delegate: 'かおを みつける やりかた',
-    delegateNote: 'うまく うごかないときは CPU に してみてね',
+    delegateNote: 'iPhone や iPad では GPU だと とまってしまうことが あるので、CPU が おすすめ',
     debugTitle: 'しらべる（かいはつよう）',
     debugNote: 'とまってしまうとき、どれを きると とまらなくなるかを しらべるための スイッチだよ。かえたら いちど もどって ひらきなおしてね',
     debugNoTracking: 'かおを みつけない',

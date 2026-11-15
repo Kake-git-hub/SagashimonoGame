@@ -4,6 +4,7 @@ import { MakeupSettings } from '../types';
 import { CameraHandle } from '../hooks/useCamera';
 import { useFaceTracker } from '../hooks/useFaceTracker';
 import { useAutoPan } from '../hooks/useAutoPan';
+import { resolveDelegate } from '../services/gpuGuard';
 import { LAYER_REGIONS, LayerId, LookState, lookReducer } from '../logic/layers';
 import { BrushSize } from '../logic/brush';
 import { clientToFrame, frameToClient } from '../logic/viewport';
@@ -133,7 +134,9 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   }, []);
 
   const getSource = useCallback(() => (isPhoto ? imageRef.current : videoRef.current), [isPhoto]);
-  const tracker = useFaceTracker({ enabled: !settings.debugNoTracking, delegate: settings.delegate, getSource });
+  // GPU を選んでいても、前に GPU の途中で落ちた端末では CPU にする
+  const delegate = useMemo(() => resolveDelegate(settings.delegate), [settings.delegate]);
+  const tracker = useFaceTracker({ enabled: !settings.debugNoTracking, delegate, getSource });
   const { loadState, status, stats } = tracker;
   // 枠からはみ出した映像のうち、顔のある側を見せる
   const panRef = useAutoPan(tracker, stageRef, frameSize.w, frameSize.h);

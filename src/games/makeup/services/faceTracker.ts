@@ -15,6 +15,7 @@ import nosimdWasmUrl from '@mediapipe/tasks-vision/vision_wasm_nosimd_internal.w
 import { Delegate, FaceFrame } from '../types';
 import { FACE_CONFIDENCE } from '../constants';
 import { diag } from './diagnostics';
+import { markGpuPending } from './gpuGuard';
 
 export const MODEL_URL = `${import.meta.env.BASE_URL}makeup/models/face_landmarker.task`;
 
@@ -122,6 +123,8 @@ export async function loadFaceTracker(delegate: Delegate, callbacks: LoadCallbac
   let used: Delegate = delegate;
   try {
     diag(`にんしき: つくる（${delegate}）まえ`);
+    // GPU は端末によって固まる。ここから最初の推論が終わるまでに落ちたら、次からは CPU にする（gpuGuard）
+    if (delegate === 'GPU') markGpuPending();
     landmarker = await create(delegate);
   } catch (err) {
     diag(`にんしき: つくる（${delegate}）しっぱい`, err);

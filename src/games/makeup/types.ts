@@ -38,6 +38,8 @@ export type Delegate = 'GPU' | 'CPU';
 export interface MakeupSettings {
   mirrored: boolean;
   delegate: Delegate;
+  // 顔認識のやり方を、設定で自分で選んだか。選んでいなければ端末に合わせた既定（iPhone / iPad は CPU）を使う
+  delegateChosen: boolean;
   showLandmarks: boolean;
   showStats: boolean;
   guideOpacity: number; // 0〜1

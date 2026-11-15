@@ -1,6 +1,7 @@
 import { DEFAULT_SETTINGS, LAST_LOOK_KEY, SETTINGS_KEY } from '../constants';
 import { MakeupSettings } from '../types';
 import { LookState, sanitizeLook } from '../logic/layers';
+import { defaultDelegate } from './gpuGuard';
 
 /**
  * 設定の保存（localStorage、接頭辞 makeup_）
@@ -9,11 +10,13 @@ import { LookState, sanitizeLook } from '../logic/layers';
 export function getMakeupSettings(): MakeupSettings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
-    if (!raw) return { ...DEFAULT_SETTINGS };
+    if (!raw) return { ...DEFAULT_SETTINGS, delegate: defaultDelegate() };
     const parsed = JSON.parse(raw) as Partial<MakeupSettings>;
     return {
       mirrored: typeof parsed.mirrored === 'boolean' ? parsed.mirrored : DEFAULT_SETTINGS.mirrored,
-      delegate: parsed.delegate === 'CPU' ? 'CPU' : 'GPU',
+      // 以前の版は GPU を既定として保存していたので、自分で選んだ印があるときだけ保存された値を使う
+      delegate: parsed.delegateChosen === true ? (parsed.delegate === 'CPU' ? 'CPU' : 'GPU') : defaultDelegate(),
+      delegateChosen: parsed.delegateChosen === true,
       showLandmarks: !!parsed.showLandmarks,
       showStats: !!parsed.showStats,
       guideOpacity: typeof parsed.guideOpacity === 'number' ? Math.max(0.2, Math.min(1, parsed.guideOpacity)) : DEFAULT_SETTINGS.guideOpacity,
@@ -23,7 +26,7 @@ export function getMakeupSettings(): MakeupSettings {
       debugLowRes: !!parsed.debugLowRes,
     };
   } catch {
-    return { ...DEFAULT_SETTINGS };
+    return { ...DEFAULT_SETTINGS, delegate: defaultDelegate() };
   }
 }
 
