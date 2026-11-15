@@ -60,6 +60,29 @@ const { launch, gotoHome, report, OUT } = require('./common.cjs');
     // ホームからもデバッグの記録を開ける
     await page.click('button[aria-label="デバッグ"]');
     await page.waitForSelector('[data-testid="debug-log"]');
+    // リポジトリに ほぞん: トークンは 1 回聞かれたら端末に保存され、2 回目からは聞かれない（GitHub への通信はここでは模擬する）
+    const puts = [];
+    await page.route('https://api.github.com/**', route => {
+      const req = route.request();
+      if (req.method() === 'PUT') puts.push({ url: req.url(), body: JSON.parse(req.postData()), auth: req.headers().authorization });
+      route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+    let prompts = 0;
+    const onDialog = d => { prompts++; d.accept('  github_pat_e2e_dummy\n'); };
+    page.on('dialog', onDialog);
+    for (let i = 0; i < 2; i++) {
+      await page.click('button:has-text("リポジトリに ほぞん")');
+      await page.waitForFunction(() => document.querySelector('[data-testid="debug-note"]').textContent.startsWith('✅'), null, { timeout: 10000 });
+      await page.waitForTimeout(200);
+    }
+    page.off('dialog', onDialog);
+    await page.unroute('https://api.github.com/**');
+    // ダミーのトークンを残すと、このあとの「落ちたあとの自動保存」が本物の GitHub へ行ってしまうので消しておく
+    await page.click('button:has-text("トークンを けす")');
+    if (await page.evaluate(() => localStorage.getItem('github_pat')) !== null) errors.push('the token was not removed');
+    console.log(label, 'save to repository:', puts.length, 'uploads,', prompts, 'token prompt(s)');
+    if (prompts !== 1) errors.push(`the token should be asked once, was asked ${prompts} times`);
+    if (puts.length !== 2 || puts.some(p => p.body.branch !== 'debug-logs' || p.auth !== 'Bearer github_pat_e2e_dummy')) errors.push('debug log upload request is wrong');
     await page.click('[role="dialog"][aria-label="デバッグ"] button:has-text("とじる")');
 
     // ミラー画面を開いたまま落ちたことにして開き直す → はじめに に「まえに とまった」と出て、記録に手がかりが残っている

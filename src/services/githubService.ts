@@ -350,9 +350,14 @@ export function getStoredGitHubToken(): string | null {
   }
 }
 
+// 貼り付けたときに混ざる空白・改行を取り除く
+export function cleanGitHubToken(raw: string): string {
+  return raw.replace(/\s+/g, '');
+}
+
 export function storeGitHubToken(token: string | null): void {
   try {
-    if (token) localStorage.setItem(PAT_KEY, token);
+    if (token) localStorage.setItem(PAT_KEY, cleanGitHubToken(token));
     else localStorage.removeItem(PAT_KEY);
   } catch {
     // 保存できなくても続ける
@@ -372,9 +377,9 @@ async function ensureDebugBranch(token: string): Promise<void> {
   const api = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git`;
   const existing = await fetch(`${api}/ref/heads/${DEBUG_LOG_BRANCH}`, { headers: githubHeaders(token) });
   if (existing.ok) return;
-  if (existing.status !== 404) throw new Error(`branch check failed: ${existing.status}`);
+  if (existing.status !== 404) throw new GitHubStepError('ブランチの かくにん', existing.status);
   const main = await fetch(`${api}/ref/heads/${BRANCH}`, { headers: githubHeaders(token) });
-  if (!main.ok) throw new Error(`main ref failed: ${main.status}`);
+  if (!main.ok) throw new GitHubStepError('main の かくにん', main.status);
   const sha = (await main.json()).object.sha as string;
   const created = await fetch(`${api}/refs`, {
     method: 'POST',
@@ -382,7 +387,28 @@ async function ensureDebugBranch(token: string): Promise<void> {
     body: JSON.stringify({ ref: `refs/heads/${DEBUG_LOG_BRANCH}`, sha }),
   });
   // 422 = 同時に別の保存が作った（もうある）
-  if (!created.ok && created.status !== 422) throw new Error(`branch create failed: ${created.status}`);
+  if (!created.ok && created.status !== 422) throw new GitHubStepError('ブランチを つくる', created.status);
+}
+
+// どの段階で、GitHub が何番を返して失敗したか
+class GitHubStepError extends Error {
+  step: string;
+  status: number;
+  constructor(step: string, status: number) {
+    super(`${step}: ${status}`);
+    this.step = step;
+    this.status = status;
+  }
+}
+
+export interface DebugUploadResult extends GitHubUploadResult {
+  // 失敗の種類: unauthorized = トークンが違う / 期限切れ、forbidden = 権限が足りない、other = それ以外（通信など）
+  reason?: 'unauthorized' | 'forbidden' | 'other';
+}
+
+function failure(step: string, status: number): DebugUploadResult {
+  const reason = status === 401 ? 'unauthorized' : status === 403 || status === 404 ? 'forbidden' : 'other';
+  return { success: false, message: `${step}: GitHub ${status}`, reason };
 }
 
 // 保存するファイルの名前（時刻順に並ぶ）
@@ -396,7 +422,8 @@ export function debugLogPath(now: Date = new Date()): string {
  * デバッグログ（文字）をリポジトリの debug-logs ブランチに保存する。
  * 開発者はそこから読める（git fetch origin debug-logs）。main には触れないので、デプロイは走らない
  */
-export async function uploadDebugLog(token: string, text: string, note = ''): Promise<GitHubUploadResult> {
+export async function uploadDebugLog(rawToken: string, text: string, note = ''): Promise<DebugUploadResult> {
+  const token = cleanGitHubToken(rawToken);
   try {
     await ensureDebugBranch(token);
     const path = debugLogPath();
@@ -409,10 +436,10 @@ export async function uploadDebugLog(token: string, text: string, note = ''): Pr
         branch: DEBUG_LOG_BRANCH,
       }),
     });
-    if (response.status === 401) return { success: false, message: 'unauthorized' };
-    if (!response.ok) return { success: false, message: `GitHub ${response.status}` };
+    if (!response.ok) return failure('ファイルを かく', response.status);
     return { success: true, message: path, url: path };
   } catch (err) {
-    return { success: false, message: err instanceof Error ? err.message : String(err) };
+    if (err instanceof GitHubStepError) return failure(err.step, err.status);
+    return { success: false, message: err instanceof Error ? err.message : String(err), reason: 'other' };
   }
 }

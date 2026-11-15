@@ -45,6 +45,27 @@ describe('uploadDebugLog', () => {
     expect((await uploadDebugLog('token', 'x')).success).toBe(true);
     expect(calls.map(c => c.method)).toEqual(['GET', 'PUT']);
     calls = mockFetch(call => (call.method === 'PUT' ? { status: 401 } : { status: 200 }));
-    expect(await uploadDebugLog('bad', 'x')).toMatchObject({ success: false, message: 'unauthorized' });
+    expect(await uploadDebugLog('bad', 'x')).toMatchObject({ success: false, reason: 'unauthorized' });
+  });
+
+  it('どの段階で失敗したかと理由を返す（最初の確認で 401 = トークンが違う、ブランチ作成で 403 = 権限が足りない）', async () => {
+    mockFetch(() => ({ status: 401 }));
+    expect(await uploadDebugLog('bad', 'x')).toMatchObject({ success: false, reason: 'unauthorized', message: 'ブランチの かくにん: GitHub 401' });
+    mockFetch(call => {
+      if (call.url.endsWith(`/git/ref/heads/${DEBUG_LOG_BRANCH}`)) return { status: 404 };
+      if (call.url.endsWith('/git/ref/heads/main')) return { status: 200, json: { object: { sha: 'abc' } } };
+      return { status: 403 };
+    });
+    expect(await uploadDebugLog('weak', 'x')).toMatchObject({ success: false, reason: 'forbidden', message: 'ブランチを つくる: GitHub 403' });
+  });
+
+  it('貼り付けたトークンに混ざった空白・改行は取り除いて使う', async () => {
+    const seen: string[] = [];
+    vi.stubGlobal('fetch', async (_url: string, init?: RequestInit) => {
+      seen.push((init?.headers as Record<string, string>).Authorization);
+      return { ok: true, status: 200, json: async () => ({}) };
+    });
+    await uploadDebugLog('  github_pat_abc\n', 'x');
+    expect(seen.every(h => h === 'Bearer github_pat_abc')).toBe(true);
   });
 });
