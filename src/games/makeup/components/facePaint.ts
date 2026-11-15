@@ -1,6 +1,6 @@
 /**
  * 塗ったメイクの絵（レイヤーごとに 1 枚、顔を平らに開いた UV 空間の canvas）
- * - なぞる: 筆のスタンプを UV の位置に押す（「はみださない」のときはパーツの型で切り抜く）
+ * - なぞる: 筆のスタンプを UV の位置に押す。ひと筆ごとに濃さの上限があり、重ねて塗る回数で濃くなる
  * - 自動で塗る: パーツの型どおりに色を入れる（できあがりを みる / ていあん の色で ためす）
  * - けしゴム: すべてのレイヤーから消す
  * 描画（makeupRenderer）は、この canvas をテクスチャにして今の顔のメッシュへ貼る。
@@ -135,6 +135,10 @@ export class FacePaint {
   private masks = new Map<LayerId, Surface>();
   private tips = new Map<number, Surface>();
   private scratch: Surface | null = null;
+  // ひと筆の間だけ使う: 塗る前の絵、このひと筆でなぞった範囲、いま塗っているレイヤー（undefined = なぞっていない）
+  private strokeBase: Surface | null = null;
+  private strokeMask: Surface | null = null;
+  private strokeTarget: LayerId | null | undefined = undefined;
   private edge: Surface | null = null;
   private listeners = new Set<() => void>();
   // どれかのレイヤーが変わるたびに増える
@@ -224,13 +228,34 @@ export class FacePaint {
   }
 
   /**
+   * ひと筆のはじまり（指を付けたとき）。target は塗るレイヤー（けしゴムなら null）
+   * ひと筆で付く濃さには上限（筆の flow）があり、同じ所を行ったり来たりしても、指を離すまではそれ以上濃くならない。
+   * 指を離してもう一度なぞると、その分だけ濃くなる（重ね塗りの回数で濃さが決まる）。
+   * そのために、ひと筆の間は「塗る前の絵」と「このひと筆でなぞった範囲」を別に持つ
+   */
+  beginStroke(target: LayerId | null): void {
+    this.strokeTarget = target;
+    if (target === null) return;
+    const layer = this.layer(target);
+    if (!this.strokeBase) this.strokeBase = makeSurface(PAINT_SIZE, PAINT_SIZE);
+    if (!this.strokeMask) this.strokeMask = makeSurface(PAINT_SIZE, PAINT_SIZE);
+    this.strokeBase.ctx.clearRect(0, 0, PAINT_SIZE, PAINT_SIZE);
+    this.strokeBase.ctx.drawImage(layer.canvas, 0, 0);
+    this.strokeMask.ctx.clearRect(0, 0, PAINT_SIZE, PAINT_SIZE);
+  }
+
+  // ひと筆のおわり（指を離したとき）
+  endStroke(): void {
+    this.strokeTarget = undefined;
+  }
+
+  /**
    * なぞった所に塗る / 消す
    * @param target  塗るレイヤー。null なら けしゴム（すべてのレイヤーから消す）
    * @param stamps  スタンプを押す位置（UV）
    * @param color   塗る色（#rrggbb）。けしゴムのときは使わない
-   * @param assist  true ならパーツの型で切り抜く（はみださない）
    */
-  stroke(target: LayerId | null, stamps: readonly FaceUV[], brush: BrushSpec, color: string, assist: boolean): void {
+  stroke(target: LayerId | null, stamps: readonly FaceUV[], brush: BrushSpec, color: string): void {
     if (stamps.length === 0) return;
     const S = PAINT_SIZE;
     const r = Math.max(1, brush.radius * S);
@@ -242,21 +267,18 @@ export class FacePaint {
     const bx = Math.max(0, Math.floor(minX) - 1), by = Math.max(0, Math.floor(minY) - 1);
     const bw = Math.min(S, Math.ceil(maxX) + 1) - bx, bh = Math.min(S, Math.ceil(maxY) + 1) - by;
     if (bw <= 0 || bh <= 0) return;
-
-    // 作業用の canvas に、変わる範囲だけスタンプを押す
+    const tip = this.tip(brush.hardness).canvas;
     const scratch = this.getScratch();
     const sctx = scratch.ctx;
-    const tip = this.tip(brush.hardness).canvas;
-    sctx.save();
-    sctx.beginPath();
-    sctx.rect(bx, by, bw, bh);
-    sctx.clip();
-    sctx.clearRect(bx, by, bw, bh);
-    sctx.globalAlpha = Math.max(0.05, Math.min(1, brush.flow));
-    for (const p of stamps) sctx.drawImage(tip, p.u * S - r, p.v * S - r, r * 2, r * 2);
-    sctx.globalAlpha = 1;
 
     if (target === null) {
+      // けしゴム: スタンプの形に、塗ってあるものを消す
+      sctx.save();
+      sctx.beginPath();
+      sctx.rect(bx, by, bw, bh);
+      sctx.clip();
+      sctx.clearRect(bx, by, bw, bh);
+      for (const p of stamps) sctx.drawImage(tip, p.u * S - r, p.v * S - r, r * 2, r * 2);
       sctx.restore();
       for (const layer of this.layers.values()) {
         const b = layer.box;
@@ -270,17 +292,34 @@ export class FacePaint {
       return;
     }
 
-    if (assist) {
-      sctx.globalCompositeOperation = 'destination-in';
-      sctx.drawImage(this.mask(target), bx, by, bw, bh, bx, by, bw, bh);
-    }
+    // beginStroke が呼ばれていなければ、ここからひと筆を始める
+    if (this.strokeTarget !== target || !this.strokeBase || !this.strokeMask) this.beginStroke(target);
+    const base = this.strokeBase!, mask = this.strokeMask!;
+    const layer = this.layer(target);
+
+    // 1. このひと筆でなぞった範囲に、スタンプを足す（重なっても 1 より濃くはならない）
+    for (const p of stamps) mask.ctx.drawImage(tip, p.u * S - r, p.v * S - r, r * 2, r * 2);
+
+    // 2. なぞった範囲を色で塗った絵を、作業用の canvas に作る（変わる範囲だけ）
+    sctx.save();
+    sctx.beginPath();
+    sctx.rect(bx, by, bw, bh);
+    sctx.clip();
+    sctx.clearRect(bx, by, bw, bh);
+    sctx.drawImage(mask.canvas, bx, by, bw, bh, bx, by, bw, bh);
     sctx.globalCompositeOperation = 'source-in';
     sctx.fillStyle = color;
     sctx.fillRect(bx, by, bw, bh);
     sctx.restore();
 
-    const layer = this.layer(target);
-    layer.ctx.drawImage(scratch.canvas, bx, by, bw, bh, bx, by, bw, bh);
+    // 3. 「塗る前の絵」に、ひと筆ぶんの濃さ（flow）で重ねたものを、レイヤーに書き直す
+    const lctx = layer.ctx;
+    lctx.clearRect(bx, by, bw, bh);
+    lctx.drawImage(base.canvas, bx, by, bw, bh, bx, by, bw, bh);
+    lctx.globalAlpha = Math.max(0.05, Math.min(1, brush.flow));
+    lctx.drawImage(scratch.canvas, bx, by, bw, bh, bx, by, bw, bh);
+    lctx.globalAlpha = 1;
+
     growBox(layer, bx, by, bw, bh);
     const first = !layer.painted;
     layer.painted = true;
@@ -288,11 +327,13 @@ export class FacePaint {
   }
 
   // パーツの型どおりに色を入れる（そのレイヤーに塗ってあったものは置き換える）
-  fill(id: LayerId, color: string, notify = true): void {
+  fill(id: LayerId, color: string, opacity = 1, notify = true): void {
     const layer = this.layer(id);
     const ctx = layer.ctx;
     ctx.clearRect(0, 0, PAINT_SIZE, PAINT_SIZE);
+    ctx.globalAlpha = Math.max(0, Math.min(1, opacity));
     ctx.drawImage(this.mask(id), 0, 0);
+    ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-in';
     ctx.fillStyle = color;
     ctx.fillRect(0, 0, PAINT_SIZE, PAINT_SIZE);
@@ -307,7 +348,7 @@ export class FacePaint {
     this.clearAll(false);
     for (const id of LAYER_ORDER) {
       const style = look[id];
-      if (style) this.fill(id, style.color, false);
+      if (style) this.fill(id, style.color, style.opacity, false);
     }
     this.changed(null, true);
   }
@@ -358,6 +399,11 @@ export class FacePaint {
     for (const m of this.masks.values()) releaseSurface(m);
     for (const t of this.tips.values()) releaseSurface(t);
     releaseSurface(this.scratch);
+    releaseSurface(this.strokeBase);
+    releaseSurface(this.strokeMask);
+    this.strokeBase = null;
+    this.strokeMask = null;
+    this.strokeTarget = undefined;
     releaseSurface(this.edge);
     this.layers.clear();
     this.masks.clear();

@@ -1,25 +1,33 @@
 import { describe, expect, it } from 'vitest';
-import { brushFor, BRUSH_SIZES, eraserBrush, strokeStamps } from './brush';
+import { brushFor, BRUSH_SIZES, buildUp, eraserBrush, strokeStamps } from './brush';
 import { LAYER_ORDER } from './layers';
 
 describe('brushFor', () => {
   it('ふとさ は ほそい < ふつう < ふとい', () => {
     for (const layer of LAYER_ORDER) {
-      for (const assist of [false, true]) {
-        const [s, m, l] = BRUSH_SIZES.map(size => brushFor(layer, size, assist).radius);
-        expect(s).toBeLessThan(m);
-        expect(m).toBeLessThan(l);
-      }
+      const [s, m, l] = BRUSH_SIZES.map(size => brushFor(layer, size).radius);
+      expect(s).toBeLessThan(m);
+      expect(m).toBeLessThan(l);
     }
   });
 
-  it('アイラインは細く、チークは太い。はみださない のときは太めになる', () => {
-    expect(brushFor('eyeliner', 'm', false).radius).toBeLessThan(brushFor('lip', 'm', false).radius);
-    expect(brushFor('lip', 'm', false).radius).toBeLessThan(brushFor('blush', 'm', false).radius);
-    for (const layer of LAYER_ORDER) {
-      expect(brushFor(layer, 'm', true).radius).toBeGreaterThan(brushFor(layer, 'm', false).radius);
-    }
+  it('アイラインは細く、チークは太い', () => {
+    expect(brushFor('eyeliner', 'm').radius).toBeLessThan(brushFor('lip', 'm').radius);
+    expect(brushFor('lip', 'm').radius).toBeLessThan(brushFor('blush', 'm').radius);
     expect(eraserBrush('l').radius).toBeGreaterThan(eraserBrush('s').radius);
+  });
+
+  it('ひと筆では塗りきらず、重ねるほど濃くなる（3 回でもまだ伸びしろがある）', () => {
+    for (const layer of LAYER_ORDER) {
+      const { flow } = brushFor(layer, 'm');
+      expect(flow).toBeGreaterThan(0.2);
+      expect(flow).toBeLessThan(0.7);
+      expect(buildUp(flow, 1)).toBeCloseTo(flow);
+      expect(buildUp(flow, 2)).toBeGreaterThan(buildUp(flow, 1));
+      expect(buildUp(flow, 3)).toBeGreaterThan(buildUp(flow, 2));
+      expect(buildUp(flow, 3)).toBeLessThan(1);
+    }
+    expect(buildUp(0.3, 0)).toBe(0);
   });
 });
 

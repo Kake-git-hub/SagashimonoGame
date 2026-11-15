@@ -11,38 +11,38 @@ export const BRUSH_SIZES: readonly BrushSize[] = ['s', 'm', 'l'];
 export interface BrushSpec {
   radius: number;    // 半径（UV）
   hardness: number;  // 0〜1。中心からこの割合までは濃さが一定で、その外がぼける
-  flow: number;      // 1 回押したときの濃さ（0〜1）。重ねて なぞるほど濃くなる
+  // ひと筆（指を付けてから離すまで）で付く濃さの上限（0〜1）。
+  // 同じ所を重ねて塗る回数で濃さが決まる: 1 回で flow、2 回で 1 − (1 − flow)²、… と少しずつ濃くなる
+  flow: number;
 }
 
-// パーツごとの「ふつう」の筆。チークやベースは大きくふんわり、アイラインやまゆは細くくっきり
-const BASE_BRUSH: Record<LayerId, { radius: number; hardness: number }> = {
-  base:      { radius: 0.06,  hardness: 0.2 },
-  concealer: { radius: 0.022, hardness: 0.3 },
-  blush:     { radius: 0.05,  hardness: 0.1 },
-  eyeshadow: { radius: 0.018, hardness: 0.3 },
-  eyeliner:  { radius: 0.005, hardness: 0.6 },
-  brow:      { radius: 0.008, hardness: 0.5 },
-  highlight: { radius: 0.02,  hardness: 0.2 },
-  lip:       { radius: 0.011, hardness: 0.5 },
+// パーツごとの「ふつう」の筆。チークやベースは大きくふんわり、アイラインやまゆは細くくっきり。
+// flow はひと筆の濃さ。うすく重ねたいもの（チーク・ベース）は小さく、線をはっきり引きたいもの（アイライン）は大きく
+const BASE_BRUSH: Record<LayerId, { radius: number; hardness: number; flow: number }> = {
+  base:      { radius: 0.06,  hardness: 0.2, flow: 0.3 },
+  concealer: { radius: 0.022, hardness: 0.3, flow: 0.35 },
+  blush:     { radius: 0.05,  hardness: 0.1, flow: 0.3 },
+  eyeshadow: { radius: 0.018, hardness: 0.3, flow: 0.35 },
+  eyeliner:  { radius: 0.005, hardness: 0.6, flow: 0.6 },
+  brow:      { radius: 0.008, hardness: 0.5, flow: 0.45 },
+  highlight: { radius: 0.02,  hardness: 0.2, flow: 0.35 },
+  lip:       { radius: 0.011, hardness: 0.5, flow: 0.4 },
 };
 
 const SIZE_SCALE: Record<BrushSize, number> = { s: 0.6, m: 1, l: 1.7 };
 
-// 「はみださない」のときは型が形を決めるので、筆は太めにして なぞりやすくする
-const ASSIST_SCALE = 2.2;
-const ASSIST_MIN_RADIUS = 0.022;
-
-export function brushFor(layer: LayerId, size: BrushSize, assist: boolean): BrushSpec {
+export function brushFor(layer: LayerId, size: BrushSize): BrushSpec {
   const base = BASE_BRUSH[layer];
-  const radius = base.radius * SIZE_SCALE[size];
-  if (assist) {
-    return { radius: Math.max(ASSIST_MIN_RADIUS * SIZE_SCALE[size], radius * ASSIST_SCALE), hardness: 0.6, flow: 0.6 };
-  }
-  return { radius, hardness: base.hardness, flow: 0.45 };
+  return { radius: base.radius * SIZE_SCALE[size], hardness: base.hardness, flow: base.flow };
 }
 
 export function eraserBrush(size: BrushSize): BrushSpec {
   return { radius: 0.03 * SIZE_SCALE[size], hardness: 0.6, flow: 1 };
+}
+
+// 同じ所を n 回なぞったときの濃さ（0〜1）
+export function buildUp(flow: number, strokes: number): number {
+  return 1 - Math.pow(1 - Math.max(0, Math.min(1, flow)), Math.max(0, strokes));
 }
 
 // これより離れた 2 点はつながない（顔を見失ったあとなどに、長い線が引かれないように）

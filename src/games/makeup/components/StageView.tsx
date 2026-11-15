@@ -13,15 +13,22 @@ interface Props {
   stageRef?: React.RefObject<HTMLDivElement | null>;
   // 映像（または写真）の実サイズが分かった / 変わったとき
   onFrameSize?: (width: number, height: number) => void;
-  // 映像の上に重ねるもの（メイク描画・ガイド描画の canvas、状態表示）
+  // 映像と一緒に拡大・移動する入れ物（useStageView が transform を書く）と、その大きさ（映像の実サイズ）
+  viewElRef?: React.RefObject<HTMLDivElement | null>;
+  frameWidth: number;
+  frameHeight: number;
+  // 映像にぴったり重ねるもの（メイク描画・ガイド描画の canvas）。映像と一緒に拡大・移動する
+  layers?: React.ReactNode;
+  // 枠に対して置くもの（なぞる面・状態表示・ボタン）。拡大しても動かない
   children?: React.ReactNode;
 }
 
 /**
  * カメラ映像（または写真）と、その上に重ねる canvas の置き場
- * 鏡像は CSS の transform で行い、重ねる canvas にも同じ変換が掛かるので座標はそのまま使える
+ * 映像と canvas は、映像の実サイズの入れ物（.mmm-view）に入れ、入れ物ごと拡大・移動して見せる（アップ）。
+ * 鏡像は入れ物の中身を CSS の transform で反転し、重ねる canvas にも同じ変換が掛かるので座標はそのまま使える
  */
-export function StageView({ source, mirrored, videoRef, imageRef, stageRef, onFrameSize, children }: Props) {
+export function StageView({ source, mirrored, videoRef, imageRef, stageRef, viewElRef, frameWidth, frameHeight, onFrameSize, layers, children }: Props) {
   const stream = source.kind === 'camera' ? source.stream : null;
   const photoUrl = source.kind === 'photo' ? source.url : null;
 
@@ -60,21 +67,24 @@ export function StageView({ source, mirrored, videoRef, imageRef, stageRef, onFr
 
   return (
     <div ref={stageRef} className={`mmm-stage${mirrored ? ' mmm-mirrored' : ''}`}>
-      {photoUrl ? (
-        <img ref={imageRef} className="mmm-video" src={photoUrl} alt="" />
-      ) : (
-        <video
-          ref={videoRef}
-          className="mmm-video"
-          playsInline
-          muted
-          autoPlay
-          disablePictureInPicture
-          controls={false}
-          // 一部の Android ブラウザが動画を勝手に全画面にしないように
-          {...{ 'webkit-playsinline': 'true', 'x5-playsinline': 'true', controlsList: 'nofullscreen nodownload' }}
-        />
-      )}
+      <div ref={viewElRef} className="mmm-view" style={{ width: frameWidth, height: frameHeight }}>
+        {photoUrl ? (
+          <img ref={imageRef} className="mmm-video" src={photoUrl} alt="" />
+        ) : (
+          <video
+            ref={videoRef}
+            className="mmm-video"
+            playsInline
+            muted
+            autoPlay
+            disablePictureInPicture
+            controls={false}
+            // 一部の Android ブラウザが動画を勝手に全画面にしないように
+            {...{ 'webkit-playsinline': 'true', 'x5-playsinline': 'true', controlsList: 'nofullscreen nodownload' }}
+          />
+        )}
+        {layers}
+      </div>
       {children}
     </div>
   );

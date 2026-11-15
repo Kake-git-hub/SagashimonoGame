@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { LAYER_SPEC, LookState } from '../logic/layers';
+import { LAYER_SPEC } from '../logic/layers';
 import { FaceTrackerHandle } from '../hooks/useFaceTracker';
 import { FrameSource } from '../services/faceTracker';
 import { FaceFrame } from '../types';
@@ -18,7 +18,6 @@ export interface MakeupView {
 interface Props {
   tracker: FaceTrackerHandle;
   paint: FacePaint;
-  look: LookState;          // パーツごとの つよさ を読む
   hidden: boolean;          // くらべる を押している間は描かない
   width: number;
   height: number;
@@ -35,15 +34,13 @@ function sourceReady(el: FrameSource): boolean {
 
 /**
  * メイクの描画 canvas。映像の上に重なり、塗ったものがあるときだけ映像ごと描く。
- * 描き直すのは「映像のコマ・顔の点・塗った絵・つよさ」のどれかが変わったときだけ（120Hz の画面で無駄に描かない）
+ * 描き直すのは「映像のコマ・顔の点・塗った絵」のどれかが変わったときだけ（120Hz の画面で無駄に描かない）
  */
-export function MakeupCanvas({ tracker, paint, look, hidden, width, height, getSource, disabled = false, viewRef }: Props) {
+export function MakeupCanvas({ tracker, paint, hidden, width, height, getSource, disabled = false, viewRef }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   // tracker そのものは状態（はやさ など）が変わるたびに新しくなるので、変わらない frameRef だけを依存にする
   const { frameRef } = tracker;
-  const lookRef = useRef(look);
   const hiddenRef = useRef(hidden);
-  lookRef.current = look;
   hiddenRef.current = hidden;
 
   useEffect(() => {
@@ -67,12 +64,12 @@ export function MakeupCanvas({ tracker, paint, look, hidden, width, height, getS
 
     const layersNow = (): RenderLayer[] => paint.paintedLayers().map(id => {
       const spec = LAYER_SPEC[id];
-      const opacity = lookRef.current[id]?.opacity ?? spec.defaultOpacity;
       return {
         id,
         canvas: paint.layerCanvas(id)!,
         version: paint.layerVersion(id),
-        alpha: Math.max(0, Math.min(1, opacity)) * spec.maxAlpha,
+        // 濃さは塗った絵そのものが持つ（重ね塗りの回数。自動で塗るときは手順の つよさ）。ここではパーツごとの上限だけ掛ける
+        alpha: spec.maxAlpha,
         blend: spec.blend,
         tint: spec.tint,
       };
@@ -135,7 +132,6 @@ export function MakeupCanvas({ tracker, paint, look, hidden, width, height, getS
     let raf = 0;
     let lastKey = '';
     let lastFrame: FaceFrame | null = null;
-    let lastLook: LookState | null = null;
     let lastDrawAt = 0;
     const tick = () => {
       raf = requestAnimationFrame(tick);
@@ -147,11 +143,10 @@ export function MakeupCanvas({ tracker, paint, look, hidden, width, height, getS
       const now = performance.now();
       // カメラの映像は、時刻が進まないブラウザでも止まって見えないよう、ときどきは描き直す
       const stale = source instanceof HTMLVideoElement && renderer.lastDrew && now - lastDrawAt > 100;
-      if (key === lastKey && frame === lastFrame && lookRef.current === lastLook && !stale) return;
+      if (key === lastKey && frame === lastFrame && !stale) return;
       lastDrawAt = now;
       lastKey = key;
       lastFrame = frame;
-      lastLook = lookRef.current;
       draw();
     };
     raf = requestAnimationFrame(tick);

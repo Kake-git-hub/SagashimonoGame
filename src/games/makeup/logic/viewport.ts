@@ -1,55 +1,82 @@
 /**
- * 画面の位置と映像の位置の変換
- * 映像は object-fit: cover で枠（rect）いっぱいに広げ、鏡像のときは左右を反転して表示している。
- * 枠からはみ出した分のどこを見せるかは pan（CSS の object-position と同じ 0〜1。0.5 が真ん中）で決まる
+ * 映像の見せ方（どこを・どのくらい大きく見せるか）と、画面の位置と映像の位置の変換
+ *
+ * 映像と重ねる canvas は、映像の実サイズ（frameWidth × frameHeight px）の入れ物に入れ、
+ * その入れ物を枠（stage）の中で「拡大 scale → 平行移動 (x, y)」して見せる（CSS の transform）。
+ * 鏡像のときは、入れ物の中身を左右反転している。
+ * - ふだん: 枠いっぱいに広げ（cover）、はみ出した分は顔のある側を見せる
+ * - パーツを選んだとき: そのパーツのあたりが枠いっぱいになるように拡大する（アップ）
  */
 export interface ViewRect { left: number; top: number; width: number; height: number }
-export interface ViewPan { x: number; y: number }
 
-export const CENTER_PAN: ViewPan = { x: 0.5, y: 0.5 };
-
-function shown(rect: ViewRect, frameWidth: number, frameHeight: number) {
-  const scale = Math.max(rect.width / frameWidth, rect.height / frameHeight);
-  return { w: frameWidth * scale, h: frameHeight * scale };
+export interface StageViewState {
+  scale: number;  // 映像の 1px が画面の何 px か
+  x: number;      // 入れ物の左上の位置（枠の左上から。px）
+  y: number;
 }
 
-// 画面の位置（clientX / clientY）→ 映像の正規化座標（顔の点と同じ 0〜1。枠からはみ出した分は範囲外になる）
+// 見せたい範囲（映像の正規化座標 0〜1）
+export interface FocusBox { x0: number; y0: number; x1: number; y1: number }
+
+// アップは、枠いっぱい（cover）の何倍まで拡大してよいか（拡大しすぎると映像が粗くなる）
+export const MAX_ZOOM = 3.5;
+
+// 枠いっぱいに広げるときの倍率
+export function coverScale(rect: ViewRect, frameWidth: number, frameHeight: number): number {
+  return Math.max(rect.width / frameWidth, rect.height / frameHeight);
+}
+
+// 画面の位置（clientX / clientY）→ 映像の正規化座標（顔の点と同じ 0〜1。見えていない所は範囲外になる）
 export function clientToFrame(
-  rect: ViewRect, frameWidth: number, frameHeight: number, mirrored: boolean, clientX: number, clientY: number, pan: ViewPan = CENTER_PAN,
+  rect: ViewRect, frameWidth: number, frameHeight: number, mirrored: boolean, view: StageViewState, clientX: number, clientY: number,
 ): { x: number; y: number } {
-  const s = shown(rect, frameWidth, frameHeight);
-  // 鏡像は、枠ごと左右を反転して表示している
-  const localX = mirrored ? rect.width - (clientX - rect.left) : clientX - rect.left;
-  return {
-    x: (localX - (rect.width - s.w) * pan.x) / s.w,
-    y: (clientY - rect.top - (rect.height - s.h) * pan.y) / s.h,
-  };
+  const x = (clientX - rect.left - view.x) / (frameWidth * view.scale);
+  const y = (clientY - rect.top - view.y) / (frameHeight * view.scale);
+  return { x: mirrored ? 1 - x : x, y };
 }
 
 // 逆変換: 映像の正規化座標 → 画面の位置
 export function frameToClient(
-  rect: ViewRect, frameWidth: number, frameHeight: number, mirrored: boolean, x: number, y: number, pan: ViewPan = CENTER_PAN,
+  rect: ViewRect, frameWidth: number, frameHeight: number, mirrored: boolean, view: StageViewState, x: number, y: number,
 ): { x: number; y: number } {
-  const s = shown(rect, frameWidth, frameHeight);
-  const localX = (rect.width - s.w) * pan.x + x * s.w;
   return {
-    x: rect.left + (mirrored ? rect.width - localX : localX),
-    y: rect.top + (rect.height - s.h) * pan.y + y * s.h,
+    x: rect.left + view.x + (mirrored ? 1 - x : x) * frameWidth * view.scale,
+    y: rect.top + view.y + y * frameHeight * view.scale,
   };
 }
 
 /**
- * 顔（中心の正規化座標）が枠の真ん中に来るような pan。はみ出していない方向は 0.5 のまま。
- * 近づくと顔は映像の端に寄りやすい（カメラは画面の端にある）ので、切り落とす側を顔に合わせて選ぶ
+ * focus の範囲を見せるための見せ方を求める
+ * @param focus   見せたい範囲。顔ぜんたいのときは顔の外接矩形、アップのときはパーツのあたり
+ * @param zoom    true なら focus が枠に収まるところまで拡大する。false なら枠いっぱい（cover）のまま、focus の中心へ寄せるだけ
+ * 映像の端より外は見せない（黒い所が出ないように、端で止める）
  */
-export function panForFace(rect: ViewRect, frameWidth: number, frameHeight: number, faceX: number, faceY: number): ViewPan {
-  const s = shown(rect, frameWidth, frameHeight);
-  const axis = (box: number, content: number, center: number): number => {
-    const overflow = content - box;
-    if (overflow < 1) return 0.5;
-    // 顔の中心を枠の真ん中に置いたときの、映像の左上のずれ（0 〜 -overflow に収める）
-    const offset = Math.max(-overflow, Math.min(0, box / 2 - center * content));
-    return Math.abs(offset) / overflow;
+export function viewFor(
+  rect: ViewRect, frameWidth: number, frameHeight: number, mirrored: boolean, focus: FocusBox | null, zoom: boolean,
+): StageViewState {
+  const cover = coverScale(rect, frameWidth, frameHeight);
+  let scale = cover;
+  let cx = 0.5, cy = 0.5;
+  if (focus) {
+    cx = (focus.x0 + focus.x1) / 2;
+    cy = (focus.y0 + focus.y1) / 2;
+    if (zoom) {
+      const fw = Math.max(1e-6, (focus.x1 - focus.x0) * frameWidth), fh = Math.max(1e-6, (focus.y1 - focus.y0) * frameHeight);
+      scale = Math.max(cover, Math.min(cover * MAX_ZOOM, rect.width / fw, rect.height / fh));
+    }
+  }
+  const shownW = frameWidth * scale, shownH = frameHeight * scale;
+  // 鏡像では、映像の x は画面の上で左右が逆になる
+  const sx = mirrored ? 1 - cx : cx;
+  const clampOffset = (box: number, content: number, center: number) => Math.min(0, Math.max(box - content, box / 2 - center * content));
+  return { scale, x: clampOffset(rect.width, shownW, sx), y: clampOffset(rect.height, shownH, cy) };
+}
+
+// いまの見せ方を目標へ少し近づける（t = 0〜1）
+export function easeView(current: StageViewState, target: StageViewState, t: number): StageViewState {
+  return {
+    scale: current.scale + (target.scale - current.scale) * t,
+    x: current.x + (target.x - current.x) * t,
+    y: current.y + (target.y - current.y) * t,
   };
-  return { x: axis(rect.width, s.w, faceX), y: axis(rect.height, s.h, faceY) };
 }

@@ -1,7 +1,7 @@
 // マジックメイクミラー: 顔のある映像で顔認識と「なぞって塗る」が動くか
 //   1. 偽カメラ（顔写真から作った y4m、鏡像）で 顔が見つかる（478 点）→ 頬をなぞる → なぞった側の頬だけ色が変わる
 //   2. 近づいた映像（顔の幅が映像の短い辺の 1.7 倍）でも顔が見つかり（余白つきの認識に切り替わる）、塗れる
-//   3. しゃしんモード: 色を選んだだけでは付かない → 唇をなぞる（はみださない）→ じゆうに ぬる → けしゴム → ほぞん → ぜんぶ けす
+//   3. しゃしんモード: パーツを選ぶとアップになる → 色を選んだだけでは付かない → 重ね塗りで濃くなる → ぜんたいに戻して自由に塗る → けしゴム → ほぞん → ぜんぶ けす
 //      → おしえて（できあがりを みる / もとに もどす）→ ていあん。Safari と同じく canvas の filter が無い状態で動かし、
 //      描画中に canvas を作り続けていないこと（iPad で落ちた原因）も確かめる
 //      点群を fixture に書き出す（E2E_WRITE_FIXTURE=1 のとき）
@@ -96,6 +96,24 @@ async function screenColorAt(page, id) {
   }, png.toString('base64'));
 }
 
+// 映像の見せ方（アップ・移動）が落ち着くまで待つ。動いている途中だと、顔の点の画面上の位置がずれる
+async function settle(page) {
+  let prev = '';
+  for (let i = 0; i < 40; i++) {
+    await page.waitForTimeout(250);
+    const cur = await page.evaluate(() => { const v = window.__makeupDebug.view; return `${v.scale.toFixed(3)},${Math.round(v.x)},${Math.round(v.y)}`; });
+    if (cur === prev) return;
+    prev = cur;
+  }
+}
+
+// パーツを選ぶ（そのあたりがアップになる）
+async function pickPart(page, part, color) {
+  await page.click(`.mmm-part:has-text("${part}")`);
+  if (color) await page.click(`.mmm-swatch[aria-label="${color}"]`);
+  await settle(page);
+}
+
 // 塗ったものが画面に出るまで待つ
 const waitDrawn = page => page.waitForFunction(() => window.__makeupDebug.makeupDrawn === true, null, { timeout: 10000 });
 
@@ -140,11 +158,7 @@ async function showLandmarks(page) {
     await page.click('text=とじる');
 
     // 頬（自分の右頬 = 鏡像では画面の右側）をなぞる → その頬だけ色が変わる
-    await page.click('.mmm-part:has-text("チーク")');
-    await page.click('.mmm-swatch[aria-label="ローズ"]');
-    // 点線の目安が消えるのを待ってから、画面の色を覚えておく
-    await page.waitForFunction(() => window.__makeupDebug.outline === null, null, { timeout: 10000 });
-    await page.waitForTimeout(300);
+    await pickPart(page, 'チーク', 'ローズ');
     const before = { right: await colorAt(page, 50), left: await colorAt(page, 280) };
     const screenBefore = { right: await screenColorAt(page, 50), left: await screenColorAt(page, 280) };
     const pts = await drag(page, [50, 123, 50, 205]);
@@ -157,11 +171,10 @@ async function showLandmarks(page) {
     if (colorDiff(before.right, after.right) < 20) errors.push('camera: the stroked cheek did not change colour');
     if (colorDiff(before.left, after.left) > 12) errors.push('camera: the other cheek changed colour');
     // 画面の上でも、なぞった位置に色が出ている（表示と当たり判定がずれていない）
-    await page.waitForFunction(() => window.__makeupDebug.outline === null, null, { timeout: 10000 });
-    await page.waitForTimeout(300);
+    await settle(page);
     const screenAfter = { right: await screenColorAt(page, 50), left: await screenColorAt(page, 280) };
-    const pan = await page.evaluate(() => window.__makeupDebug.pan);
-    console.log('camera paint on screen: right cheek', JSON.stringify(screenBefore.right), '→', JSON.stringify(screenAfter.right), '| left cheek diff', colorDiff(screenBefore.left, screenAfter.left), '| pan', JSON.stringify(pan));
+    const pan = await page.evaluate(() => window.__makeupDebug.view);
+    console.log('camera paint on screen: right cheek', JSON.stringify(screenBefore.right), '→', JSON.stringify(screenAfter.right), '| left cheek diff', colorDiff(screenBefore.left, screenAfter.left), '| view', JSON.stringify(pan));
     if (colorDiff(screenBefore.right, screenAfter.right) < 20) errors.push('camera: the stroked cheek did not change colour on screen');
     if (colorDiff(screenBefore.left, screenAfter.left) > 12) errors.push('camera: the other cheek changed colour on screen');
     // 塗った色は、内部の絵と画面とで同じ場所にある
@@ -207,10 +220,8 @@ async function showLandmarks(page) {
     if (close.count !== 478) errors.push(`close-up: expected 478 landmarks, got ${close.count}`);
     if (!(close.widthRatio > 1.4)) errors.push(`close-up: face should be wider than the frame, got ${close.widthRatio}`);
     if (close.status === 'none') errors.push('close-up: status should not be none');
-    // 鼻すじをなぞる（じゆうに ぬる）
-    await page.click('button[role="switch"]:has-text("はみださない")');
-    await page.click('.mmm-part:has-text("ハイライト")');
-    await page.click('.mmm-swatch[aria-label="パール"]');
+    // 鼻すじをなぞる
+    await pickPart(page, 'ハイライト', 'パール');
     const noseBefore = await screenColorAt(page, 195);
     await drag(page, [168, 6, 195, 4]);
     await drag(page, [168, 6, 195, 4]);
@@ -253,62 +264,75 @@ async function showLandmarks(page) {
     await page.click('.mmm-setting-row:has-text("かおの てんを みせる") input');
     await page.click('text=とじる');
 
-    // 色を選んだだけでは顔に付かない
-    await page.click('.mmm-part:has-text("リップ")');
-    await page.click('.mmm-swatch[aria-label="ローズ"]');
-    await page.waitForTimeout(500);
-    const idle = await page.evaluate(() => ({ painted: window.__makeupDebug.painted, drawn: window.__makeupDebug.makeupDrawn, outline: window.__makeupDebug.outline }));
-    console.log('colour picked:', JSON.stringify(idle));
-    if (idle.painted.length !== 0 || idle.drawn) errors.push('picking a colour should not apply makeup by itself');
-    if (!idle.outline || idle.outline[0] !== 'lipsOuter') errors.push('the lip outline hint should be shown after picking the part');
-    await page.screenshot({ path: `${OUT}/tablet-makeup-outline.png` });
+    // パーツを選ぶと、そのあたりがアップになる（唇が画面の真ん中に大きく出る）。色を選んだだけでは顔に付かない
+    const wide = await page.evaluate(() => window.__makeupDebug.view.scale);
+    const lipWide = await page.evaluate(() => { const a = window.__makeupDebug.facePoint(61), b = window.__makeupDebug.facePoint(291); return Math.abs(a.x - b.x); });
+    await pickPart(page, 'リップ', 'ローズ');
+    const zoom = await page.evaluate(() => {
+      const d = window.__makeupDebug, a = d.facePoint(61), b = d.facePoint(291), c = d.facePoint(13);
+      const r = document.querySelector('.mmm-stage').getBoundingClientRect();
+      return { zoomed: d.zoomed, scale: d.view.scale, lipWidth: Math.abs(a.x - b.x), dx: Math.abs(c.x - (r.left + r.width / 2)) / r.width, dy: Math.abs(c.y - (r.top + r.height / 2)) / r.height,
+        painted: d.painted, drawn: d.makeupDrawn };
+    });
+    console.log('zoom on lip:', JSON.stringify({ scale: `${wide.toFixed(2)} → ${zoom.scale.toFixed(2)}`, lipWidthPx: `${Math.round(lipWide)} → ${Math.round(zoom.lipWidth)}`, offCentre: [zoom.dx.toFixed(2), zoom.dy.toFixed(2)] }));
+    if (!zoom.zoomed || !(zoom.scale > wide * 1.5)) errors.push(`picking a part should zoom in: ${wide} → ${zoom.scale}`);
+    if (zoom.dx > 0.12 || zoom.dy > 0.12) errors.push(`the lips should be near the centre when zoomed: ${zoom.dx}, ${zoom.dy}`);
+    if (zoom.painted.length !== 0 || zoom.drawn) errors.push('picking a colour should not apply makeup by itself');
+    await page.screenshot({ path: `${OUT}/tablet-makeup-zoom-lip.png` });
 
-    // はみださない: 唇を ざっくり なぞる → 唇に色が付き、唇の外（鼻の下・あご）には付かない
-    const base = { lip: await colorAt(page, 17), aboveLip: await colorAt(page, 164), chin: await colorAt(page, 200), forehead: await colorAt(page, 151) };
-    await drag(page, [61, 164, 291]);   // 上唇の少し上（鼻の下）を通って はみ出すように
-    await drag(page, [61, 0, 291]);
-    await drag(page, [61, 17, 291]);
-    await drag(page, [61, 200, 291]);   // あごの方まで はみ出すように
+    // 濃さは重ね塗りの回数: 同じ所を 1 回なぞるより、3 回なぞった方が濃い。ひと筆の中で行ったり来たりしても濃くなりすぎない
+    const lip0 = await colorAt(page, 17);
+    await drag(page, [61, 17, 291, 17, 61, 17, 291]);   // ひと筆で 3 往復
     await waitDrawn(page);
     await page.waitForTimeout(400);
-    const assisted = { lip: await colorAt(page, 17), aboveLip: await colorAt(page, 164), chin: await colorAt(page, 200) };
-    console.log('assist paint: lip', JSON.stringify(base.lip), '→', JSON.stringify(assisted.lip), '| above lip diff', colorDiff(base.aboveLip, assisted.aboveLip), '| chin diff', colorDiff(base.chin, assisted.chin));
-    if (colorDiff(base.lip, assisted.lip) < 20) errors.push('assist: the lip did not change colour');
-    if (colorDiff(base.aboveLip, assisted.aboveLip) > 12) errors.push('assist: colour went outside the lips (above)');
-    if (colorDiff(base.chin, assisted.chin) > 12) errors.push('assist: colour went outside the lips (chin)');
-    await page.screenshot({ path: `${OUT}/tablet-makeup-paint-assist.png` });
+    const lip1 = await colorAt(page, 17);
+    await drag(page, [61, 17, 291]);
+    await drag(page, [61, 17, 291]);
+    await page.waitForTimeout(400);
+    const lip3 = await colorAt(page, 17);
+    const d1 = colorDiff(lip0, lip1), d3 = colorDiff(lip0, lip3);
+    console.log('build-up: lip', JSON.stringify(lip0), '→ 1 stroke', JSON.stringify(lip1), `(${d1})`, '→ 3 strokes', JSON.stringify(lip3), `(${d3})`);
+    if (d1 < 10) errors.push('one stroke should already be visible');
+    if (!(d3 > d1 * 1.4)) errors.push(`three strokes should be clearly stronger than one: ${d1} → ${d3}`);
+    await drag(page, [61, 0, 291]);
+    await page.screenshot({ path: `${OUT}/tablet-makeup-paint-lip.png` });
 
-    // チーク・アイシャドウ・まゆ も なぞる
+    // チーク・アイシャドウ・まゆ も なぞる（選ぶたびに、そのあたりがアップになる）
     for (const [part, color, strokes] of [
       ['チーク', 'ピーチ', [[50, 123, 116], [205, 50, 117], [280, 352, 345], [425, 280, 346]]],
       ['アイシャドウ', 'ブラウン', [[33, 27, 133], [263, 257, 362]]],
       ['まゆ', 'ナチュラルブラウン', [[70, 105, 107], [300, 334, 336]]],
     ]) {
-      await page.click(`.mmm-part:has-text("${part}")`);
-      await page.click(`.mmm-swatch[aria-label="${color}"]`);
+      await pickPart(page, part, color);
       for (const ids of strokes) await drag(page, ids);
     }
+    await page.screenshot({ path: `${OUT}/tablet-makeup-zoom-brow.png` });
     const painted = await page.evaluate(() => window.__makeupDebug.painted);
     console.log('painted:', JSON.stringify(painted));
     if (painted.length !== 4) errors.push(`expected 4 painted layers, got ${painted.length}`);
 
-    // じゆうに ぬる（はみださない を切る）: リップの色で おでこ に線が引ける → けしゴム で消える
-    await page.click('button[role="switch"]:has-text("はみださない")');
-    await page.click('.mmm-part:has-text("リップ")');
+    // ぜんたいを みる に戻す → どこにでも自由に塗れる: リップの色で おでこ に線が引ける → けしゴム で消える
+    await pickPart(page, 'リップ');
+    await page.click('button:has-text("ぜんたいを みる")');
+    await settle(page);
+    const back = await page.evaluate(() => ({ zoomed: window.__makeupDebug.zoomed, scale: window.__makeupDebug.view.scale }));
+    if (back.zoomed || Math.abs(back.scale - wide) > 0.02) errors.push(`zoom out should restore the whole view: ${JSON.stringify(back)}`);
+    const forehead0 = await colorAt(page, 151);
     await page.click('button[aria-label="ふとさ ふとい"]');
+    await drag(page, [104, 151, 333]);
     await drag(page, [104, 151, 333]);
     await page.waitForTimeout(400);
     const free = await colorAt(page, 151);
-    console.log('free paint: forehead', JSON.stringify(base.forehead), '→', JSON.stringify(free));
-    if (colorDiff(base.forehead, free) < 20) errors.push('free: the forehead stroke did not change colour');
+    console.log('free paint: forehead', JSON.stringify(forehead0), '→', JSON.stringify(free));
+    if (colorDiff(forehead0, free) < 20) errors.push('free: the forehead stroke did not change colour');
     await page.screenshot({ path: `${OUT}/tablet-makeup-paint-free.png` });
     await page.click('button[aria-label="けしゴム"]');
     await drag(page, [104, 151, 333]);
     await drag(page, [104, 151, 333]);
     await page.waitForTimeout(400);
     const erased = await colorAt(page, 151);
-    console.log('erased: forehead diff', colorDiff(base.forehead, erased));
-    if (colorDiff(base.forehead, erased) > 12) errors.push('eraser: the forehead stroke is still visible');
+    console.log('erased: forehead diff', colorDiff(forehead0, erased));
+    if (colorDiff(forehead0, erased) > 12) errors.push('eraser: the forehead stroke is still visible');
 
     // 塗ったまま描き続けても canvas を作り続けない（iPad で落ちた原因: 毎フレーム canvas を作っていた）
     const c0 = await page.evaluate(() => window.__canvasCount);

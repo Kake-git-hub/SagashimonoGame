@@ -3,9 +3,9 @@ import { S } from '../strings';
 import { MakeupSettings } from '../types';
 import { CameraHandle } from '../hooks/useCamera';
 import { useFaceTracker } from '../hooks/useFaceTracker';
-import { useAutoPan } from '../hooks/useAutoPan';
+import { useStageView } from '../hooks/useStageView';
 import { resolveDelegate } from '../services/gpuGuard';
-import { LAYER_REGIONS, LayerId, LookState, lookReducer } from '../logic/layers';
+import { LayerId, LookState, lookReducer } from '../logic/layers';
 import { BrushSize } from '../logic/brush';
 import { clientToFrame, frameToClient } from '../logic/viewport';
 import { Recipe, recipeLook, RecipeSummary } from '../logic/guide';
@@ -50,9 +50,6 @@ interface Props {
   onOpenDebug?: () => void;
 }
 
-// 「ここに ぬれるよ」の点線を出しておく時間（ms）: パーツを選んだあと / なぞり終わったあと
-const OUTLINE_AFTER_SELECT_MS = 3500;
-const OUTLINE_AFTER_STROKE_MS = 1200;
 // 一時的な文言（ほぞんしたよ / かおの うえを なぞってね）を出しておく時間（ms）
 const NOTE_MS = 3000;
 
@@ -70,8 +67,9 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   const [painted, setPainted] = useState<LayerId[]>([]);
   const [erasing, setErasing] = useState(false);
   const [brushSize, setBrushSize] = useState<BrushSize>('m');
-  const [outlineOn, setOutlineOn] = useState(false);
-  const outlineTimer = useRef(0);
+  // パーツのあたりをアップで見せているか（パーツを選ぶとアップになる。映像の右下のボタンで切り替え）
+  const [zoomed, setZoomed] = useState(false);
+  const viewElRef = useRef<HTMLDivElement | null>(null);
   const noteTimer = useRef(0);
   const [frameSize, setFrameSize] = useState({ w: 960, h: 720 });
   const [showSettings, setShowSettings] = useState(false);
@@ -105,7 +103,6 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
     return paint.subscribe(() => setPainted(paint.paintedLayers()));
   }, [paint]);
   useEffect(() => () => {
-    window.clearTimeout(outlineTimer.current);
     window.clearTimeout(noteTimer.current);
     lookBackupRef.current?.paint.forEach(canvas => { canvas.width = 0; canvas.height = 0; });
     lookBackupRef.current = null;
@@ -120,13 +117,6 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
     noteTimer.current = window.setTimeout(() => setNote(null), NOTE_MS);
   }, []);
 
-  // 「ここに ぬれるよ」の点線をしばらく出す
-  const flashOutline = useCallback((ms: number) => {
-    setOutlineOn(true);
-    window.clearTimeout(outlineTimer.current);
-    outlineTimer.current = window.setTimeout(() => setOutlineOn(false), ms);
-  }, []);
-
   const dropBackup = useCallback(() => {
     // 取っておいた写しの canvas のメモリを返す
     lookBackupRef.current?.paint.forEach(canvas => { canvas.width = 0; canvas.height = 0; });
@@ -138,8 +128,9 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   const delegate = useMemo(() => resolveDelegate(settings.delegate), [settings.delegate]);
   const tracker = useFaceTracker({ enabled: !settings.debugNoTracking, delegate, getSource });
   const { loadState, status, stats } = tracker;
-  // 枠からはみ出した映像のうち、顔のある側を見せる
-  const panRef = useAutoPan(tracker, stageRef, frameSize.w, frameSize.h);
+  // 映像の見せ方: ふだんは顔のある側を見せ、ためす でパーツを選んだらそのあたりをアップにする
+  const mirrored = settings.mirrored && !isPhoto;
+  const stageView = useStageView(tracker, stageRef, viewElRef, frameSize.w, frameSize.h, mirrored, mode === 'try' && zoomed ? part : null);
 
   // 色のパレット
   useEffect(() => {
@@ -241,43 +232,26 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   }, [paint, dropBackup]);
 
   // --- ためす: なぞって塗る ---
-  const assist = settings.paintAssist;
   // いまの筆の色: 選んであればその色、まだなら そのパーツの最初の色
   const toolColor = look[part]?.color ?? palettes?.[part]?.[0]?.color ?? null;
-  const tool = useMemo<PaintTool>(() => ({ layer: part, color: toolColor, erasing, size: brushSize, assist }), [part, toolColor, erasing, brushSize, assist]);
+  const tool = useMemo<PaintTool>(() => ({ layer: part, color: toolColor, erasing, size: brushSize }), [part, toolColor, erasing, brushSize]);
 
-  // 「はみださない」の型は最初に使うときに作る（少し時間がかかる）ので、パーツを選んだ時点で作っておき、
-  // 最初のひと塗りで引っかからないようにする
-  useEffect(() => {
-    if (!assist || mode !== 'try') return;
-    const timer = window.setTimeout(() => paint.mask(part), 150);
-    return () => window.clearTimeout(timer);
-  }, [paint, part, assist, mode]);
-
+  // パーツを選ぶと、そのあたりをアップにする
   const handlePart = useCallback((next: LayerId) => {
     setPart(next);
     setErasing(false);
-    flashOutline(OUTLINE_AFTER_SELECT_MS);
-  }, [flashOutline]);
-
-  const handleAssist = useCallback((next: boolean) => {
-    onSettingsChange({ ...settings, paintAssist: next });
-    if (next) flashOutline(OUTLINE_AFTER_SELECT_MS);
-  }, [settings, onSettingsChange, flashOutline]);
+    setZoomed(true);
+  }, []);
 
   const handleStrokeStart = useCallback(() => {
-    // なぞっている間は点線を出したままにする
-    window.clearTimeout(outlineTimer.current);
-    setOutlineOn(true);
     // 塗り始めたら「できあがり」の表示ではなくなる（もどす で消えないように）
     setResultShown(false);
     dropBackup();
   }, [dropBackup]);
 
   const handleStrokeEnd = useCallback((hit: boolean) => {
-    flashOutline(OUTLINE_AFTER_STROKE_MS);
     if (!hit) showNote(tracker.frameRef.current ? S.try.missHint : S.try.needFace);
-  }, [flashOutline, showNote, tracker]);
+  }, [showNote, tracker]);
 
   const handleClearAll = useCallback(() => {
     paint.clearAll();
@@ -292,11 +266,8 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   useEffect(() => { onLookChange(look); }, [look, onLookChange]);
 
   // 自動テスト用: ?makeupdebug=1 のとき最新の結果を window に出す
-  const mirrored = settings.mirrored && !isPhoto;
-  // ためす で「はみださない」のとき、選んだパーツの塗れる所を点線で見せる
-  const paintOutline = mode === 'try' && assist && !erasing && outlineOn ? LAYER_REGIONS[part] : null;
-  const latestRef = useRef({ status, loadState, stats, frameSize, look, currentStep, poseOk, suggestion, mode, mirrored, paintOutline });
-  latestRef.current = { status, loadState, stats, frameSize, look, currentStep, poseOk, suggestion, mode, mirrored, paintOutline };
+  const latestRef = useRef({ status, loadState, stats, frameSize, look, currentStep, poseOk, suggestion, mode, mirrored, zoomed });
+  latestRef.current = { status, loadState, stats, frameSize, look, currentStep, poseOk, suggestion, mode, mirrored, zoomed };
   useEffect(() => {
     if (!debug) return;
     const w = window as unknown as { __makeupDebug?: unknown };
@@ -309,8 +280,8 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
       get look() { return latestRef.current.look; },
       get makeupDrawn() { return viewRef.current?.lastDrew ?? false; },
       get painted() { return paint.paintedLayers(); },
-      get outline() { return latestRef.current.paintOutline; },
-      get pan() { return panRef.current; },
+      get zoomed() { return latestRef.current.zoomed; },
+      get view() { return stageView.current; },
       // 顔の点（番号）が画面のどこにあるか（自動テストが顔の上をなぞるのに使う）
       facePoint(index: number) {
         const frame = tracker.frameRef.current;
@@ -318,7 +289,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
         if (!frame || !el) return null;
         const { frameSize, mirrored } = latestRef.current;
         const p = frame.landmarks[index];
-        return frameToClient(el.getBoundingClientRect(), frameSize.w, frameSize.h, mirrored, p.x, p.y, panRef.current);
+        return frameToClient(el.getBoundingClientRect(), frameSize.w, frameSize.h, mirrored, stageView.current, p.x, p.y);
       },
       get guideStep() { return latestRef.current.currentStep?.id ?? null; },
       get poseOk() { return latestRef.current.poseOk; },
@@ -330,7 +301,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
         const canvas = viewRef.current?.capture(false);
         if (!el || !canvas) return null;
         const { frameSize, mirrored } = latestRef.current;
-        const p = clientToFrame(el.getBoundingClientRect(), frameSize.w, frameSize.h, mirrored, clientX, clientY, panRef.current);
+        const p = clientToFrame(el.getBoundingClientRect(), frameSize.w, frameSize.h, mirrored, stageView.current, clientX, clientY);
         // 顔の点は 1px ほど揺れるので、まわり 7×7 の平均にする
         const N = 7;
         const d = canvas.getContext('2d')?.getImageData(Math.round(p.x * canvas.width) - 3, Math.round(p.y * canvas.height) - 3, N, N).data;
@@ -347,7 +318,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
       },
     };
     return () => { delete w.__makeupDebug; };
-  }, [debug, tracker, paint, panRef]);
+  }, [debug, tracker, paint, stageView]);
 
   // 状態欄の文言
   const statusText = useMemo(() => {
@@ -366,11 +337,6 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   const statusKind = loadState.phase === 'error' || (!isPhoto && camera.status === 'error') ? 'error' : loadState.phase !== 'ready' ? 'loading' : status;
 
   const faceVisible = loadState.phase === 'ready' && status !== 'none';
-
-  // 顔が見えるようになったら、「ここに ぬれるよ」の点線を出して、なぞる場所を知らせる
-  useEffect(() => {
-    if (faceVisible) flashOutline(OUTLINE_AFTER_SELECT_MS);
-  }, [faceVisible, flashOutline]);
 
   // 実機での切り分け用（はやさを みせる のときだけ表示）: 画面の大きさ・表示モード・ブラウザ
   const envInfo = settings.showStats ? describeEnvironment() : '';
@@ -408,29 +374,41 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
       </header>
 
       <div className="mmm-body">
-        <StageView source={source} mirrored={mirrored} videoRef={videoRef} imageRef={imageRef} stageRef={stageRef} onFrameSize={handleFrameSize}>
-          <MakeupCanvas
-            tracker={tracker}
-            paint={paint}
-            look={look}
-            hidden={comparing}
-            width={frameSize.w}
-            height={frameSize.h}
-            getSource={getSource}
-            disabled={settings.debugNoRender}
-            viewRef={viewRef}
-          />
-          <GuideCanvas
-            tracker={tracker}
-            width={frameSize.w}
-            height={frameSize.h}
-            showLandmarks={settings.showLandmarks}
-            showNumbers={debug && settings.showLandmarks}
-            mirrored={mirrored}
-            step={currentStep}
-            opacity={settings.guideOpacity}
-            outline={paintOutline}
-          />
+        <StageView
+          source={source}
+          mirrored={mirrored}
+          videoRef={videoRef}
+          imageRef={imageRef}
+          stageRef={stageRef}
+          viewElRef={viewElRef}
+          frameWidth={frameSize.w}
+          frameHeight={frameSize.h}
+          onFrameSize={handleFrameSize}
+          layers={
+            <>
+              <MakeupCanvas
+                tracker={tracker}
+                paint={paint}
+                hidden={comparing}
+                width={frameSize.w}
+                height={frameSize.h}
+                getSource={getSource}
+                disabled={settings.debugNoRender}
+                viewRef={viewRef}
+              />
+              <GuideCanvas
+                tracker={tracker}
+                width={frameSize.w}
+                height={frameSize.h}
+                showLandmarks={settings.showLandmarks}
+                showNumbers={debug && settings.showLandmarks}
+                mirrored={mirrored}
+                step={currentStep}
+                opacity={settings.guideOpacity}
+              />
+            </>
+          }
+        >
           {mode === 'try' && (
             <PaintSurface
               tracker={tracker}
@@ -439,7 +417,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
               mirrored={mirrored}
               frameWidth={frameSize.w}
               frameHeight={frameSize.h}
-              panRef={panRef}
+              viewRef={stageView}
               onStrokeStart={handleStrokeStart}
               onStrokeEnd={handleStrokeEnd}
             />
@@ -465,6 +443,11 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
               <br />{frameSize.w}×{frameSize.h} / {envInfo}
             </div>
           )}
+          {mode === 'try' && (
+            <button className="mmm-zoom-button" onClick={() => setZoomed(z => !z)} aria-pressed={zoomed}>
+              {zoomed ? `🔍 ${S.try.zoomOut}` : `🔎 ${S.try.zoomIn}`}
+            </button>
+          )}
         </StageView>
 
         {/* 操作パネルは 2 つに分ける。横向きでは映像の左右、縦向きでは映像の下に続けて並ぶ（makeup.css） */}
@@ -489,14 +472,12 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
                 painted={painted}
                 erasing={erasing}
                 brushSize={brushSize}
-                assist={assist}
                 faceVisible={faceVisible}
                 saving={saving}
                 note={note}
                 onPart={handlePart}
                 onErasing={setErasing}
                 onBrushSize={setBrushSize}
-                onAssist={handleAssist}
                 dispatch={dispatch}
                 onCompare={setComparing}
                 onClearAll={handleClearAll}
@@ -528,14 +509,12 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
                 painted={painted}
                 erasing={erasing}
                 brushSize={brushSize}
-                assist={assist}
                 faceVisible={faceVisible}
                 saving={saving}
                 note={note}
                 onPart={handlePart}
                 onErasing={setErasing}
                 onBrushSize={setBrushSize}
-                onAssist={handleAssist}
                 dispatch={dispatch}
                 onCompare={setComparing}
                 onClearAll={handleClearAll}

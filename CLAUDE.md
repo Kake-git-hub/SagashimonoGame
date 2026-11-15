@@ -66,7 +66,8 @@ push 前に `npm run build` / `npm run lint` / `npm test` を通す。CI（`.git
 - マジックメイクミラーの推論（顔認識）は同期処理で画面の操作を止める。映像のコマが変わったときだけ回し、推論のあとに休みを入れる仕組み（`useFaceTracker`）を外さない
 - 実機のデバッグログを読むとき: `git fetch origin debug-logs && git ls-tree --name-only origin/debug-logs debug-logs/ | tail -5` で新しいものを探し、`git show origin/debug-logs:debug-logs/<名前>.txt` で読む
 - 実機で落ちる・固まる不具合は、推測で直す前にデバッグログで場所を確かめる。重い処理（読み込み・初期化・最初の 1 回）の **前と後** に記録を入れておくと、処理の中で落ちたときに「まえ」で記録が終わる。マジックメイクミラーの中からは `services/diagnostics.ts` の `diag()` を使う（保存先は `MakeupApp` の `onDebugLog` で受け取る）。毎フレームは書かない（定期的な状態は `replaceKey` で 1 行を上書きする）。映像・顔の点は記録しない
-- マジックメイクミラーの画面は、映像を真ん中に置く。横向きは操作パネルを左右に分け（左: モード・パーツ・ふとさ・つよさ、右: 色・ボタン）、縦向きは映像の下に続けて並べる（`makeup.css` の `.mmm-panels` / `.mmm-panel-a` / `.mmm-panel-b`、`TryPanel` の `section`）
+- マジックメイクミラーの ためす は「自由に塗る」: パーツを選ぶとそのあたりがアップになり（`hooks/useStageView.ts`、`logic/focus.ts`。映像の右下のボタンで全体に戻せる）、なぞった所にそのまま色が付く。濃さのスライダーは無く、重ねてなぞる回数で濃くなる（ひと筆ごとに濃さの上限 `flow` がある。`FacePaint.beginStroke` / `endStroke`）。「はみださない」（パーツの型で切り抜く）は画面から外してある（`FacePaint.mask` は できあがりを みる の自動塗りで使う）
+- マジックメイクミラーの画面は、映像を真ん中に置く。横向きは操作パネルを左右に分け（左: モード・パーツ・ふとさ、右: 色・ボタン）、縦向きは映像の下に続けて並べる（`makeup.css` の `.mmm-panels` / `.mmm-panel-a` / `.mmm-panel-b`、`TryPanel` の `section`）
 - レシピ（`public/makeup/recipes/`）や領域の番号を変えたら `npm test`（`recipes.test.ts` / `regions.test.ts`）を通す。顔の点の番号は `logic/regions.ts` にだけ書く
 - ホーム画面など軽い画面から three.js に依存するモジュールを import しない（`src/games/neji/logic/geometry.ts` 等）。ネジはずしは `React.lazy` で別チャンクにしてある
 - ネジはずしのステージ JSON を追加・変更したら `npm run validate:neji` を通す。検証を弱めてごまかさない（解けないステージを配布しないための仕組み）。底面（`dir: [0,-1,0]`）にもネジを置き、外側のパーツを外さないと取れないネジ（ふた・上の段・前の画）を多めに入れる

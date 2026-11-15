@@ -193,15 +193,39 @@
   overflow: hidden;
 }
 
+/* 映像と重ねる canvas の入れ物。大きさは映像の実サイズで、useStageView が transform（拡大と移動）を書く */
+.mmm-view {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
 .mmm-video,
 .mmm-overlay {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  /* 枠からはみ出した分のどこを見せるか。顔が切れないよう useAutoPan が変数を動かす */
-  object-position: var(--mmm-pan-x, 50%) var(--mmm-pan-y, 50%);
+  object-fit: fill;
+}
+
+/* アップ / ぜんたい の切り替え（映像の右下） */
+.mmm-zoom-button {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 2;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.55);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .mmm-overlay {
