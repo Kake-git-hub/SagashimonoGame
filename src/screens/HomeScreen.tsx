@@ -14,6 +14,7 @@ interface Props {
   onSelectGame: (game: GameId) => void;
   onSwitchProfile: () => void;       // 「だれが あそぶ？」へ
   onOpenParentSettings: () => void;  // おうちのひと設定へ
+  onOpenDebug?: () => void;          // デバッグ画面（開発用の記録を見る）
 }
 
 // 各ゲームのクリア数（null は未集計）
@@ -26,7 +27,7 @@ interface ClearCount {
  * ホーム画面（ゲーム選択）
  * 起動時に必ず表示され、遊ぶゲームをカードで選ぶ
  */
-export function HomeScreen({ profile, onSelectGame, onSwitchProfile, onOpenParentSettings }: Props) {
+export function HomeScreen({ profile, onSelectGame, onSwitchProfile, onOpenParentSettings, onOpenDebug }: Props) {
   const isTablet = useIsTablet();
   const [counts, setCounts] = useState<Partial<Record<GameId, ClearCount>>>({});
   const updateReady = usePwaUpdate();
@@ -145,6 +146,9 @@ export function HomeScreen({ profile, onSelectGame, onSwitchProfile, onOpenParen
             {updateLabel}
           </button>
           {updateNote && <p style={styles.updateNote}>{updateNote}</p>}
+          {onOpenDebug && (
+            <button onClick={onOpenDebug} style={styles.debugButton} aria-label="デバッグ">🐞 デバッグ</button>
+          )}
         </div>
       </div>
     </div>
@@ -284,6 +288,16 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: '6px',
     margin: '24px 0 0',
+  },
+  debugButton: {
+    padding: '4px 10px',
+    fontSize: '0.7rem',
+    borderRadius: '12px',
+    border: '1px solid #ddd',
+    backgroundColor: 'transparent',
+    color: '#aaa',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
   },
   buildInfo: {
     margin: 0,

@@ -3,6 +3,7 @@ import { FaceFrame, FaceStatus, Delegate, TrackerLoadState } from '../types';
 import { FaceTracker, FrameSource, loadFaceTracker } from '../services/faceTracker';
 import { FrameHolder, smoothLandmarks } from '../logic/smoothing';
 import { classifyStatus, faceBounds } from '../logic/pose';
+import { diag } from '../services/diagnostics';
 import { initialCloseRange, nextCloseRange, paddedLayout, unpadLandmarks } from '../logic/closeRange';
 import {
   INFERENCE_REST_MAX_MS, INFERENCE_REST_RATIO, PHOTO_INFERENCE_INTERVAL_MS, SLOW_INFERENCE_MS, SMOOTHING_ALPHA, STATUS_THRESHOLDS,
@@ -33,6 +34,10 @@ interface Options {
   // 今のフレームの元（video か img）。無ければ null
   getSource: () => FrameSource | null;
 }
+
+// 開発用の記録: 最初のこの回数だけ推論の前後を残し、そのあとは BEAT_MS ごとに状態を残す
+const EARLY_DETECTS = 3;
+const BEAT_MS = 5000;
 
 // 映像の時刻（currentTime）が変わらなくても、これだけ経ったら推論する（ms）
 const STALE_VIDEO_TIME_MS = 120;
@@ -91,6 +96,7 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
         setLoadState({ phase: 'ready' });
       })
       .catch(err => {
+        diag('にんしき: よみこみ しっぱい', err);
         console.error('FaceLandmarker load failed', err);
         if (!cancelled) setLoadState({ phase: 'error', message: err instanceof Error ? err.message : String(err) });
       });
@@ -114,6 +120,9 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
     let lastSource: FrameSource | null = null;
     let lastDetectAt = 0;
     let closeRange = initialCloseRange();
+    let detectCount = 0;
+    let lastBeatAt = performance.now();
+    const startedAt = lastBeatAt;
     let avgMs = 0;
     let count = 0;
     let windowStart = performance.now();
@@ -193,14 +202,21 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
 
       const padded = closeRange.padded ? drawPadded(el) : null;
       let detected: FaceFrame | null = null;
+      // 最初の数回は、推論の前後を記録する（推論の中で落ちたら「まえ」で記録が終わる）
+      const early = detectCount < EARLY_DETECTS;
+      if (early) diag(`すいろん ${detectCount + 1} かいめ: まえ`, { ...sourceSize(el), padded: !!padded, kind: el.tagName });
       try {
         detected = tracker.detect(padded ?? el, now);
       } catch (err) {
+        if (detectCount < 20) diag('すいろん: しっぱい', err);
+        detectCount++;
         console.warn('detect failed', err);
         return;
       }
       const ended = performance.now();
       const ms = ended - now;
+      if (early) diag(`すいろん ${detectCount + 1} かいめ: おわり`, { ms: Math.round(ms), face: !!detected });
+      detectCount++;
       avgMs = avgMs === 0 ? ms : avgMs * 0.9 + ms * 0.1;
       nextAllowedAt = ended + Math.min(INFERENCE_REST_MAX_MS, avgMs * INFERENCE_REST_RATIO);
       count++;
@@ -208,7 +224,9 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
       const { w, h } = sourceSize(el);
       if (detected && padded) detected = { ...detected, landmarks: unpadLandmarks(detected.landmarks) };
       // 次のコマを余白つきで認識するか（平滑化の前の、今のコマの結果で決める）
+      const wasPadded = closeRange.padded;
       closeRange = nextCloseRange(closeRange, detected?.landmarks ?? null, w / h, now);
+      if (closeRange.padded !== wasPadded) diag(closeRange.padded ? 'ちかい: よはくつきに する' : 'ちかい: もとに もどす');
 
       if (detected) {
         detected = { ...detected, landmarks: smoothLandmarks(prevLandmarks, detected.landmarks, SMOOTHING_ALPHA) };
@@ -234,6 +252,13 @@ export function useFaceTracker({ enabled, delegate, getSource }: Options): FaceT
         setStats(s => ({ ...s, fps: Math.round(fps), inferenceMs: Math.round(avgMs), skipping: avgMs > SLOW_INFERENCE_MS, padded: closeRange.padded }));
         count = 0;
         windowStart = now;
+      }
+      // 5 秒ごとに状態を残す（同じ行を上書きしていくので、落ちる直前の状態が最後に残る）
+      if (now - lastBeatAt >= BEAT_MS) {
+        lastBeatAt = now;
+        diag('じょうたい', {
+          sec: Math.round((now - startedAt) / 1000), detects: detectCount, ms: Math.round(avgMs), face: lastStatus, padded: closeRange.padded, size: `${w}x${h}`,
+        }, 'beat');
       }
     };
     raf = requestAnimationFrame(tick);

@@ -236,10 +236,13 @@
   background: rgba(183, 28, 28, 0.8);
 }
 
-/* 下部の操作パネル（高くなりすぎたら中でスクロールして、顔が見える高さを残す） */
-.mmm-panel {
+/*
+ * 操作パネル（パレット）: 映像がいつも画面の真ん中に来るように置く。
+ * - 縦向き: 映像の下に、2 つの部分を続けて並べる（高くなりすぎたら中でスクロールして、顔が見える高さを残す）
+ * - 横向き: 映像の左（パーツ・ふとさ・つよさ）と右（色・ボタン）に分ける
+ */
+.mmm-panels {
   flex-shrink: 0;
-  min-height: 120px;
   max-height: 52dvh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -250,6 +253,15 @@
   gap: 10px;
 }
 
+/* 縦向きでは 2 つの部分の中身を 1 列に並べ、写真のボタンをいちばん下に送る */
+.mmm-panel {
+  display: contents;
+}
+
+.mmm-photo-row {
+  order: 10;
+}
+
 .mmm-panel-note {
   margin: auto;
   color: rgba(255, 255, 255, 0.6);
@@ -257,23 +269,49 @@
   text-align: center;
 }
 
-/* 横持ち: 映像を左、パネルを右 */
+/* 横向き: パネルを映像の左右に分け、映像を真ん中に置く */
 @media (orientation: landscape) and (min-width: 700px) {
   .mmm-body {
     flex-direction: row;
   }
 
   .mmm-stage {
-    flex: 3;
+    order: 1;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .mmm-panels {
+    display: contents;
   }
 
   .mmm-panel {
-    flex: 2;
+    flex: 0 0 auto;
+    width: clamp(200px, 24vw, 300px);
     min-height: 0;
-    max-height: none;
-    max-width: 420px;
-    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px)) 14px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: #16213e;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-sizing: border-box;
+  }
+
+  .mmm-panel-a {
+    order: 0;
+    padding: 12px 10px calc(12px + env(safe-area-inset-bottom, 0px)) calc(10px + env(safe-area-inset-left, 0px));
+  }
+
+  .mmm-panel-b {
+    order: 2;
+    padding: 12px calc(10px + env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) 10px;
+  }
+
+  /* 左の列では、写真のボタンをいちばん下に寄せる */
+  .mmm-photo-row {
+    order: 0;
+    margin-top: auto;
   }
 }
 
@@ -437,6 +475,16 @@
 .mmm-segment button.mmm-segment-on {
   background: #e91e63;
   color: white;
+}
+
+.mmm-sheet-subtitle {
+  margin: 14px 0 0;
+  font-size: 1rem;
+  color: #c2185b;
+}
+
+.mmm-intro-settings {
+  margin-left: auto;
 }
 
 .mmm-sheet-note {
@@ -684,10 +732,6 @@
   font-size: 0.85rem;
 }
 
-.mmm-panel {
-  min-height: 0;
-}
-
 .mmm-panel-placeholder {
   flex: 1;
   display: flex;
@@ -699,14 +743,38 @@
 }
 
 @media (orientation: landscape) and (min-width: 700px) {
+  /* 左の列: パーツは 2 列に並べ、ふとさ と つよさ は 2 行に分ける */
   .mmm-parts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+
+  .mmm-part {
+    min-width: 0;
+  }
+
+  .mmm-brush-row {
+    flex-wrap: wrap;
+  }
+
+  .mmm-strength {
+    flex: 1 1 100%;
+  }
+
+  .mmm-modes {
+    flex-direction: column;
+  }
+
+  /* 右の列: 色は折り返して並べ、ボタンは幅いっぱいに縦に積む */
+  .mmm-swatches {
     flex-wrap: wrap;
     overflow: visible;
   }
 
-  .mmm-swatches {
-    flex-wrap: wrap;
-    overflow: visible;
+  .mmm-try-colors .mmm-panel-row {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 
@@ -909,4 +977,16 @@
   height: 22px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.6);
+}
+
+/* 横向きでは右の列が細いので、おしえて・ていあん のカードは 1 列にする */
+@media (orientation: landscape) and (min-width: 700px) {
+  .mmm-recipes,
+  .mmm-suggest-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .mmm-suggest-card-wide {
+    grid-column: auto;
+  }
 }

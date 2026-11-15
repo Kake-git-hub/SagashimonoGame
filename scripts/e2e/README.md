@@ -13,7 +13,7 @@ bash scripts/e2e/run.sh treasure-shots  # 全発掘ステージの土を外し�
 bash scripts/e2e/run.sh pwa-update      # 旧ビルド起動 → 新ビルド公開 → 自動更新 → オフライン起動
 bash scripts/e2e/run.sh home-smoke      # ホーム / さがしもの一覧 / ゲーム画面 の表示
 bash scripts/e2e/run.sh offline         # ホームを開いた直後にマジックメイクミラーを一度開いてからサーバーを止め、さがしもの（絵も）・ネジはずし・マジックメイクミラーが遊べるか
-bash scripts/e2e/run.sh makeup-smoke    # マジックメイクミラー: 偽カメラ（合成映像）で はじめに → ミラー → もどる（カメラのトラックが止まるか）
+bash scripts/e2e/run.sh makeup-smoke    # マジックメイクミラー: 偽カメラ（合成映像）で はじめに → ミラー → もどる（カメラのトラックが止まるか）。映像が真ん中に来るレイアウト（横: 左右にパレット / 縦: 下にパレット）、デバッグログの中身、落ちたあとに開き直したときの案内も確かめる
 bash scripts/e2e/run.sh makeup-face     # マジックメイクミラー: 顔写真の偽カメラ（鏡像）で頬をなぞる → 近づいた映像（顔が はみ出す）でも認識して塗れる → 写真モードで はみださない / じゆう / けしゴム / ほぞん → おしえて（ナチュラル）→ ていあん
 ```
 

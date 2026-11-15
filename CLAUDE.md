@@ -21,6 +21,7 @@
 | プロフィール（なんさい？） | `src/services/profileService.ts`, `src/screens/ProfileScreen.tsx` | 起動時に名前と年齢を登録。兄弟分を持てて、進捗はプロフィールごとに分かれる。年齢 → 難易度・クイズレベル（`difficultyForAge`） |
 | べんきょうクイズ | `src/services/quiz/`（`index.ts` が科目の登録簿、`generators/` が科目ごとの問題生成）, `src/components/quiz/QuizScreen.tsx`（全画面）, `src/hooks/useQuizGate.tsx` | 年齢に合わせた問題を生成。`useQuizGate().ask(trigger)` が「クイズに正解したら true」の Promise を返す。科目を増やすときは `generators/` にファイルを足して `GENERATORS` に登録する |
 | おうちのひと設定 | `src/services/appSettingsService.ts`, `src/screens/ParentSettingsScreen.tsx` | かけ算の関門の先。クイズを出す場面・レベル・科目、おたすけの回数、プロフィールの編集 |
+| デバッグログ（開発用） | `src/services/debugLogService.ts`, `src/components/DebugPanel.tsx` | 実機で落ちたときの手がかりを端末に残す。`debugLog(tag, message, data)` が localStorage（`asobi_debug_log`）へその場で書き、画面を表示したまま終わっていたら次の起動で「落ちた」と分かる（`getPreviousCrash`）。ホーム画面下の「🐞 デバッグ」で見る・コピーする・送る。エラー（error / unhandledrejection）と画面の切り替えは自動で記録される |
 
 ## よく使うコマンド
 
@@ -37,7 +38,7 @@ bash scripts/e2e/run.sh neji-smoke   # ヘッドレス Chromium で実際に遊�
 bash scripts/e2e/run.sh neji-dig     # 発掘ステージ・クイズ・おたすけ・つづきから の流れ
 bash scripts/e2e/run.sh geo-shots    # 展開図・ピラミッド・漢字ステージ（ブロックの確認とスクリーンショット）
 bash scripts/e2e/run.sh offline      # サーバーを止めて、さがしもの（絵も）・ネジはずし・マジックメイクミラーがオフラインで遊べるか
-bash scripts/e2e/run.sh makeup-smoke # 偽カメラで マジックメイクミラーの はじめに → ミラー → もどる（カメラが止まるか）
+bash scripts/e2e/run.sh makeup-smoke # 偽カメラで マジックメイクミラーの はじめに → ミラー → もどる（カメラが止まるか）、レイアウト、デバッグログ、落ちたあとの案内
 bash scripts/e2e/run.sh makeup-face  # 顔写真で顔認識 → なぞって塗る（鏡像・近づいた映像・けしゴム）→ おしえて → ていあん の流れ（写真は初回にダウンロード、ffmpeg が要る）
 ```
 
@@ -62,6 +63,8 @@ push 前に `npm run build` / `npm run lint` / `npm test` を通す。CI（`.git
 - マジックメイクミラーの文言も子ども向けのひらがな中心（メイク用語はカタカナ）。文言は `src/games/makeup/strings.ts` に集めてある。`src/games/makeup/` の中からプラットフォームのコード（`profileService` など）を import しない（`MakeupApp` の props で受け取る。後で単体アプリに切り出すため）
 - マジックメイクミラーの描画は、canvas・テクスチャを最初に 1 回だけ作って使い回す。毎フレーム `document.createElement('canvas')` しない（iPad でメモリが尽きて落ちた原因）。canvas の `filter` は Safari で使えないので頼らない。描画やなぞる操作を変えたら `bash scripts/e2e/run.sh makeup-face` を通す（canvas を作り続けていないことも確かめる）
 - マジックメイクミラーの推論（顔認識）は同期処理で画面の操作を止める。映像のコマが変わったときだけ回し、推論のあとに休みを入れる仕組み（`useFaceTracker`）を外さない
+- 実機で落ちる・固まる不具合は、推測で直す前にデバッグログで場所を確かめる。重い処理（読み込み・初期化・最初の 1 回）の **前と後** に記録を入れておくと、処理の中で落ちたときに「まえ」で記録が終わる。マジックメイクミラーの中からは `services/diagnostics.ts` の `diag()` を使う（保存先は `MakeupApp` の `onDebugLog` で受け取る）。毎フレームは書かない（定期的な状態は `replaceKey` で 1 行を上書きする）。映像・顔の点は記録しない
+- マジックメイクミラーの画面は、映像を真ん中に置く。横向きは操作パネルを左右に分け（左: モード・パーツ・ふとさ・つよさ、右: 色・ボタン）、縦向きは映像の下に続けて並べる（`makeup.css` の `.mmm-panels` / `.mmm-panel-a` / `.mmm-panel-b`、`TryPanel` の `section`）
 - レシピ（`public/makeup/recipes/`）や領域の番号を変えたら `npm test`（`recipes.test.ts` / `regions.test.ts`）を通す。顔の点の番号は `logic/regions.ts` にだけ書く
 - ホーム画面など軽い画面から three.js に依存するモジュールを import しない（`src/games/neji/logic/geometry.ts` 等）。ネジはずしは `React.lazy` で別チャンクにしてある
 - ネジはずしのステージ JSON を追加・変更したら `npm run validate:neji` を通す。検証を弱めてごまかさない（解けないステージを配布しないための仕組み）。底面（`dir: [0,-1,0]`）にもネジを置き、外側のパーツを外さないと取れないネジ（ふた・上の段・前の画）を多めに入れる

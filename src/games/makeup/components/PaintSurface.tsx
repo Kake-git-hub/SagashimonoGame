@@ -5,6 +5,7 @@ import { LayerId } from '../logic/layers';
 import { clientToFrame, ViewPan } from '../logic/viewport';
 import { FaceTrackerHandle } from '../hooks/useFaceTracker';
 import { FacePaint } from './facePaint';
+import { diag } from '../services/diagnostics';
 
 // いま持っている道具
 export interface PaintTool {
@@ -93,6 +94,8 @@ export function PaintSurface({ tracker, paint, tool, mirrored, frameWidth, frame
       hit = false;
       try { el.setPointerCapture(e.pointerId); } catch { /* 取れなくても続ける */ }
       e.preventDefault();
+      const { tool } = latest.current;
+      diag('なぞる: はじめ', { part: tool.layer, erasing: tool.erasing, assist: tool.assist, size: tool.size, by: e.pointerType }, 'stroke');
       latest.current.onStrokeStart?.();
       apply(e);
     };

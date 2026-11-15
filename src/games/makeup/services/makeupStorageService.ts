@@ -18,6 +18,9 @@ export function getMakeupSettings(): MakeupSettings {
       showStats: !!parsed.showStats,
       guideOpacity: typeof parsed.guideOpacity === 'number' ? Math.max(0.2, Math.min(1, parsed.guideOpacity)) : DEFAULT_SETTINGS.guideOpacity,
       paintAssist: typeof parsed.paintAssist === 'boolean' ? parsed.paintAssist : DEFAULT_SETTINGS.paintAssist,
+      debugNoTracking: !!parsed.debugNoTracking,
+      debugNoRender: !!parsed.debugNoRender,
+      debugLowRes: !!parsed.debugLowRes,
     };
   } catch {
     return { ...DEFAULT_SETTINGS };

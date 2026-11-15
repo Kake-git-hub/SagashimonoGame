@@ -57,6 +57,9 @@ export const DEFAULT_SETTINGS: MakeupSettings = {
   showStats: false,
   guideOpacity: 0.8,
   paintAssist: true,
+  debugNoTracking: false,
+  debugNoRender: false,
+  debugLowRes: false,
 };
 
 // 保存キー（localStorage）

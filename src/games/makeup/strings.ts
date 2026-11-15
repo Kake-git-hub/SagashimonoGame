@@ -18,6 +18,9 @@ export const S = {
     privacy: 'うつした かおは、この たんまつの なかだけで つかうよ。どこにも おくらないし、かってに ほぞんも しないよ。',
     download: 'はじめて ひらくときは、かおを みつけるための データを ダウンロードするよ（やく 19MB）。Wi-Fi が おすすめ。',
     start: 'カメラを つかう',
+    crashed: 'まえに ひらいたとき、とちゅうで とまってしまったみたい。',
+    crashedHelp: '⚙️ の「しらべる」で スイッチを きりかえて、もういちど ためしてみてね。',
+    settings: 'せってい',
   },
   camera: {
     starting: 'カメラを じゅんびちゅう...',
@@ -30,6 +33,7 @@ export const S = {
     unknown: 'もういちど ためしてね。',
     retry: 'もういちど',
     interrupted: 'カメラが とまったよ。もういちど つなぐね...',
+    trackingOff: 'かおを みつけない せってい（しらべる）',
   },
   // 顔の状態（状態欄）
   face: {
@@ -53,6 +57,12 @@ export const S = {
     showStats: 'はやさを みせる',
     delegate: 'かおを みつける やりかた',
     delegateNote: 'うまく うごかないときは CPU に してみてね',
+    debugTitle: 'しらべる（かいはつよう）',
+    debugNote: 'とまってしまうとき、どれを きると とまらなくなるかを しらべるための スイッチだよ。かえたら いちど もどって ひらきなおしてね',
+    debugNoTracking: 'かおを みつけない',
+    debugNoRender: 'メイクを かかない',
+    debugLowRes: 'カメラを ちいさく する',
+    openDebug: 'デバッグの きろくを みる',
     close: 'とじる',
   },
   photo: {

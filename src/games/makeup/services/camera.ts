@@ -3,6 +3,8 @@
  * getUserMedia の失敗理由を「許可されなかった / 無い / 使用中 / ...」に分類して、画面で案内できるようにする
  */
 
+import { diag } from './diagnostics';
+
 export type CameraErrorKind = 'denied' | 'notfound' | 'busy' | 'insecure' | 'unsupported' | 'unknown';
 
 export class CameraError extends Error {
@@ -22,6 +24,16 @@ const CONSTRAINT_ATTEMPTS: MediaStreamConstraints[] = [
   { video: { facingMode: 'user' }, audio: false },
   { video: true, audio: false },
 ];
+
+// 開発用: 小さい解像度（落ちる原因の切り分け）
+const LOW_RES_ATTEMPTS: MediaStreamConstraints[] = [
+  { video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false },
+  { video: true, audio: false },
+];
+
+export interface CameraOptions {
+  lowRes?: boolean;
+}
 
 export function isCameraSupported(): boolean {
   return typeof navigator !== 'undefined' && !!navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function';
@@ -47,15 +59,20 @@ export function classifyCameraError(err: unknown): CameraErrorKind {
   }
 }
 
-export async function startCamera(): Promise<MediaStream> {
+export async function startCamera(options: CameraOptions = {}): Promise<MediaStream> {
   if (!isCameraSupported()) {
     throw new CameraError(typeof window !== 'undefined' && window.isSecureContext === false ? 'insecure' : 'unsupported');
   }
   let lastError: unknown = null;
-  for (const constraints of CONSTRAINT_ATTEMPTS) {
+  for (const constraints of options.lowRes ? LOW_RES_ATTEMPTS : CONSTRAINT_ATTEMPTS) {
     try {
-      return await navigator.mediaDevices.getUserMedia(constraints);
+      diag('カメラ: たのむ', constraints.video);
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      const settings = stream.getVideoTracks()[0]?.getSettings?.();
+      diag('カメラ: はじまった', settings ? { w: settings.width, h: settings.height, fps: settings.frameRate, facing: settings.facingMode } : undefined);
+      return stream;
     } catch (err) {
+      diag('カメラ: しっぱい', (err as { name?: string } | null)?.name ?? String(err));
       lastError = err;
       // 条件を緩めれば通る見込みがあるのは OverconstrainedError だけ。それ以外はそのまま失敗にする
       if ((err as { name?: string } | null)?.name !== 'OverconstrainedError') {

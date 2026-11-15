@@ -14,6 +14,7 @@ import nosimdLoaderUrl from '@mediapipe/tasks-vision/vision_wasm_nosimd_internal
 import nosimdWasmUrl from '@mediapipe/tasks-vision/vision_wasm_nosimd_internal.wasm?url';
 import { Delegate, FaceFrame } from '../types';
 import { FACE_CONFIDENCE } from '../constants';
+import { diag } from './diagnostics';
 
 export const MODEL_URL = `${import.meta.env.BASE_URL}makeup/models/face_landmarker.task`;
 
@@ -85,6 +86,7 @@ export async function loadFaceTracker(delegate: Delegate, callbacks: LoadCallbac
   };
   report();
 
+  diag('にんしき: よみこみ', { simd, delegate, wasm: cachedWasm ? 'あり' : 'これから', model: cachedModel ? 'あり' : 'これから' });
   if (!cachedWasm) {
     const bytes = await fetchWithProgress(wasmUrl, (n, total) => {
       if (total) totals.wasm = total;
@@ -92,6 +94,7 @@ export async function loadFaceTracker(delegate: Delegate, callbacks: LoadCallbac
       report();
     });
     cachedWasm = { loaderUrl, blobUrl: URL.createObjectURL(new Blob([bytes as BlobPart], { type: 'application/wasm' })) };
+    diag('にんしき: wasm を うけとった', { bytes: bytes.byteLength });
   }
   if (!cachedModel) {
     cachedModel = await fetchWithProgress(MODEL_URL, (n, total) => {
@@ -100,6 +103,7 @@ export async function loadFaceTracker(delegate: Delegate, callbacks: LoadCallbac
       report();
     });
   }
+  diag('にんしき: モデルを うけとった', { bytes: cachedModel.byteLength });
   callbacks.onStarting?.();
 
   const fileset = { wasmLoaderPath: cachedWasm.loaderUrl, wasmBinaryPath: cachedWasm.blobUrl };
@@ -117,13 +121,16 @@ export async function loadFaceTracker(delegate: Delegate, callbacks: LoadCallbac
   let landmarker: FaceLandmarker;
   let used: Delegate = delegate;
   try {
+    diag(`にんしき: つくる（${delegate}）まえ`);
     landmarker = await create(delegate);
   } catch (err) {
+    diag(`にんしき: つくる（${delegate}）しっぱい`, err);
     if (delegate === 'CPU') throw err;
     console.warn('FaceLandmarker: GPU failed, falling back to CPU', err);
     used = 'CPU';
     landmarker = await create('CPU');
   }
+  diag(`にんしき: できた（${used}）`);
 
   let lastTs = -1;
   return {

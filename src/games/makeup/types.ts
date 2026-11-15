@@ -42,4 +42,8 @@ export interface MakeupSettings {
   showStats: boolean;
   guideOpacity: number; // 0〜1
   paintAssist: boolean; // はみださない（なぞった所を、パーツの型で切り抜いて塗る）
+  // 開発用: 実機で落ちる原因を切り分けるためのスイッチ（どれを切ると落ちなくなるかを見る）
+  debugNoTracking: boolean;  // 顔認識を動かさない
+  debugNoRender: boolean;    // メイクの描画（WebGL）を動かさない
+  debugLowRes: boolean;      // カメラを小さい解像度（640×480）にする
 }

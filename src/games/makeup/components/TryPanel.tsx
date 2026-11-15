@@ -11,6 +11,9 @@ const PART_TABS: LayerId[] = ['lip', 'blush', 'eyeshadow', 'eyeliner', 'brow', '
 const SIZE_DOT: Record<BrushSize, number> = { s: 8, m: 14, l: 22 };
 
 interface Props {
+  // どちらの部分を描くか。tools = パーツ・ふとさ・つよさ、colors = 色・ボタン・ひとこと。
+  // 横向きでは映像の左右に、縦向きでは映像の下に続けて置く
+  section: 'tools' | 'colors';
   palettes: PaletteMap | null;
   paletteError: boolean;
   look: LookState;          // パーツごとに選んでいる色と つよさ
@@ -38,7 +41,7 @@ interface Props {
  * 色を選んだだけでは顔に付かない。映像の上を指でなぞった所に付く
  */
 export function TryPanel({
-  palettes, paletteError, look, part, color, painted, erasing, brushSize, assist, faceVisible, saving, note,
+  section, palettes, paletteError, look, part, color, painted, erasing, brushSize, assist, faceVisible, saving, note,
   onPart, onErasing, onBrushSize, onAssist, dispatch, onCompare, onClearAll, onSave,
 }: Props) {
   const colors = palettes?.[part] ?? [];
@@ -55,8 +58,42 @@ export function TryPanel({
     dispatch({ type: 'set', layer: part, style: { color, opacity: value / 100 } });
   };
 
-  return (
-    <div className="mmm-try">
+  const brushRow = (
+    <div className="mmm-brush-row">
+      <div className="mmm-sizes" role="radiogroup" aria-label={S.try.size}>
+        <span className="mmm-brush-label">{S.try.size}</span>
+        {BRUSH_SIZES.map(size => (
+          <button
+            key={size}
+            role="radio"
+            aria-checked={brushSize === size}
+            aria-label={`${S.try.size} ${S.try.sizes[size]}`}
+            title={S.try.sizes[size]}
+            className={`mmm-size${brushSize === size ? ' mmm-size-on' : ''}`}
+            onClick={() => onBrushSize(size)}
+          >
+            <span className="mmm-size-dot" style={{ width: SIZE_DOT[size], height: SIZE_DOT[size] }} aria-hidden="true" />
+          </button>
+        ))}
+      </div>
+      <label className="mmm-strength">
+        <span className="mmm-brush-label">{S.try.strength}</span>
+        <input
+          type="range"
+          min={5}
+          max={100}
+          value={strength}
+          disabled={!color}
+          onChange={e => setStrength(Number(e.target.value))}
+          aria-label={`${S.parts[part]} ${S.try.strength}`}
+        />
+        <span className="mmm-strength-value">{strength}%</span>
+      </label>
+    </div>
+  );
+
+  if (section === 'tools') return (
+    <div className="mmm-try mmm-try-tools">
       <div className="mmm-parts" role="tablist" aria-label={S.try.parts}>
         {PART_TABS.map(id => (
           <button
@@ -73,6 +110,12 @@ export function TryPanel({
         ))}
       </div>
 
+      {brushRow}
+    </div>
+  );
+
+  return (
+    <div className="mmm-try mmm-try-colors">
       <div className="mmm-swatches" role="radiogroup" aria-label={S.try.colors}>
         <button
           role="radio"
@@ -101,38 +144,6 @@ export function TryPanel({
             />
           );
         })}
-      </div>
-
-      <div className="mmm-brush-row">
-        <div className="mmm-sizes" role="radiogroup" aria-label={S.try.size}>
-          <span className="mmm-brush-label">{S.try.size}</span>
-          {BRUSH_SIZES.map(size => (
-            <button
-              key={size}
-              role="radio"
-              aria-checked={brushSize === size}
-              aria-label={`${S.try.size} ${S.try.sizes[size]}`}
-              title={S.try.sizes[size]}
-              className={`mmm-size${brushSize === size ? ' mmm-size-on' : ''}`}
-              onClick={() => onBrushSize(size)}
-            >
-              <span className="mmm-size-dot" style={{ width: SIZE_DOT[size], height: SIZE_DOT[size] }} aria-hidden="true" />
-            </button>
-          ))}
-        </div>
-        <label className="mmm-strength">
-          <span className="mmm-brush-label">{S.try.strength}</span>
-          <input
-            type="range"
-            min={5}
-            max={100}
-            value={strength}
-            disabled={!color}
-            onChange={e => setStrength(Number(e.target.value))}
-            aria-label={`${S.parts[part]} ${S.try.strength}`}
-          />
-          <span className="mmm-strength-value">{strength}%</span>
-        </label>
       </div>
 
       <div className="mmm-panel-row">

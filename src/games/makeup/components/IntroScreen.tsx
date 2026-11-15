@@ -9,12 +9,16 @@ interface Props {
   onStart: () => void;
   onPickPhoto: () => void;
   onExit: () => void;
+  // 開発用: 前の回が途中で落ちていたら知らせる・設定（切り分けスイッチ）とデバッグの記録を開く
+  crashedLastTime?: boolean;
+  onOpenSettings?: () => void;
+  onOpenDebug?: () => void;
 }
 
 /**
  * はじめに: カメラを使うことと、映像を外に出さないことを説明してから許可を求める
  */
-export function IntroScreen({ status, error, onStart, onPickPhoto, onExit }: Props) {
+export function IntroScreen({ status, error, onStart, onPickPhoto, onExit, crashedLastTime = false, onOpenSettings, onOpenDebug }: Props) {
   const ready = useTapGuard();
   const starting = status === 'starting';
 
@@ -23,6 +27,9 @@ export function IntroScreen({ status, error, onStart, onPickPhoto, onExit }: Pro
       <header className="mmm-intro-header">
         <button className="mmm-icon-button" onClick={onExit} aria-label={S.backToHome} title={S.backToHome}>←</button>
         <h1 className="mmm-intro-title">💄 {S.title}</h1>
+        {onOpenSettings && (
+          <button className="mmm-icon-button mmm-intro-settings" onClick={onOpenSettings} aria-label={S.intro.settings} title={S.intro.settings}>⚙️</button>
+        )}
       </header>
       <div className="mmm-intro-scroll">
         <div className="mmm-intro-card">
@@ -36,6 +43,13 @@ export function IntroScreen({ status, error, onStart, onPickPhoto, onExit }: Pro
             <p>{S.intro.privacy}</p>
             <p>{S.intro.download}</p>
           </section>
+          {crashedLastTime && (
+            <div className="mmm-intro-error" role="alert">
+              <strong>⚠ {S.intro.crashed}</strong>
+              <p>{S.intro.crashedHelp}</p>
+              {onOpenDebug && <button className="mmm-secondary-button" onClick={onOpenDebug}>🐞 {S.settings.openDebug}</button>}
+            </div>
+          )}
           {status === 'error' && (
             <div className="mmm-intro-error" role="alert">
               <strong>{S.camera.errorTitle}</strong>

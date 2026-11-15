@@ -4,17 +4,18 @@ import { TrackerStats } from '../hooks/useFaceTracker';
 
 interface Props {
   settings: MakeupSettings;
-  stats: TrackerStats;
+  stats?: TrackerStats;     // ミラー画面から開いたときだけ（いま使っている GPU / CPU を出す）
   isPhoto: boolean;
   onChange: (next: MakeupSettings) => void;
+  onOpenDebug?: () => void; // デバッグの記録を見る（あそびひろば側の画面）
   onClose: () => void;
 }
 
 /**
  * せってい（ミラー画面に重なるシート）
  */
-export function SettingsSheet({ settings, stats, isPhoto, onChange, onClose }: Props) {
-  const toggle = (key: 'mirrored' | 'showLandmarks' | 'showStats') => onChange({ ...settings, [key]: !settings[key] });
+export function SettingsSheet({ settings, stats, isPhoto, onChange, onOpenDebug, onClose }: Props) {
+  const toggle = (key: 'mirrored' | 'showLandmarks' | 'showStats' | 'debugNoTracking' | 'debugNoRender' | 'debugLowRes') => onChange({ ...settings, [key]: !settings[key] });
   const row = (label: string, checked: boolean, onToggle: () => void, disabled = false) => (
     <label className="mmm-setting-row">
       <span>{label}</span>
@@ -46,7 +47,13 @@ export function SettingsSheet({ settings, stats, isPhoto, onChange, onClose }: P
             ))}
           </div>
         </div>
-        <p className="mmm-sheet-note">{S.settings.delegateNote}{stats.delegate ? `（いま: ${stats.delegate}）` : ''}</p>
+        <p className="mmm-sheet-note">{S.settings.delegateNote}{stats?.delegate ? `（いま: ${stats.delegate}）` : ''}</p>
+        <h3 className="mmm-sheet-subtitle">🐞 {S.settings.debugTitle}</h3>
+        {row(S.settings.debugNoTracking, settings.debugNoTracking, () => toggle('debugNoTracking'))}
+        {row(S.settings.debugNoRender, settings.debugNoRender, () => toggle('debugNoRender'))}
+        {row(S.settings.debugLowRes, settings.debugLowRes, () => toggle('debugLowRes'))}
+        <p className="mmm-sheet-note">{S.settings.debugNote}</p>
+        {onOpenDebug && <button className="mmm-secondary-button" onClick={onOpenDebug}>🐞 {S.settings.openDebug}</button>}
         <button className="mmm-secondary-button" onClick={onClose}>{S.settings.close}</button>
       </div>
     </div>

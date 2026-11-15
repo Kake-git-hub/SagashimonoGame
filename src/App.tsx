@@ -8,6 +8,8 @@ import { ParentSettingsScreen } from './screens/ParentSettingsScreen';
 import { SagashimonoApp } from './games/sagashimono/SagashimonoApp';
 import { usePwaUpdate } from './hooks/usePwaUpdate';
 import { applyPwaUpdate } from './services/pwaUpdateService';
+import { debugLog, debugScreen, getPreviousCrash } from './services/debugLogService';
+import { DebugPanel } from './components/DebugPanel';
 import './App.css';
 
 // ネジはずしは 3D ライブラリを含むので、選ばれたときだけ読み込む
@@ -17,6 +19,9 @@ const MakeupApp = lazy(() => import('./games/makeup/MakeupApp'));
 
 // アプリ全体の画面: プロフィール選択 / ホーム（ゲーム選択）/ おうちのひと設定 / いずれかのゲーム
 type AppScreen = 'profile' | 'home' | 'parent' | GameId;
+
+// マジックメイクミラーへ渡す記録の口（ゲーム側はプラットフォームのコードを import しない）
+const logMakeup = (message: string, data?: unknown, replaceKey?: string) => debugLog('makeup', message, data, replaceKey);
 
 function LoadingScreen() {
   return (
@@ -45,6 +50,11 @@ function App() {
   const [ready, setReady] = useState(false);
   const [updating, setUpdating] = useState(false);
   const updateReady = usePwaUpdate();
+  const [debugOpen, setDebugOpen] = useState(false);
+  const openDebug = useCallback(() => setDebugOpen(true), []);
+
+  // どの画面にいたかを記録しておく（落ちたときの手がかり）
+  useEffect(() => { debugScreen(screen); }, [screen]);
 
   // 初回起動時に localStorage → IndexedDB 移行（さがしものゲームの自作パズル）
   useEffect(() => {
@@ -103,7 +113,13 @@ function App() {
     case 'makeup':
       content = (
         <Suspense fallback={<LoadingScreen />}>
-          <MakeupApp onExit={goHome} storageKey={profileStorageKey} />
+          <MakeupApp
+            onExit={goHome}
+            storageKey={profileStorageKey}
+            onDebugLog={logMakeup}
+            onOpenDebug={openDebug}
+            crashedLastTime={getPreviousCrash()?.screen === 'makeup'}
+          />
         </Suspense>
       );
       break;
@@ -116,6 +132,7 @@ function App() {
           onSelectGame={setScreen}
           onSwitchProfile={openProfiles}
           onOpenParentSettings={openParent}
+          onOpenDebug={openDebug}
         />
       );
   }
@@ -124,6 +141,7 @@ function App() {
     // プロフィールを切り替えたら画面を作り直して、そのプロフィールの進捗を読み直す
     <div key={profile?.id ?? 'none'} style={{ height: '100%' }}>
       {content}
+      {debugOpen && <DebugPanel onClose={() => setDebugOpen(false)} />}
       {updating && (
         <div className="update-toast" role="status">
           🔄 あたらしいバージョンに こうしんしています…

@@ -46,6 +46,7 @@ interface Props {
   onPickPhoto: () => void;
   onUseCamera: () => void;
   onBack: () => void;
+  onOpenDebug?: () => void;
 }
 
 // 「ここに ぬれるよ」の点線を出しておく時間（ms）: パーツを選んだあと / なぞり終わったあと
@@ -58,7 +59,7 @@ const NOTE_MS = 3000;
  * ミラー画面: ヘッダー + 映像（鏡像）+ メイク描画 + ガイド描画 + 状態 + 下部パネル（ためす / おしえて / ていあん）
  * ためす では、パレットで色を選び、映像の顔を指でなぞった所にメイクが付く
  */
-export function MirrorScreen({ source, camera, settings, initialLook, debug, onLookChange, onSettingsChange, onPickPhoto, onUseCamera, onBack }: Props) {
+export function MirrorScreen({ source, camera, settings, initialLook, debug, onLookChange, onSettingsChange, onPickPhoto, onUseCamera, onBack, onOpenDebug }: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -132,7 +133,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
   }, []);
 
   const getSource = useCallback(() => (isPhoto ? imageRef.current : videoRef.current), [isPhoto]);
-  const tracker = useFaceTracker({ enabled: true, delegate: settings.delegate, getSource });
+  const tracker = useFaceTracker({ enabled: !settings.debugNoTracking, delegate: settings.delegate, getSource });
   const { loadState, status, stats } = tracker;
   // 枠からはみ出した映像のうち、顔のある側を見せる
   const panRef = useAutoPan(tracker, stageRef, frameSize.w, frameSize.h);
@@ -347,6 +348,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
 
   // 状態欄の文言
   const statusText = useMemo(() => {
+    if (settings.debugNoTracking) return S.camera.trackingOff;
     if (loadState.phase === 'downloading') {
       const pct = loadState.total > 0 ? Math.min(99, Math.round((loadState.loaded / loadState.total) * 100)) : 0;
       return `${S.loading.downloading} ${pct}%`;
@@ -357,7 +359,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
       return camera.status === 'error' ? `${S.camera.errorTitle} ${S.camera[camera.error ?? 'unknown']}` : S.camera.interrupted;
     }
     return S.face[status];
-  }, [loadState, isPhoto, camera.status, camera.error, status]);
+  }, [loadState, isPhoto, camera.status, camera.error, status, settings.debugNoTracking]);
   const statusKind = loadState.phase === 'error' || (!isPhoto && camera.status === 'error') ? 'error' : loadState.phase !== 'ready' ? 'loading' : status;
 
   const faceVisible = loadState.phase === 'ready' && status !== 'none';
@@ -412,6 +414,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
             width={frameSize.w}
             height={frameSize.h}
             getSource={getSource}
+            disabled={settings.debugNoRender}
             viewRef={viewRef}
           />
           <GuideCanvas
@@ -461,73 +464,105 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
           )}
         </StageView>
 
-        <div className="mmm-panel">
-          <div className="mmm-modes" role="tablist">
-            {(['try', 'guide', 'suggest'] as Mode[]).map(m => (
-              <button key={m} role="tab" aria-selected={mode === m} className="mmm-mode" onClick={() => setMode(m)}>
-                {S.modes[m]}
-              </button>
-            ))}
+        {/* 操作パネルは 2 つに分ける。横向きでは映像の左右、縦向きでは映像の下に続けて並ぶ（makeup.css） */}
+        <div className="mmm-panels">
+          <div className="mmm-panel mmm-panel-a">
+            <div className="mmm-modes" role="tablist">
+              {(['try', 'guide', 'suggest'] as Mode[]).map(m => (
+                <button key={m} role="tab" aria-selected={mode === m} className="mmm-mode" onClick={() => setMode(m)}>
+                  {S.modes[m]}
+                </button>
+              ))}
+            </div>
+
+            {mode === 'try' && (
+              <TryPanel
+                section="tools"
+                palettes={palettes}
+                paletteError={paletteError}
+                look={look}
+                part={part}
+                color={toolColor}
+                painted={painted}
+                erasing={erasing}
+                brushSize={brushSize}
+                assist={assist}
+                faceVisible={faceVisible}
+                saving={saving}
+                note={note}
+                onPart={handlePart}
+                onErasing={setErasing}
+                onBrushSize={setBrushSize}
+                onAssist={handleAssist}
+                dispatch={dispatch}
+                onCompare={setComparing}
+                onClearAll={handleClearAll}
+                onSave={handleSave}
+              />
+            )}
+
+            <div className="mmm-panel-row mmm-photo-row">
+              {isPhoto ? (
+                <>
+                  <button className="mmm-chip-button" onClick={onPickPhoto}>🖼️ {S.photo.change}</button>
+                  <button className="mmm-chip-button" onClick={onUseCamera}>📷 {S.photo.useCamera}</button>
+                </>
+              ) : (
+                <button className="mmm-chip-button" onClick={onPickPhoto}>🖼️ {S.photo.pick}</button>
+              )}
+            </div>
           </div>
 
-          {mode === 'try' ? (
-            <TryPanel
-              palettes={palettes}
-              paletteError={paletteError}
-              look={look}
-              part={part}
-              color={toolColor}
-              painted={painted}
-              erasing={erasing}
-              brushSize={brushSize}
-              assist={assist}
-              faceVisible={faceVisible}
-              saving={saving}
-              note={note}
-              onPart={handlePart}
-              onErasing={setErasing}
-              onBrushSize={setBrushSize}
-              onAssist={handleAssist}
-              dispatch={dispatch}
-              onCompare={setComparing}
-              onClearAll={handleClearAll}
-              onSave={handleSave}
-            />
-          ) : mode === 'guide' ? (
-            <GuidePanel
-              recipes={recipes}
-              recipesError={recipesError}
-              recipe={recipe}
-              loadingRecipe={loadingRecipe}
-              stepIndex={stepIndex}
-              poseOk={poseOk}
-              faceVisible={faceVisible}
-              resultShown={resultShown}
-              onSelectRecipe={handleSelectRecipe}
-              onStep={handleStep}
-              onRestart={handleRestart}
-              onLeaveRecipe={handleLeaveRecipe}
-              onToggleResult={handleToggleResult}
-            />
-          ) : (
-            <SuggestPanel
-              suggestion={suggestion}
-              faceVisible={faceVisible}
-              recipes={recipes}
-              onDiagnose={handleDiagnose}
-              onOpenRecipe={handleOpenRecipe}
-              onApplyLook={handleApplySuggestedLook}
-            />
-          )}
-
-          <div className="mmm-panel-row">
-            {isPhoto ? (
-              <>
-                <button className="mmm-chip-button" onClick={onPickPhoto}>🖼️ {S.photo.change}</button>
-                <button className="mmm-chip-button" onClick={onUseCamera}>📷 {S.photo.useCamera}</button>
-              </>
+          <div className="mmm-panel mmm-panel-b">
+            {mode === 'try' ? (
+              <TryPanel
+                section="colors"
+                palettes={palettes}
+                paletteError={paletteError}
+                look={look}
+                part={part}
+                color={toolColor}
+                painted={painted}
+                erasing={erasing}
+                brushSize={brushSize}
+                assist={assist}
+                faceVisible={faceVisible}
+                saving={saving}
+                note={note}
+                onPart={handlePart}
+                onErasing={setErasing}
+                onBrushSize={setBrushSize}
+                onAssist={handleAssist}
+                dispatch={dispatch}
+                onCompare={setComparing}
+                onClearAll={handleClearAll}
+                onSave={handleSave}
+              />
+            ) : mode === 'guide' ? (
+              <GuidePanel
+                recipes={recipes}
+                recipesError={recipesError}
+                recipe={recipe}
+                loadingRecipe={loadingRecipe}
+                stepIndex={stepIndex}
+                poseOk={poseOk}
+                faceVisible={faceVisible}
+                resultShown={resultShown}
+                onSelectRecipe={handleSelectRecipe}
+                onStep={handleStep}
+                onRestart={handleRestart}
+                onLeaveRecipe={handleLeaveRecipe}
+                onToggleResult={handleToggleResult}
+              />
             ) : (
-              <button className="mmm-chip-button" onClick={onPickPhoto}>🖼️ {S.photo.pick}</button>
+              <SuggestPanel
+                suggestion={suggestion}
+                faceVisible={faceVisible}
+                recipes={recipes}
+                onDiagnose={handleDiagnose}
+                onOpenRecipe={handleOpenRecipe}
+                onApplyLook={handleApplySuggestedLook}
+              />
             )}
           </div>
         </div>
@@ -539,6 +574,7 @@ export function MirrorScreen({ source, camera, settings, initialLook, debug, onL
           stats={stats}
           isPhoto={isPhoto}
           onChange={onSettingsChange}
+          onOpenDebug={onOpenDebug}
           onClose={() => setShowSettings(false)}
         />
       )}

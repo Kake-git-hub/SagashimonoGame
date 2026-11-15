@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { CameraError, CameraErrorKind, startCamera, stopStream } from '../services/camera';
+import { CameraError, CameraErrorKind, CameraOptions, startCamera, stopStream } from '../services/camera';
+import { diag } from '../services/diagnostics';
 
 export type CameraStatus = 'idle' | 'starting' | 'running' | 'error';
 
@@ -7,7 +8,7 @@ export interface CameraHandle {
   status: CameraStatus;
   stream: MediaStream | null;
   error: CameraErrorKind | null;
-  start: () => Promise<boolean>;
+  start: (options?: CameraOptions) => Promise<boolean>;
   stop: () => void;
 }
 
@@ -24,6 +25,7 @@ export function useCamera(): CameraHandle {
   const streamRef = useRef<MediaStream | null>(null);
   const wantedRef = useRef(false);   // ユーザーがカメラを使いたい状態か
   const attemptRef = useRef(0);      // 古い start() の結果を無視するための番号
+  const optionsRef = useRef<CameraOptions>({});
 
   const release = useCallback(() => {
     stopStream(streamRef.current);
@@ -31,13 +33,15 @@ export function useCamera(): CameraHandle {
     setStream(null);
   }, []);
 
-  const start = useCallback(async (): Promise<boolean> => {
+  const start = useCallback(async (options?: CameraOptions): Promise<boolean> => {
+    // つなぎ直すとき（裏から戻った・トラックが切れた）は、前と同じ条件で頼む
+    if (options) optionsRef.current = options;
     wantedRef.current = true;
     const attempt = ++attemptRef.current;
     setStatus('starting');
     setError(null);
     try {
-      const next = await startCamera();
+      const next = await startCamera(optionsRef.current);
       if (attempt !== attemptRef.current || !wantedRef.current) {
         stopStream(next);
         return false;
@@ -67,6 +71,7 @@ export function useCamera(): CameraHandle {
     if (!stream) return;
     const tracks = stream.getVideoTracks();
     const onEnded = () => {
+      diag('カメラ: トラックが とまった');
       if (!wantedRef.current || streamRef.current !== stream) return;
       release();
       setStatus('starting');

@@ -6,6 +6,8 @@ import { StageSource } from './components/StageView';
 import { MakeupSettings } from './types';
 import { LookState } from './logic/layers';
 import { loadPhotoUrl } from './services/photo';
+import { diag, DiagnosticsSink, setDiagnosticsSink } from './services/diagnostics';
+import { SettingsSheet } from './components/SettingsSheet';
 import { getLastLook, getMakeupSettings, saveLastLook, saveMakeupSettings } from './services/makeupStorageService';
 import './makeup.css';
 
@@ -14,6 +16,10 @@ interface Props {
   onExit: () => void;
   // 保存キーをプロフィールごとに分けるための関数（あそびひろばの profileStorageKey）。無ければそのまま
   storageKey?: (base: string) => string;
+  // 開発用: 記録（足あと）の保存先・デバッグ画面を開く・前の回がこのゲームの途中で落ちたか
+  onDebugLog?: DiagnosticsSink;
+  onOpenDebug?: () => void;
+  crashedLastTime?: boolean;
 }
 
 type Screen = 'intro' | 'mirror';
@@ -30,7 +36,10 @@ function readDebugParams(): { debug: boolean; photo: string | null } {
  * はじめに（説明・カメラの許可）→ ミラー画面 の切り替えと、カメラ / 写真の切り替え、設定の保存を担当する。
  * あそびひろばに依存するのは onExit だけにして、後で単体アプリに切り出せるようにしておく
  */
-export default function MakeupApp({ onExit, storageKey }: Props) {
+export default function MakeupApp({ onExit, storageKey, onDebugLog, onOpenDebug, crashedLastTime = false }: Props) {
+  // 子の effect より先に記録できるよう、描画のたびに出口を合わせる
+  setDiagnosticsSink(onDebugLog ?? null);
+  const [introSettings, setIntroSettings] = useState(false);
   const debugParams = useMemo(readDebugParams, []);
   const keyOf = useMemo(() => storageKey ?? ((base: string) => base), [storageKey]);
   const initialLook = useMemo(() => getLastLook(keyOf), [keyOf]);
@@ -58,10 +67,16 @@ export default function MakeupApp({ onExit, storageKey }: Props) {
   }, [keyOf]);
   useEffect(() => () => window.clearTimeout(saveTimer.current), []);
 
+  // どの画面にいるかの記録
+  useEffect(() => { diag(`がめん: ${screen}${screen === 'mirror' ? (photoUrl ? '（しゃしん）' : '（カメラ）') : ''}`); }, [screen, photoUrl]);
+  useEffect(() => {
+    diag('せってい', settings);
+  }, [settings]);
+
   const handleStart = useCallback(async () => {
-    const ok = await camera.start();
+    const ok = await camera.start({ lowRes: settings.debugLowRes });
     if (ok) setScreen('mirror');
-  }, [camera]);
+  }, [camera, settings.debugLowRes]);
 
   const handleBackToIntro = useCallback(() => {
     camera.stop();
@@ -98,9 +113,9 @@ export default function MakeupApp({ onExit, storageKey }: Props) {
       if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
       return null;
     });
-    const ok = await camera.start();
+    const ok = await camera.start({ lowRes: settings.debugLowRes });
     if (!ok) setScreen('intro');
-  }, [camera]);
+  }, [camera, settings.debugLowRes]);
 
   // 画面を離れるときに写真の URL を解放する
   useEffect(() => () => {
@@ -123,6 +138,7 @@ export default function MakeupApp({ onExit, storageKey }: Props) {
           onPickPhoto={pickPhoto}
           onUseCamera={useCameraAgain}
           onBack={handleBackToIntro}
+          onOpenDebug={onOpenDebug}
         />
       ) : (
         <IntroScreen
@@ -131,6 +147,18 @@ export default function MakeupApp({ onExit, storageKey }: Props) {
           onStart={handleStart}
           onPickPhoto={pickPhoto}
           onExit={handleExit}
+          crashedLastTime={crashedLastTime}
+          onOpenSettings={() => setIntroSettings(true)}
+          onOpenDebug={onOpenDebug}
+        />
+      )}
+      {introSettings && (
+        <SettingsSheet
+          settings={settings}
+          isPhoto={false}
+          onChange={updateSettings}
+          onOpenDebug={onOpenDebug}
+          onClose={() => setIntroSettings(false)}
         />
       )}
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} aria-hidden="true" tabIndex={-1} />

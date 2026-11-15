@@ -12,6 +12,7 @@ import { LAYER_ORDER, LAYER_SPEC, LayerId, LookState, shapesForLayer } from '../
 import { blurAlpha, edgeFeatherUV, warpAlphaToUV } from '../logic/maskWarp';
 import { referenceFace } from '../logic/referenceFace';
 import { faceRegions, Pt, Shape } from '../logic/regions';
+import { diag } from '../services/diagnostics';
 
 // 塗る絵の一辺（px）。顔ぜんたいで 512 なので、唇でおよそ 120px
 export const PAINT_SIZE = 512;
@@ -167,6 +168,7 @@ export class FacePaint {
     let l = this.layers.get(id);
     if (!l) {
       l = { ...makeSurface(PAINT_SIZE, PAINT_SIZE), version: 0, painted: false, box: null };
+      diag(`ぬる え（${id}）を つくった`, { layers: this.layers.size + 1 });
       this.layers.set(id, l);
     }
     return l;
@@ -194,6 +196,8 @@ export class FacePaint {
   mask(id: LayerId): HTMLCanvasElement {
     let m = this.masks.get(id);
     if (!m) {
+      const t0 = performance.now();
+      diag(`かた（${id}）: つくる まえ`);
       const ref = referenceFace(REFERENCE_WIDTH);
       const regions = faceRegions(ref.landmarks, ref.width, ref.height);
       const work = makeSurface(ref.width, ref.height);
@@ -208,6 +212,7 @@ export class FacePaint {
       const points = ref.landmarks.map(p => ({ x: p.x * ref.width, y: p.y * ref.height }));
       m = alphaToSurface(warpAlphaToUV(image, points, PAINT_SIZE), PAINT_SIZE);
       this.masks.set(id, m);
+      diag(`かた（${id}）: できた`, { ms: Math.round(performance.now() - t0) });
     }
     return m.canvas;
   }
