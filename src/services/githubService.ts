@@ -333,3 +333,86 @@ export async function deleteServerPuzzle(
     };
   }
 }
+
+// --- デバッグログの保存（開発用） ---
+
+// デバッグログを置くブランチ。main に置くと保存のたびにデプロイが走るので、別のブランチにする
+export const DEBUG_LOG_BRANCH = 'debug-logs';
+const DEBUG_LOG_DIR = 'debug-logs';
+// パズルのアップロードと同じ Personal Access Token（この端末の localStorage に保存してある）
+const PAT_KEY = 'github_pat';
+
+export function getStoredGitHubToken(): string | null {
+  try {
+    return localStorage.getItem(PAT_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function storeGitHubToken(token: string | null): void {
+  try {
+    if (token) localStorage.setItem(PAT_KEY, token);
+    else localStorage.removeItem(PAT_KEY);
+  } catch {
+    // 保存できなくても続ける
+  }
+}
+
+function githubHeaders(token: string): Record<string, string> {
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json',
+  };
+}
+
+// 保存先のブランチが無ければ、main の先頭から作る
+async function ensureDebugBranch(token: string): Promise<void> {
+  const api = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git`;
+  const existing = await fetch(`${api}/ref/heads/${DEBUG_LOG_BRANCH}`, { headers: githubHeaders(token) });
+  if (existing.ok) return;
+  if (existing.status !== 404) throw new Error(`branch check failed: ${existing.status}`);
+  const main = await fetch(`${api}/ref/heads/${BRANCH}`, { headers: githubHeaders(token) });
+  if (!main.ok) throw new Error(`main ref failed: ${main.status}`);
+  const sha = (await main.json()).object.sha as string;
+  const created = await fetch(`${api}/refs`, {
+    method: 'POST',
+    headers: githubHeaders(token),
+    body: JSON.stringify({ ref: `refs/heads/${DEBUG_LOG_BRANCH}`, sha }),
+  });
+  // 422 = 同時に別の保存が作った（もうある）
+  if (!created.ok && created.status !== 422) throw new Error(`branch create failed: ${created.status}`);
+}
+
+// 保存するファイルの名前（時刻順に並ぶ）
+export function debugLogPath(now: Date = new Date()): string {
+  const p = (n: number) => String(n).padStart(2, '0');
+  const stamp = `${now.getUTCFullYear()}${p(now.getUTCMonth() + 1)}${p(now.getUTCDate())}-${p(now.getUTCHours())}${p(now.getUTCMinutes())}${p(now.getUTCSeconds())}`;
+  return `${DEBUG_LOG_DIR}/${stamp}.txt`;
+}
+
+/**
+ * デバッグログ（文字）をリポジトリの debug-logs ブランチに保存する。
+ * 開発者はそこから読める（git fetch origin debug-logs）。main には触れないので、デプロイは走らない
+ */
+export async function uploadDebugLog(token: string, text: string, note = ''): Promise<GitHubUploadResult> {
+  try {
+    await ensureDebugBranch(token);
+    const path = debugLogPath();
+    const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+      method: 'PUT',
+      headers: githubHeaders(token),
+      body: JSON.stringify({
+        message: `Add debug log ${path.split('/').pop()}${note ? ` (${note})` : ''}`,
+        content: utf8ToBase64(text),
+        branch: DEBUG_LOG_BRANCH,
+      }),
+    });
+    if (response.status === 401) return { success: false, message: 'unauthorized' };
+    if (!response.ok) return { success: false, message: `GitHub ${response.status}` };
+    return { success: true, message: path, url: path };
+  } catch (err) {
+    return { success: false, message: err instanceof Error ? err.message : String(err) };
+  }
+}

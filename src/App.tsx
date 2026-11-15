@@ -10,6 +10,8 @@ import { usePwaUpdate } from './hooks/usePwaUpdate';
 import { applyPwaUpdate } from './services/pwaUpdateService';
 import { debugLog, debugScreen, getPreviousCrash } from './services/debugLogService';
 import { DebugPanel } from './components/DebugPanel';
+import { getStoredGitHubToken, uploadDebugLog } from './services/githubService';
+import { formatDebugLog } from './services/debugLogService';
 import './App.css';
 
 // ネジはずしは 3D ライブラリを含むので、選ばれたときだけ読み込む
@@ -22,6 +24,9 @@ type AppScreen = 'profile' | 'home' | 'parent' | GameId;
 
 // マジックメイクミラーへ渡す記録の口（ゲーム側はプラットフォームのコードを import しない）
 const logMakeup = (message: string, data?: unknown, replaceKey?: string) => debugLog('makeup', message, data, replaceKey);
+
+// 落ちた記録の自動保存は、起動ごとに 1 回だけ（開発時の StrictMode で 2 回走らないように）
+let crashUploadStarted = false;
 
 function LoadingScreen() {
   return (
@@ -52,6 +57,18 @@ function App() {
   const updateReady = usePwaUpdate();
   const [debugOpen, setDebugOpen] = useState(false);
   const openDebug = useCallback(() => setDebugOpen(true), []);
+
+  // 前の回が落ちていて、GitHub のトークンがこの端末にあれば、記録をリポジトリ（debug-logs ブランチ）へ自動で保存する。
+  // 落ちた直後の記録を、手で操作しなくても開発者が読めるようにするため
+  useEffect(() => {
+    const crash = getPreviousCrash();
+    const token = getStoredGitHubToken();
+    if (!crash || !token || crashUploadStarted) return;
+    crashUploadStarted = true;
+    uploadDebugLog(token, formatDebugLog(), `crash on ${crash.screen ?? '?'}`).then(result => {
+      debugLog('app', result.success ? 'おちた きろくを じどうで ほぞんした' : 'じどうほぞん しっぱい', result.message);
+    });
+  }, []);
 
   // どの画面にいたかを記録しておく（落ちたときの手がかり）
   useEffect(() => { debugScreen(screen); }, [screen]);

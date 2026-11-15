@@ -21,7 +21,7 @@
 | プロフィール（なんさい？） | `src/services/profileService.ts`, `src/screens/ProfileScreen.tsx` | 起動時に名前と年齢を登録。兄弟分を持てて、進捗はプロフィールごとに分かれる。年齢 → 難易度・クイズレベル（`difficultyForAge`） |
 | べんきょうクイズ | `src/services/quiz/`（`index.ts` が科目の登録簿、`generators/` が科目ごとの問題生成）, `src/components/quiz/QuizScreen.tsx`（全画面）, `src/hooks/useQuizGate.tsx` | 年齢に合わせた問題を生成。`useQuizGate().ask(trigger)` が「クイズに正解したら true」の Promise を返す。科目を増やすときは `generators/` にファイルを足して `GENERATORS` に登録する |
 | おうちのひと設定 | `src/services/appSettingsService.ts`, `src/screens/ParentSettingsScreen.tsx` | かけ算の関門の先。クイズを出す場面・レベル・科目、おたすけの回数、プロフィールの編集 |
-| デバッグログ（開発用） | `src/services/debugLogService.ts`, `src/components/DebugPanel.tsx` | 実機で落ちたときの手がかりを端末に残す。`debugLog(tag, message, data)` が localStorage（`asobi_debug_log`）へその場で書き、画面を表示したまま終わっていたら次の起動で「落ちた」と分かる（`getPreviousCrash`）。ホーム画面下の「🐞 デバッグ」で見る・コピーする・送る。エラー（error / unhandledrejection）と画面の切り替えは自動で記録される |
+| デバッグログ（開発用） | `src/services/debugLogService.ts`, `src/components/DebugPanel.tsx` | 実機で落ちたときの手がかりを端末に残す。`debugLog(tag, message, data)` が localStorage（`asobi_debug_log`）へその場で書き、画面を表示したまま終わっていたら次の起動で「落ちた」と分かる（`getPreviousCrash`）。ホーム画面下の「🐞 デバッグ」で見る・コピーする・送る。エラー（error / unhandledrejection）と画面の切り替えは自動で記録される。「☁️ リポジトリに ほぞん」で **`debug-logs` ブランチ** の `debug-logs/<UTC の日時>.txt` に保存され（`githubService.uploadDebugLog`。パズルと同じ PAT を使う。`main` には触れないのでデプロイは走らない）、落ちたあとの起動ではトークンがあれば自動で保存される |
 
 ## よく使うコマンド
 
@@ -63,6 +63,7 @@ push 前に `npm run build` / `npm run lint` / `npm test` を通す。CI（`.git
 - マジックメイクミラーの文言も子ども向けのひらがな中心（メイク用語はカタカナ）。文言は `src/games/makeup/strings.ts` に集めてある。`src/games/makeup/` の中からプラットフォームのコード（`profileService` など）を import しない（`MakeupApp` の props で受け取る。後で単体アプリに切り出すため）
 - マジックメイクミラーの描画は、canvas・テクスチャを最初に 1 回だけ作って使い回す。毎フレーム `document.createElement('canvas')` しない（iPad でメモリが尽きて落ちた原因）。canvas の `filter` は Safari で使えないので頼らない。描画やなぞる操作を変えたら `bash scripts/e2e/run.sh makeup-face` を通す（canvas を作り続けていないことも確かめる）
 - マジックメイクミラーの推論（顔認識）は同期処理で画面の操作を止める。映像のコマが変わったときだけ回し、推論のあとに休みを入れる仕組み（`useFaceTracker`）を外さない
+- 実機のデバッグログを読むとき: `git fetch origin debug-logs && git ls-tree --name-only origin/debug-logs debug-logs/ | tail -5` で新しいものを探し、`git show origin/debug-logs:debug-logs/<名前>.txt` で読む
 - 実機で落ちる・固まる不具合は、推測で直す前にデバッグログで場所を確かめる。重い処理（読み込み・初期化・最初の 1 回）の **前と後** に記録を入れておくと、処理の中で落ちたときに「まえ」で記録が終わる。マジックメイクミラーの中からは `services/diagnostics.ts` の `diag()` を使う（保存先は `MakeupApp` の `onDebugLog` で受け取る）。毎フレームは書かない（定期的な状態は `replaceKey` で 1 行を上書きする）。映像・顔の点は記録しない
 - マジックメイクミラーの画面は、映像を真ん中に置く。横向きは操作パネルを左右に分け（左: モード・パーツ・ふとさ・つよさ、右: 色・ボタン）、縦向きは映像の下に続けて並べる（`makeup.css` の `.mmm-panels` / `.mmm-panel-a` / `.mmm-panel-b`、`TryPanel` の `section`）
 - レシピ（`public/makeup/recipes/`）や領域の番号を変えたら `npm test`（`recipes.test.ts` / `regions.test.ts`）を通す。顔の点の番号は `logic/regions.ts` にだけ書く
