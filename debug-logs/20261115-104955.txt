@@ -1,0 +1,111 @@
+11:42:53.239 [app] === きどう === {"build":"2026-11-15T02:15:16.064Z","ua":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.14 Safari/605.1.15","screen":"1024x748 @2","standalone":true,"cores":4,"touch":5,"online":true}
+11:42:53.259 [app] がめん: profile
+11:42:54.236 [app] がめん: home
+11:42:55.938 [app] がめん: makeup
+11:42:56.286 [makeup] がめん: intro
+11:42:56.286 [makeup] せってい {"mirrored":true,"delegate":"GPU","showLandmarks":false,"showStats":false,"guideOpacity":0.8,"paintAssist":true,"debugNoTracking":false,"debugNoRender":false,"debugLowRes":false}
+11:42:57.215 [makeup] カメラ: たのむ {"facingMode":"user","width":{"ideal":960},"height":{"ideal":720}}
+11:42:59.087 [makeup] カメラ: はじまった {"w":720,"h":960,"fps":30,"facing":"user"}
+11:42:59.209 [makeup] びょうが: つくる まえ {"w":960,"h":720}
+11:42:59.652 [makeup] びょうが: できた
+11:42:59.673 [makeup] がめん: mirror（カメラ）
+11:42:59.691 [makeup] にんしき: よみこみ {"simd":true,"delegate":"GPU","wasm":"これから","model":"これから"}
+11:42:59.824 [makeup] かた（lip）: つくる まえ
+11:42:59.950 [makeup] かた（lip）: できた {"ms":126}
+11:43:00.047 [makeup] にんしき: wasm を うけとった {"bytes":14466654}
+11:43:00.272 [makeup] にんしき: モデルを うけとった {"bytes":3758596}
+11:43:00.273 [makeup] にんしき: つくる（GPU）まえ
+11:43:01.569 [makeup] にんしき: できた（GPU）
+11:43:01.587 [makeup] すいろん 1 かいめ: まえ {"w":960,"h":720,"padded":false,"kind":"VIDEO"}
+11:43:16.183 [app] ⚠ まえの かいは とちゅうで おわった（おちた かも）
+11:43:16.185 [app] === きどう === {"build":"2026-11-15T02:15:16.064Z","ua":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.14 Safari/605.1.15","screen":"768x1004 @2","standalone":true,"cores":4,"touch":5,"online":true}
+11:43:16.345 [app] がめん: profile
+11:43:17.680 [app] がめん: home
+11:43:18.560 [app] がめん: makeup
+11:43:18.903 [makeup] がめん: intro
+11:43:18.904 [makeup] せってい {"mirrored":true,"delegate":"GPU","showLandmarks":false,"showStats":false,"guideOpacity":0.8,"paintAssist":true,"debugNoTracking":false,"debugNoRender":false,"debugLowRes":false}
+11:43:22.299 [makeup] カメラ: たのむ {"facingMode":"user","width":{"ideal":960},"height":{"ideal":720}}
+11:43:23.638 [makeup] カメラ: はじまった {"w":960,"h":720,"fps":30,"facing":"user"}
+11:43:23.763 [makeup] びょうが: つくる まえ {"w":960,"h":720}
+11:43:24.347 [makeup] びょうが: できた
+11:43:24.366 [makeup] がめん: mirror（カメラ）
+11:43:24.398 [makeup] にんしき: よみこみ {"simd":true,"delegate":"GPU","wasm":"これから","model":"これから"}
+11:43:24.525 [makeup] かた（lip）: つくる まえ
+11:43:24.660 [makeup] かた（lip）: できた {"ms":135}
+11:43:24.689 [makeup] びょうが: つくる まえ {"w":720,"h":960}
+11:43:24.698 [makeup] びょうが: できた
+11:43:24.785 [makeup] にんしき: wasm を うけとった {"bytes":14466654}
+11:43:25.127 [makeup] にんしき: モデルを うけとった {"bytes":3758596}
+11:43:25.127 [makeup] にんしき: つくる（GPU）まえ
+11:43:26.538 [makeup] にんしき: できた（GPU）
+11:43:26.555 [makeup] すいろん 1 かいめ: まえ {"w":720,"h":960,"padded":false,"kind":"VIDEO"}
+11:44:02.738 [app] ⚠ まえの かいは とちゅうで おわった（おちた かも）
+11:44:02.743 [app] === きどう === {"build":"2026-11-15T02:15:16.064Z","ua":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.14 Safari/605.1.15","screen":"768x1004 @2","standalone":true,"cores":4,"touch":5,"online":true}
+11:44:03.053 [app] がめん: profile
+11:44:06.264 [app] がめん: home
+11:44:07.327 [app] がめん: makeup
+11:44:07.673 [makeup] がめん: intro
+11:44:07.673 [makeup] せってい {"mirrored":true,"delegate":"GPU","showLandmarks":false,"showStats":false,"guideOpacity":0.8,"paintAssist":true,"debugNoTracking":false,"debugNoRender":false,"debugLowRes":false}
+11:55:10.691 [app] まえに もどった
+11:55:10.704 [app] まえに もどった
+11:55:10.706 [app] まえに もどった
+11:55:10.706 [app] まえに もどった
+11:55:10.706 [app] まえに もどった
+11:55:10.707 [app] まえに もどった
+11:55:20.054 [app] うらに まわった
+11:55:22.234 [app] === きどう === {"build":"2026-11-15T02:15:16.064Z","ua":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.14 Safari/605.1.15","screen":"768x1004 @2","standalone":true,"cores":4,"touch":5,"online":true}
+11:55:22.334 [app] がめん: profile
+11:55:23.515 [app] がめん: home
+11:55:24.755 [app] がめん: makeup
+11:55:25.126 [makeup] がめん: intro
+11:55:25.127 [makeup] せってい {"mirrored":true,"delegate":"GPU","showLandmarks":false,"showStats":false,"guideOpacity":0.8,"paintAssist":true,"debugNoTracking":false,"debugNoRender":false,"debugLowRes":false}
+11:55:27.709 [makeup] カメラ: たのむ {"facingMode":"user","width":{"ideal":960},"height":{"ideal":720}}
+11:55:28.923 [makeup] カメラ: はじまった {"w":960,"h":720,"fps":30,"facing":"user"}
+11:55:29.005 [makeup] びょうが: つくる まえ {"w":960,"h":720}
+11:55:29.497 [makeup] びょうが: できた
+11:55:29.516 [makeup] がめん: mirror（カメラ）
+11:55:29.551 [makeup] にんしき: よみこみ {"simd":true,"delegate":"GPU","wasm":"これから","model":"これから"}
+11:55:29.666 [makeup] かた（lip）: つくる まえ
+11:55:29.771 [makeup] かた（lip）: できた {"ms":105}
+11:55:29.815 [makeup] びょうが: つくる まえ {"w":720,"h":960}
+11:55:29.836 [makeup] びょうが: できた
+11:55:29.896 [makeup] にんしき: wasm を うけとった {"bytes":14466654}
+11:55:30.113 [makeup] にんしき: モデルを うけとった {"bytes":3758596}
+11:55:30.113 [makeup] にんしき: つくる（GPU）まえ
+11:55:31.424 [makeup] にんしき: できた（GPU）
+11:55:31.448 [makeup] すいろん 1 かいめ: まえ {"w":720,"h":960,"padded":false,"kind":"VIDEO"}
+11:55:56.836 [app] ⚠ まえの かいは とちゅうで おわった（おちた かも）
+11:55:56.840 [app] === きどう === {"build":"2026-11-15T02:15:16.064Z","ua":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.14 Safari/605.1.15","screen":"768x1004 @2","standalone":true,"cores":4,"touch":5,"online":true}
+11:55:57.838 [app] がめん: profile
+12:00:15.826 [app] まえに もどった
+12:00:17.059 [app] がめん: home
+12:00:18.411 [app] がめん: makeup
+12:00:18.793 [makeup] がめん: intro
+12:00:18.793 [makeup] せってい {"mirrored":true,"delegate":"GPU","showLandmarks":false,"showStats":false,"guideOpacity":0.8,"paintAssist":true,"debugNoTracking":false,"debugNoRender":false,"debugLowRes":false}
+19:48:28.792 [app] まえに もどった
+19:48:28.810 [app] まえに もどった
+19:48:30.795 [app] がめん: home
+19:48:31.379 [app] うらに まわった
+19:48:31.443 [app] === きどう === {"build":"2026-11-15T03:05:01.689Z","ua":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.14 Safari/605.1.15","screen":"1024x748 @2","standalone":true,"cores":4,"touch":5,"online":true}
+19:48:31.468 [app] がめん: profile
+19:48:32.523 [app] がめん: home
+19:48:40.123 [app] がめん: makeup
+19:48:40.450 [makeup] がめん: intro
+19:48:40.451 [makeup] せってい {"mirrored":true,"delegate":"GPU","showLandmarks":false,"showStats":false,"guideOpacity":0.8,"paintAssist":true,"debugNoTracking":false,"debugNoRender":false,"debugLowRes":false}
+19:48:41.625 [makeup] カメラ: たのむ {"facingMode":"user","width":{"ideal":960},"height":{"ideal":720}}
+19:48:42.699 [makeup] カメラ: はじまった {"w":720,"h":960,"fps":30,"facing":"user"}
+19:48:42.799 [makeup] びょうが: つくる まえ {"w":960,"h":720}
+19:48:43.245 [makeup] びょうが: できた
+19:48:43.264 [makeup] がめん: mirror（カメラ）
+19:48:43.283 [makeup] にんしき: よみこみ {"simd":true,"delegate":"GPU","wasm":"これから","model":"これから"}
+19:48:43.415 [makeup] かた（lip）: つくる まえ
+19:48:43.560 [makeup] かた（lip）: できた {"ms":145}
+19:48:43.675 [makeup] にんしき: wasm を うけとった {"bytes":14466654}
+19:48:43.827 [makeup] にんしき: モデルを うけとった {"bytes":3758596}
+19:48:43.827 [makeup] にんしき: つくる（GPU）まえ
+19:48:44.979 [makeup] にんしき: できた（GPU）
+19:48:44.988 [makeup] すいろん 1 かいめ: まえ {"w":960,"h":720,"padded":false,"kind":"VIDEO"}
+19:49:07.909 [app] ⚠ まえの かいは とちゅうで おわった（おちた かも）
+19:49:07.912 [app] === きどう === {"build":"2026-11-15T03:05:01.689Z","ua":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.14 Safari/605.1.15","screen":"1024x748 @2","standalone":true,"cores":4,"touch":5,"online":true}
+19:49:08.174 [app] がめん: profile
+19:49:10.756 [app] がめん: home
